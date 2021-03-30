@@ -1,2 +1,7 @@
 **/classes
 **/target
+
+.calva
+.cpcache
+.lsp
+.nrepl-port

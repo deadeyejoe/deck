@@ -5,17 +5,45 @@
             :compact-views #{}
             :release-tag-pattern "v[0-9]*"
             :stable-tag-pattern "stable-*"
-            :project-to-alias {"development" "dev"}
+            :project-to-alias {"development" "dev"
+                               "command-line" "cl"}
             :ns-to-lib {}}
 
- :aliases  {:dev {:extra-paths ["development/src"]
+ :aliases  {:dev {:extra-paths ["development/src"
+                                "components/action/src"
+                                "components/action/resources"
+                                "components/deck/src"
+                                "components/deck/resources"
+                                "components/ordering/src"
+                                "components/ordering/resources"
+                                "components/phase/src"
+                                "components/phase/resources"
+                                "components/player/src"
+                                "components/player/resources"
+                                "components/table/src"
+                                "components/table/resources"
+                                "components/user/src"
+                                "components/user/resources"
+                                "components/utility/src"
+                                "components/utility/resources"
+                                "bases/cli/src"
+                                "bases/cli/resources"]
                   :extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}
-                               org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}}}
+                               org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
+                               juxt/crux-core {:mvn/version "21.02-1.15.0-beta"}}}
 
-            :test {:extra-paths []}
+            :test {:extra-paths ["components/action/test"
+                                 "components/deck/test"
+                                 "components/ordering/test"
+                                 "components/phase/test"
+                                 "components/player/test"
+                                 "components/table/test"
+                                 "components/user/test"
+                                 "components/utility/test"
+                                 "bases/cli/test"]}
 
             :poly {:main-opts ["-m" "polylith.clj.core.poly-cli.core"]
                    :extra-deps {polyfy/polylith
                                 {:git/url   "https://github.com/polyfy/polylith"
-                                 :sha       "INSERT_LATEST_SHA_HERE"
+                                 :sha       "c4c94908be46514cbb4efcca1642d98be28618ee"
                                  :deps/root "projects/poly"}}}}}
