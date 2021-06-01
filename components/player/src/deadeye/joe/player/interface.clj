@@ -1,8 +1,5 @@
-(ns deadeye.joe.player.interface)
+(ns deadeye.joe.player.interface
+  (:require [deadeye.joe.player.core :as core]))
 
-
-(defn create [name]
-  {:player/id name
-   :player/decks {}
-   :player/hands {}
-   :player/tokens {}})
+(def build core/build)
+(def select core/select)

@@ -6,41 +6,63 @@
             :release-tag-pattern "v[0-9]*"
             :stable-tag-pattern "stable-*"
             :project-to-alias {"development" "dev"
-                               "command-line" "cl"}
+                               "command-line" "cl"
+                               "imperium" "imp"}
             :ns-to-lib {}}
 
- :aliases  {:dev {:extra-paths ["development/src"
-                                "components/action/src"
-                                "components/action/resources"
-                                "components/deck/src"
-                                "components/deck/resources"
-                                "components/ordering/src"
-                                "components/ordering/resources"
-                                "components/phase/src"
-                                "components/phase/resources"
-                                "components/player/src"
-                                "components/player/resources"
-                                "components/table/src"
-                                "components/table/resources"
-                                "components/user/src"
-                                "components/user/resources"
-                                "components/utility/src"
-                                "components/utility/resources"
+ :aliases  {:joe {:main-opts ["-i" "development/src/dev/joe.clj" "-e" "(in-ns,'dev.joe)" "-r"]}
+            :dev {:extra-paths ["development/src"
+                                "bases/cli/resources"
                                 "bases/cli/src"
-                                "bases/cli/resources"]
+                                "bases/twilight_imperium/resources"
+                                "bases/twilight_imperium/src"
+                                "components/action/resources"
+                                "components/action/src"
+                                "components/choice/resources"
+                                "components/choice/src"
+                                "components/consensus/resources"
+                                "components/consensus/src"
+                                "components/crux/resources"
+                                "components/crux/src"
+                                "components/ordering/resources"
+                                "components/ordering/src"
+                                "components/pack/resources"
+                                "components/pack/src"
+                                "components/player/resources"
+                                "components/player/src"
+                                "components/phase/resources"
+                                "components/phase/src"
+                                "components/role/resources"
+                                "components/role/src"
+                                "components/state/resources"
+                                "components/state/src"
+                                "components/table/resources"
+                                "components/table/src"
+                                "components/user/resources"
+                                "components/user/src"
+                                "components/utility/resources"
+                                "components/utility/src"]
                   :extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}
                                org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
-                               juxt/crux-core {:mvn/version "21.02-1.15.0-beta"}}}
+                               juxt/crux-core {:mvn/version "21.02-1.15.0-beta"}
+                               integrant/integrant {:mvn/version "0.8.0"}
+                               integrant/repl {:mvn/version "0.3.2"}
+                               io.pedestal/pedestal.service {:mvn/version "0.5.7"}
+                               io.pedestal/pedestal.route   {:mvn/version "0.5.7"}
+                               io.pedestal/pedestal.jetty   {:mvn/version "0.5.7"}
+                               org.slf4j/slf4j-simple       {:mvn/version "1.7.28"}}}
 
-            :test {:extra-paths ["components/action/test"
+            :test {:extra-paths ["bases/cli/test"
+                                 "bases/twilight-imperium/test"
+                                 "components/action/test"
+                                 "components/crux/test"
                                  "components/deck/test"
                                  "components/ordering/test"
                                  "components/phase/test"
                                  "components/player/test"
                                  "components/table/test"
                                  "components/user/test"
-                                 "components/utility/test"
-                                 "bases/cli/test"]}
+                                 "components/utility/test"]}
 
             :poly {:main-opts ["-m" "polylith.clj.core.poly-cli.core"]
                    :extra-deps {polyfy/polylith

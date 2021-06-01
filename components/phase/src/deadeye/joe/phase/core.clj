@@ -1,53 +1,27 @@
-(ns deadeye.joe.phase.core
-  (:require [deadeye.joe.player.interface :as player]))
+(ns deadeye.joe.phase.core)
 
-(def sample
-  {:crux.db/id :s1
-   :phase/type :strategy
-   :phase/name "Strategy Turn 1"
-   :phase/children []
-   :phase/parent :s0})
+(defn build
+  ([id] (build id nil))
+  ([id name] (build id name {}))
+  ([id name opts]
+   (merge {:phase/id id
+           :phase/name name}
+          opts)))
 
-(defn state []
-  {:phase/stack []
-   :phase/active nil
-   :playspace {:decks []}
-   :players (vec (map player/create ["joe" "mark"]))})
+(defn increment-round [phase]
+  (update phase :phase/round #(inc (or % 1))))
 
-(defn create [name next-fn]
-  {:phase/name name
-   :phase/next next-fn
-   :phase/active nil
-   :phase/done false
-   :phase/stack []})
+(defn label [phase]
+  (let [{name :phase/name round :phase/round} phase]
+    (when name (apply str name (when round [" (Round " round ")"])))))
 
-(defn start-phase [state new-phase]
-  (let [{stack :phase/stack
-         active :phase/active} state]
-    (merge state {:phase/stack (conj stack  active)
-                  :phase/active new-phase})))
-
-
-(defn end-phase [state]
-  (let [{stack :phase/stack} state]
-    (merge state {:phase/stack (pop stack)
-                  :phase/active (peek stack)})))
-
-(defn choice-pick-one [phase player options]
-  {:choice/name "pick one"
-   :choice/phase (:phase/name phase)
-   :choice/player player
-   :choice/options options})
-
-
-(defn strategy-phase [state]
-  (let [next-fn (fn [state])])
-  (create "strategy-phase"))
-
-
-(defn advance [state,action])
-
-
+(comment
+  (-> (build :root)
+      (increment-round)
+      (label))
+  (-> (build :game-round "Game Round")
+      (increment-round)
+      (label)))
 
 
 
