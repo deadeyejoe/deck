@@ -1,0 +1,4 @@
+#kaocha/v1 {:tests [{:id :unit
+                     :source-paths ["components/consensus/src"]
+                     :test-paths ["components/consensus/test"]}]}
+

@@ -1,4 +1,13 @@
-{:polylith {:vcs "git"
+{:deps {org.clojure/clojure {:mvn/version "1.10.1"}
+        org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
+        juxt/crux-core {:mvn/version "21.02-1.15.0-beta"}
+        integrant/integrant {:mvn/version "0.8.0"}
+        io.pedestal/pedestal.service {:mvn/version "0.5.7"}
+        io.pedestal/pedestal.route   {:mvn/version "0.5.7"}
+        io.pedestal/pedestal.jetty   {:mvn/version "0.5.7"}
+        org.slf4j/slf4j-simple       {:mvn/version "1.7.28"}}
+
+ :polylith {:vcs "git"
             :top-namespace "deadeye.joe"
             :interface-ns "interface"
             :default-profile-name "default"
@@ -42,19 +51,13 @@
                                 "components/user/src"
                                 "components/utility/resources"
                                 "components/utility/src"]
-                  :extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}
-                               org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
-                               juxt/crux-core {:mvn/version "21.02-1.15.0-beta"}
-                               integrant/integrant {:mvn/version "0.8.0"}
-                               integrant/repl {:mvn/version "0.3.2"}
-                               io.pedestal/pedestal.service {:mvn/version "0.5.7"}
-                               io.pedestal/pedestal.route   {:mvn/version "0.5.7"}
-                               io.pedestal/pedestal.jetty   {:mvn/version "0.5.7"}
-                               org.slf4j/slf4j-simple       {:mvn/version "1.7.28"}}}
+                  :extra-deps {integrant/repl {:mvn/version "0.3.2"}
+                               djblue/portal {:mvn/version "0.12.0"}}}
 
             :test {:extra-paths ["bases/cli/test"
                                  "bases/twilight-imperium/test"
                                  "components/action/test"
+                                 "components/consensus/test"
                                  "components/crux/test"
                                  "components/deck/test"
                                  "components/ordering/test"
@@ -62,7 +65,8 @@
                                  "components/player/test"
                                  "components/table/test"
                                  "components/user/test"
-                                 "components/utility/test"]}
+                                 "components/utility/test"]
+                   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}}}
 
             :poly {:main-opts ["-m" "polylith.clj.core.poly-cli.core"]
                    :extra-deps {polyfy/polylith

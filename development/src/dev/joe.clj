@@ -4,7 +4,12 @@
             [integrant.repl.state :refer [system]]
             [deadeye.joe.twilight-imperium.core :as ti.core]
             [io.pedestal.test :as test]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [portal.api :as p]))
+
+(def portal (p/open))
+
+(add-tap #'p/submit)
 
 (integrant.repl/set-prep! (constantly ti.core/dev-config))
 
@@ -21,6 +26,8 @@
   (go))
 
 (comment
+  (p/open portal)
+  (tap> {:foo "bar"})
   (body (test-route :get "/table/t41931"))
   (test-route :post "/table?name=test")
   system

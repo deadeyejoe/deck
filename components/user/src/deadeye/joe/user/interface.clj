@@ -5,7 +5,4 @@
   ([identifier] (core/build identifier))
   ([identifier name] (core/build identifier name)))
 
-(defn join-table [user table]
-  (core/join-table user table))
-
 (defn random-name [] (core/random-name))
