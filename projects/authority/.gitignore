@@ -11,10 +11,5 @@ pom.xml.asc
 *.jar
 *.log
 .shadow-cljs
-.idea
 .lein-*
 .nrepl-*
-.DS_Store
-
-.hgignore
-.hg/
