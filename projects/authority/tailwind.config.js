@@ -1,4 +1,8 @@
 
+function imgUrl() {
+  process.env.NODE_ENV == 'production' ? "url('https://deadeyejoe.github.io/deck/galaxy.jpg')" :"url('/galaxy.jpg')"
+}
+
 module.exports = {
   mode: 'jit',
   purge: {
@@ -21,7 +25,7 @@ module.exports = {
       },
       backgroundImage: theme => (
         {
-          'galaxy': process.env.NODE_ENV == 'production' ? "url('deck/galaxy.jpg')" :"url('/galaxy.jpg')",
+          'galaxy': imgUrl()
         }
        )
     },

@@ -1,7 +1,6 @@
 (ns authority.app
   (:require [reagent.dom]
             [re-frame.core :as rf]
-            [portal.web :as p]
             [authority.coeffects]
             [authority.effects]
             [authority.interceptors]
@@ -11,10 +10,6 @@
             [authority.views.restore :as restore]
             [authority.views.players :as players]
             [authority.views.game-round :as game-round]))
-
-(comment
-  (p/open)
-  (add-tap #'p/submit))
 
 (defn debug-buttons []
   [:div
