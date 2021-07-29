@@ -19,9 +19,11 @@ module.exports = {
       fontSize: {
         'hueg': '10rem',
       },
-      backgroundImage: theme => ({
-        'galaxy': "url('/galaxy.jpg')",
-       })
+      backgroundImage: theme => (
+        {
+          'galaxy': process.env.NODE_ENV == 'production' ? "url('deck/galaxy.jpg')" :"url('/galaxy.jpg')",
+        }
+       )
     },
     variants: {},
   }
