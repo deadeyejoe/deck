@@ -10,17 +10,18 @@
              :value initiative
              :disabled disabled?
              :on-click #(rf/dispatch [:strategy/set position initiative])
-             :class (into ["px-2" "m-1" "rounded" "border" "border-gray-600" "cursor-pointer"]
+             :class (into ["px-2" "m-1" "rounded" "border-2" "cursor-pointer"]
                           (if disabled?
-                            ["text-gray-800" "bg-gray-500"]
-                            ["bg-gray-800"]))}]))
+                            ["border-gray-400" "bg-gray-500" "text-gray-800"]
+                            [(const/strategy->border initiative) "bg-gray-800"]))}]))
 
 (defn initiative-selected [position initiative]
   [:input {:type "button"
            :key initiative
            :value initiative
            :on-click #(rf/dispatch [:strategy/unset position])
-           :class ["px-2" "m-1" "rounded" "border" "border-gray-600" "bg-gray-700" "cursor-pointer"]}])
+           :class ["px-2" "m-1" "border-transparent" "border" "rounded"  "text-black" "cursor-pointer"
+                   (const/strategy->bg initiative)]}])
 
 (defn player-initiative-select [position]
   (let [{:keys [name initiative]} (listen [:player position])

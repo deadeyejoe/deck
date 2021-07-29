@@ -4,8 +4,11 @@
             [portal.web :as p]
             [authority.coeffects]
             [authority.effects]
+            [authority.interceptors]
             [authority.event-handlers]
             [authority.subs]
+            [authority.storage]
+            [authority.views.restore :as restore]
             [authority.views.players :as players]
             [authority.views.game-round :as game-round]))
 
@@ -22,6 +25,7 @@
   [:div {:class ["font-sans" "text-xl" "text-gray-300" "bg-gray-800"]}
    (let [state @(rf/subscribe [:state])]
      (case state
+       :restore [restore/component]
        :player-select [players/component]
        :game-round [game-round/component]
        (str "Unrecognized state")))])

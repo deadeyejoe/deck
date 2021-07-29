@@ -197,7 +197,6 @@
  :action/current-elapsed-in-range
  :<- [:action/current-time-elapsed]
  (fn [elapsed [_ from to]]
-   (println (str from ":" to))
    (if to
      (< from elapsed to)
      (<= from elapsed))))

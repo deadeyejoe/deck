@@ -8,10 +8,11 @@
         initiative (listen [:player/initiative position])
         current? (listen [:action/is-current position])]
     [:div {:key position
-           :class (into ["flex" "flex-row"  "p-2" "mb-1"]
+           :class (into ["flex" "flex-row"  "p-2" "mb-1" "ml-2" "border-b" "w-5/6"
+                         (const/strategy->border initiative)]
                         (if current?
                           ["text-5xl"]
-                          ["text-xl"]))}
+                          ["text-3xl"]))}
      (when current? [:div ">"])
      [:div {:class ["mr-10"]} initiative]
      [:div name]]))
@@ -53,12 +54,11 @@
      display]))
 
 (defn big-timer []
-  (let [current-player (listen [:action/current-player])]
+  (let [{:keys [:name :initiative]}  (listen [:action/current-player])]
     [:div {:class ["flex" "flex-col" "h-1/2" "justify-between" "items-center"]}
-     [:div {:class ["text-7xl"]}
-      (:name current-player)]
-     [:div {:class ["text-5xl" "mb-20"]}
-      (-> current-player :initiative const/strategy->title)]
+     [:div {:class ["text-7xl"]} name]
+     [:div {:class ["text-5xl" "mb-20" (const/strategy->text initiative)]}
+      (const/strategy->title initiative)]
      [time-display]
      [timer-control]]))
 

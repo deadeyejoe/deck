@@ -4,8 +4,26 @@
 
 (rf/reg-event-fx
  :initialize
- (fn [] {:db (db/init)
-         :fx [[:dispatch [:timer/start]]]}))
+ [(rf/inject-cofx :local-store)]
+ (fn [{:keys [:local-store]}]
+   (if local-store
+     {:db (assoc (db/init) :state :restore)}
+     {:fx [[:dispatch [:new-game]]]})))
+
+(rf/reg-event-fx
+ :new-game
+ [(rf/inject-cofx :local-store)]
+ (fn []
+   {:db (db/init)
+    :persist-local nil
+    :fx [[:dispatch [:timer/start]]]}))
+
+(rf/reg-event-fx
+ :restore-game
+ [(rf/inject-cofx :local-store)]
+ (fn [{:keys [:local-store]}]
+   {:db local-store
+    :fx [[:dispatch [:timer/start]]]}))
 
 (rf/reg-event-db
  :save-name
