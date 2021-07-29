@@ -1,6 +1,6 @@
 
 function imgUrl() {
-  process.env.NODE_ENV == 'production' ? "url('https://deadeyejoe.github.io/deck/galaxy.jpg')" :"url('/galaxy.jpg')"
+  process.env.NODE_ENV == 'production' ? "url('/galaxy.jpg')" :"url('/galaxy.jpg')"
 }
 
 module.exports = {
@@ -25,7 +25,7 @@ module.exports = {
       },
       backgroundImage: theme => (
         {
-          'galaxy': imgUrl()
+          'galaxy': "url('/galaxy.jpg')"
         }
        )
     },

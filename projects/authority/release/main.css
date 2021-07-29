@@ -862,6 +862,9 @@ video {
 	--tw-bg-opacity: 1;
 	background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
 }
+.bg-galaxy {
+	background-image: url('/galaxy.jpg');
+}
 .bg-contain {
 	background-size: contain;
 }
