@@ -1,6 +1,12 @@
 (ns authority.utils
   (:require [re-frame.core :as rf]))
 
+(defn transform-values [m f]
+  (reduce
+   (fn [a [k v]] (assoc a k (f v)))
+   {}
+   m))
+
 (def listen (comp deref rf/subscribe))
 
 (defn player= [player other]

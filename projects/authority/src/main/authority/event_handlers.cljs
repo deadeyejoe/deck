@@ -1,14 +1,18 @@
 (ns authority.event-handlers
   (:require [re-frame.core :as rf]
-            [authority.db :as db]))
+            [re-pressed.core :as rp]
+            [authority.db :as db]
+            [authority.shortcuts :as short]))
 
 (rf/reg-event-fx
  :initialize
  [(rf/inject-cofx :local-store)]
  (fn [{:keys [:local-store]}]
    (if local-store
-     {:db (assoc (db/init) :state :restore)}
-     {:fx [[:dispatch [:new-game]]]})))
+     {:db (assoc (db/init) :state :restore)
+      :fx [[:dispatch [::rp/add-keyboard-event-listener "keyup"]]]}
+     {:fx [[:dispatch [:new-game]]
+           [:dispatch [::rp/add-keyboard-event-listener "keyup"]]]})))
 
 (rf/reg-event-fx
  :new-game
@@ -16,14 +20,21 @@
  (fn []
    {:db (db/init)
     :persist-local nil
-    :fx [[:dispatch [:timer/start]]]}))
+    :fx [[:dispatch [:timer/start]]
+         [:dispatch [:refresh-shortcuts]]]}))
 
 (rf/reg-event-fx
  :restore-game
  [(rf/inject-cofx :local-store)]
  (fn [{:keys [:local-store]}]
    {:db local-store
-    :fx [[:dispatch [:timer/start]]]}))
+    :fx [[:dispatch [:timer/start]]
+         [:dispatch [:refresh-shortcuts]]]}))
+
+(rf/reg-event-fx
+ :refresh-shortcuts
+ (fn [{db :db}]
+   {:fx (short/rp-dispatch-based-on-db db)}))
 
 (rf/reg-event-db
  :save-name
@@ -62,9 +73,11 @@
  :round/start
  [(rf/inject-cofx :now)]
  (fn [{:keys [:db :now]} _]
-   {:db (-> db
-            (db/start-round now)
-            (db/start-strategy now))}))
+   (let [new-db (-> db
+                    (db/start-round now)
+                    (db/start-strategy now))]
+     {:db new-db
+      :fx (short/rp-dispatch-based-on-db new-db)})))
 
 (rf/reg-event-db
  :strategy/set
@@ -80,11 +93,12 @@
  :action/start
  [(rf/inject-cofx :now)]
  (fn [{:keys [:db :now]} _]
-   {:db
-    (-> db
-        (db/end-strategy now)
-        (db/start-action now)
-        (db/first-action now))}))
+   (let [new-db (-> db
+                    (db/end-strategy now)
+                    (db/start-action now)
+                    (db/first-action now))]
+     {:db new-db
+      :fx (short/rp-dispatch-based-on-db new-db)})))
 
 (rf/reg-event-fx
  :action/next-turn
@@ -92,12 +106,21 @@
  (fn [{:keys [:db :now]} _]
    {:db (db/next-turn db now)}))
 
+(defn paused? [db]
+  (= :pause (-> db :round/stream first :action)))
+
+(rf/reg-event-fx
+ :action/toggle-turn
+ (fn [{:keys [:db]} _]
+   (if (paused? db)
+     {:fx [[:dispatch [:action/resume-turn]]]}
+     {:fx [[:dispatch [:action/pause-turn]]]})))
+
 (rf/reg-event-fx
  :action/pause-turn
  [(rf/inject-cofx :now)]
  (fn [{:keys [:db :now]} _]
    {:db (db/pause-turn db now)}))
-
 
 (rf/reg-event-fx
  :action/resume-turn
@@ -109,25 +132,33 @@
  :status/start
  [(rf/inject-cofx :now)]
  (fn [{:keys [:db :now]} _]
-   {:db (-> db
-            (db/end-action now)
-            (db/start-status now))}))
+   (let [new-db (-> db
+                    (db/end-action now)
+                    (db/start-status now))]
+     (merge
+      {:db new-db
+       :fx (short/rp-dispatch-based-on-db new-db)}))))
 
 (rf/reg-event-fx
  :agenda/start
  [(rf/inject-cofx :now)]
  (fn [{:keys [:db :now]} _]
-   {:db (-> db
-            (db/end-status now)
-            (db/start-agenda now))}))
+   (let [new-db (-> db
+                    (db/end-action now)
+                    (db/start-agenda now))]
+     (merge
+      {:db new-db
+       :fx (short/rp-dispatch-based-on-db new-db)}))))
 
 (rf/reg-event-fx
  :round/end
  [(rf/inject-cofx :now)]
  (fn [{:keys [:db :now]} _]
-   {:db (-> db
-            (db/end-agenda now)
-            (db/end-round))}))
+   (let [new-db (-> db
+                    (db/end-agenda now)
+                    (db/end-round))]
+     {:db new-db
+      :fx (short/rp-dispatch-based-on-db new-db)})))
 
 
 

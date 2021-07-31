@@ -7,6 +7,7 @@
             [authority.event-handlers]
             [authority.subs]
             [authority.storage]
+            [authority.shortcuts]
             [authority.views.restore :as restore]
             [authority.views.players :as players]
             [authority.views.game-round :as game-round]))
