@@ -8,8 +8,8 @@
 ;; COMMON
 
 (rf/reg-sub
- :state
- (fn [db _] (:state db)))
+ :game/state
+ (fn [db _] (:game/state db)))
 
 (rf/reg-sub
  :positions

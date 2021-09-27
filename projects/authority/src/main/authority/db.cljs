@@ -4,14 +4,14 @@
 
 (defn event [state now action]
   (merge
-   (select-keys state [:state :round/phase :round/number])
+   (select-keys state [:game/state :round/phase :round/number])
    {:time now
     :action action}))
 
 (defn player-event [state now action]
   (let [current-player (:action/current-player state)]
     (merge
-     (select-keys state [:state :round/phase :round/number])
+     (select-keys state [:game/state :round/phase :round/number])
      {:time now
       :player (:name current-player)
       :position (:position current-player)
@@ -35,7 +35,7 @@
 ;; SETUP ========================================================
 
 (defn init []
-  {:state :player-select
+  {:game/state :player-select
    :players {}})
 
 (defn update-name [state position name]
@@ -46,7 +46,7 @@
 
 (defn start-game [state now]
   (assoc state
-         :state :game-round
+         :game/state :game-round
          :game/start now
          :stream (list (event state now :start))
          :positions (-> state :players keys sort)))

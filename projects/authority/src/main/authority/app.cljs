@@ -19,7 +19,7 @@
 
 (defn ui []
   [:div {:class ["font-sans" "text-xl" "text-gray-300" "bg-gray-800"]}
-   (let [state @(rf/subscribe [:state])]
+   (let [state @(rf/subscribe [:game/state])]
      (case state
        :restore [restore/component]
        :player-select [players/component]

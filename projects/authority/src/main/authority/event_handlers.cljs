@@ -9,7 +9,7 @@
  [(rf/inject-cofx :local-store)]
  (fn [{:keys [:local-store]}]
    (if local-store
-     {:db (assoc (db/init) :state :restore)
+     {:db (assoc (db/init) :game/state :restore)
       :fx [[:dispatch [::rp/add-keyboard-event-listener "keyup"]]]}
      {:fx [[:dispatch [:new-game]]
            [:dispatch [::rp/add-keyboard-event-listener "keyup"]]]})))
