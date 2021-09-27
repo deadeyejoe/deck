@@ -39,7 +39,7 @@
 
 (rf/reg-sub
  :heartbeat
- (fn [db _] (:timer/heartbeat db)))
+ (fn [db _] (:heartbeat db)))
 
 (rf/reg-sub
  :time/base

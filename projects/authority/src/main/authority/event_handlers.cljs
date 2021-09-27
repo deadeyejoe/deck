@@ -20,7 +20,7 @@
  (fn []
    {:db (db/init)
     :persist-local nil
-    :fx [[:dispatch [:timer/start]]
+    :fx [[:dispatch [:heartbeat/start]]
          [:dispatch [:refresh-shortcuts]]]}))
 
 (rf/reg-event-fx
@@ -28,7 +28,7 @@
  [(rf/inject-cofx :local-store)]
  (fn [{:keys [:local-store]}]
    {:db local-store
-    :fx [[:dispatch [:timer/start]]
+    :fx [[:dispatch [:heartbeat/start]]
          [:dispatch [:refresh-shortcuts]]]}))
 
 (rf/reg-event-fx
@@ -50,24 +50,24 @@
     :fx [[:dispatch [:round/start]]]}))
 
 (rf/reg-event-fx
- :timer/start
+ :heartbeat/start
  (fn [_]
    {:interval {:action :start
                :id :heartbeat
                :frequency 1000
-               :event [:timer/heartbeat]}}))
+               :event [:heartbeat]}}))
 
 (rf/reg-event-fx
- :timer/stop
+ :heartbeat/stop
  (fn [_]
    {:interval {:action :stop
                :id :heartbeat}}))
 
 (rf/reg-event-fx
- :timer/heartbeat
+ :heartbeat
  [(rf/inject-cofx :now)]
  (fn [{:keys [db now]} _]
-   {:db (assoc db :timer/heartbeat now)}))
+   {:db (assoc db :heartbeat now)}))
 
 (rf/reg-event-fx
  :round/start
