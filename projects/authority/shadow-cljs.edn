@@ -1,8 +1,5 @@
 ;; shadow-cljs configuration
-{:deps {:aliases [:cljs]}
-
- :dependencies []
- :dev-http {8080 "public"}
+{:dev-http {8080 "public"}
  :builds
  {:app
   {:target :browser
@@ -15,4 +12,8 @@
           {re-frame.trace.trace-enabled? true
            day8.re-frame.tracing.trave-enabled? true}}}
    :release {:output-dir "release"
-             :asset-path "/"}}}}
+             :asset-path "/"}}
+  :test
+  {:target :node-test
+   :output-to "target/node-test"
+   :autorun true}}}
