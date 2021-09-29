@@ -8,12 +8,11 @@
             [authority.views.game-round.summary :as summary]))
 
 (defn timer [id label]
-  (let [time (rf/subscribe [:time/display id])]
+  (let [time (rf/subscribe [:timer/display id])]
     [:div {:class ["flex" "flex-row" "space-x-5" "flex-grow-0" "justify-between" "text-3xl"
                    "border" "rounded-lg" "border-gray-700" "py-2" "px-4"]}
      [:div label]
      [:div {:class ["text-gray-400"]} @time]]))
-
 
 (defn round-number []
   (let [number (rf/subscribe [:round/number])

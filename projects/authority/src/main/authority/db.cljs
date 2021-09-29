@@ -1,4 +1,5 @@
-(ns authority.db)
+(ns authority.db
+  (:require [authority.timer.db :as timer-db]))
 
 ;; UTIL ========================================================
 
@@ -45,22 +46,32 @@
                                          :name name})))
 
 (defn start-game [state now]
-  (assoc state
-         :game/state :game-round
-         :game/start now
-         :stream (list (event state now :start))
-         :positions (-> state :players keys sort)))
+  (-> state
+      (assoc :game/state :game-round
+             :game/start now
+             :stream (list (event state now :start))
+             :positions (-> state :players keys sort))
+      (timer-db/create now {:id :game :label "Game"})))
 
 (defn start-round [state now]
   (-> state
       (assoc :round/start now
              :round/stream '())
+      (timer-db/create now {:id :round :label "Round"})
       (update :round/number inc)))
 
 (defn end-round [state]
   (-> state
       (update :stream conj (:round/stream state))
       (assoc :round/phase :round-summary)))
+
+;; PHASE ========================================================
+
+(defn start-phase [state phase now]
+  (-> state
+      (assoc :round/phase phase
+             :phase/start now)
+      (timer-db/create now {:id :phase :label "Phase"})))
 
 ;; STRATEGY ========================================================
 
@@ -69,8 +80,7 @@
 
 (defn start-strategy [state now]
   (-> state
-      (assoc :round/phase :strategy-phase
-             :phase/start now)
+      (start-phase :strategy-phase now)
       (push-round-event now :start)
       (update :players reset-initiative)))
 
@@ -102,9 +112,8 @@
 
 (defn start-action [state now]
   (-> state
-      (assoc :round/phase :action-phase
-             :round/initiative-order (-> state :players in-initiative-order)
-             :phase/start now)
+      (start-phase :action-phase now)
+      (assoc :round/initiative-order (-> state :players in-initiative-order))
       (push-round-event now :start)))
 
 (defn first-action [state now]
@@ -136,8 +145,7 @@
 
 (defn start-status [state now]
   (-> state
-      (assoc :round/phase :status-phase
-             :phase/start now)
+      (start-phase :status-phase now)
       (push-round-event now :start)))
 
 (defn end-status [state now]
@@ -149,8 +157,7 @@
 
 (defn start-agenda [state now]
   (-> state
-      (assoc :round/phase :agenda-phase
-             :phase/start now)
+      (start-phase :agenda-phase now)
       (push-round-event now :start)))
 
 (defn end-agenda [state now]

@@ -1,21 +1,19 @@
 (ns authority.timer.utils
   (:require [cuerdas.core :as str]))
 
-(defn elapsed [from to]
+(defn difference [from to]
   (-> (- to from)
+      (/ 1000)
       int
       Math/abs))
 
-(defn ms->s [ms] (int (/ ms 1000)))
+(defn decompose [seconds]
+  [(quot seconds 3600)
+   (mod (quot seconds 60) 60)
+   (mod seconds 60)])
 
-(defn decompose [elapsed-ms]
-  (let [seconds (ms->s elapsed-ms)]
-    [(quot seconds 3600)
-     (mod (quot seconds 60) 60)
-     (mod seconds 60)]))
-
-(defn ms->display [ms]
-  (->> ms
+(defn seconds->display [seconds]
+  (->> seconds
        decompose
        (map #(str/pad (str %) {:length 2 :padding "0"}))
        (interpose ":")
@@ -24,7 +22,7 @@
 (defn event-offset [[first-event second-event]]
   (let [interval (vector (:action first-event) (:action second-event))]
     (if (= interval [:pause :resume])
-      (elapsed (:time second-event) (:time first-event))
+      (difference (:time second-event) (:time first-event))
       0)))
 
 (defn offset [timer]
@@ -35,9 +33,9 @@
    (map event-offset)
    (apply +)))
 
-(defn elapsed-total [timer now]
-  (elapsed now (:start timer)))
+(defn elapsed-real [timer now]
+  (difference now (:start timer)))
 
 (defn elapsed [timer now]
-  (- (elapsed-total timer now)
+  (- (elapsed-real timer now)
      (offset timer)))
