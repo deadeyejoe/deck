@@ -3,29 +3,17 @@
 
 ;; UTIL ========================================================
 
-(defn event [state now action]
-  (merge
-   (select-keys state [:game/state :round/phase :round/number])
-   {:time now
-    :action action}))
-
-(defn player-event [state now action]
+(defn build-log-event [state action]
   (let [current-player (:action/current-player state)]
     (merge
      (select-keys state [:game/state :round/phase :round/number])
-     {:time now
+     {:time (:heartbeat state)
       :player (:name current-player)
       :position (:position current-player)
       :action action})))
 
-(defn push-event [state event]
-  (update state :stream conj event))
-
-(defn push-round-event [state time action]
-  (update state :round/stream conj (event state time action)))
-
-(defn push-player-event [state time action]
-  (update state :round/stream conj (player-event state time action)))
+(defn log-event [state action]
+  (update state :stream conj (build-log-event state action)))
 
 (defn transform-values [m f]
   (reduce-kv
@@ -49,14 +37,14 @@
   (-> state
       (assoc :game/state :game-round
              :game/start now
-             :stream (list (event state now :start))
              :positions (-> state :players keys sort))
+      (log-event :start)
       (timer-db/create now {:id :game :label "Game"})))
 
 (defn start-round [state now]
   (-> state
-      (assoc :round/start now
-             :round/stream '())
+      (assoc :round/start now)
+      (timer-db/resume-all now)
       (timer-db/create now {:id :round :label "Round"})
       (update :round/number inc)))
 
@@ -71,6 +59,8 @@
   (-> state
       (assoc :round/phase phase
              :phase/start now)
+      (log-event :start)
+      (timer-db/resume-all now)
       (timer-db/create now {:id :phase :label "Phase"})))
 
 ;; STRATEGY ========================================================
@@ -81,7 +71,6 @@
 (defn start-strategy [state now]
   (-> state
       (start-phase :strategy-phase now)
-      (push-round-event now :start)
       (update :players reset-initiative)))
 
 (defn set-strategy [state position initiative]
@@ -91,7 +80,7 @@
   (update-in state [:players position] dissoc :initiative))
 
 (defn end-strategy [state now]
-  (push-round-event state now :end))
+  (log-event state :end))
 
 ;; ACTION ========================================================
 
@@ -113,52 +102,56 @@
 (defn start-action [state now]
   (-> state
       (start-phase :action-phase now)
-      (assoc :round/initiative-order (-> state :players in-initiative-order))
-      (push-round-event now :start)))
+      (assoc :round/initiative-order (-> state :players in-initiative-order))))
+
+(defn start-player-turn [state player now]
+  (-> state
+      (assoc :action/current-player player)
+      (timer-db/resume-all now)
+      (timer-db/create now {:id :player})
+      (log-event :start)))
 
 (defn first-action [state now]
   (let [current (-> state :round/initiative-order first)]
-    (-> state
-        (assoc :action/current-player current)
-        (push-player-event now :start))))
+    (start-player-turn state current now)))
 
 (defn next-turn [state now]
   (let [current-player (:action/current-player state)
         next-player (next-player state current-player)]
     (-> state
-        (push-player-event now :end)
-        (assoc :action/current-player next-player)
-        (push-player-event now :start))))
+        (log-event :end)
+        (start-player-turn next-player now))))
 
 (defn pause-turn [state now]
-  (push-player-event state now :pause))
+  (-> state
+      (timer-db/pause-all now)
+      (log-event :pause)))
 
 (defn resume-turn [state now]
-  (push-player-event state now :resume))
+  (-> state
+      (timer-db/resume-all now)
+      (log-event :resume)))
 
 (defn end-action [state now]
   (-> state
-      (push-round-event now :end)
+      (log-event :end)
+      (timer-db/delete :player)
       (dissoc :action/current-player)))
 
 ;;  STATUS
 
 (defn start-status [state now]
-  (-> state
-      (start-phase :status-phase now)
-      (push-round-event now :start)))
+  (start-phase state :status-phase now))
 
 (defn end-status [state now]
   (-> state
       (dissoc :round/initiative-order)
-      (push-round-event now :end)))
+      (log-event :end)))
 
 ;;  AGENDA
 
 (defn start-agenda [state now]
-  (-> state
-      (start-phase :agenda-phase now)
-      (push-round-event now :start)))
+  (start-phase state :agenda-phase now))
 
 (defn end-agenda [state now]
-  (push-round-event state now :end))
+  (log-event state :end))

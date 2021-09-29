@@ -1,7 +1,7 @@
 (ns authority.timer.db
   (:require [authority.utils :as utils]))
 
-(defn build [{:keys [id label pauseable]}]
+(defn build [{:keys [id label pauseable] :or {pauseable true}}]
   {:id id
    :label (or label id)
    :pauseable pauseable
@@ -63,7 +63,11 @@
        (sort-by :id)))
 
 (defn pause-all [db now]
-  (update db :timer utils/transform-values (fn [timer] (pause timer now))))
+  (-> db
+      (update :timer utils/transform-values (fn [timer] (pause timer now)))
+      (assoc-in [:timer :paused] true)))
 
 (defn resume-all [db now]
-  (update db :timer utils/transform-values (fn [timer] (resume timer now))))
+  (-> db
+      (update :timer utils/transform-values (fn [timer] (resume timer now)))
+      (update :timer dissoc :paused)))

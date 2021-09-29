@@ -28,11 +28,11 @@
        (map (comp player-order :position) @ordering))]]))
 
 (defn timer-control []
-  (let [status (listen [:action/current-status])
+  (let [paused? (listen [:timer/paused])
         classes (into utils/primary-button
                       ["text-5xl" "mt-10"])]
     [:div
-     (if (not= status :pause)
+     (if-not paused?
        [:input {:type "button"
                 :value "Pause"
                 :on-click #(rf/dispatch [:action/pause-turn])
@@ -43,10 +43,10 @@
                 :class classes}])]))
 
 (defn time-display []
-  (let [elapsed (listen [:action/current-time-elapsed])
-        display (listen [:action/current-time-display])
-        warning? (listen [:action/current-elapsed-in-range 90 120])
-        danger? (listen [:action/current-elapsed-in-range 120])]
+  (let [elapsed (listen [:timer/elapsed :player])
+        display (listen [:timer/display :player])
+        warning? (listen [:timer/elapsed-in-range :player 90 120])
+        danger? (listen [:timer/elapsed-in-range :player 120])]
     [:div {:class (into ["text-hueg" "mb-10" "transition-colors" "duration-1000" "ease-in"]
                         (cond warning? ["text-yellow-500"]
                               (and danger? (even? elapsed)) ["text-red-600"]

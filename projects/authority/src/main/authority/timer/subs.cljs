@@ -4,6 +4,10 @@
             [authority.timer.utils :as timer]))
 
 (rf/reg-sub
+ :timer/paused
+ (fn [db _] (some? (get-in db [:timer :paused]))))
+
+(rf/reg-sub
  :timer/now
  (fn [db _] (:heartbeat db)))
 
@@ -35,3 +39,13 @@
      (rf/subscribe [:timer/elapsed timer-id])))
  (fn [elapsed _]
    (timer/seconds->display elapsed)))
+
+
+(rf/reg-sub
+ :timer/elapsed-in-range
+ (fn [[_ timer-id & _] _]
+   (rf/subscribe [:timer/elapsed timer-id]))
+ (fn [elapsed [_ _ from to]]
+   (if to
+     (< from elapsed to)
+     (<= from elapsed))))

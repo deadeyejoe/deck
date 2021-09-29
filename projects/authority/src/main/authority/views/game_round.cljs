@@ -7,12 +7,15 @@
             [authority.views.game-round.agenda :as agenda]
             [authority.views.game-round.summary :as summary]))
 
-(defn timer [id label]
-  (let [time (rf/subscribe [:timer/display id])]
-    [:div {:class ["flex" "flex-row" "space-x-5" "flex-grow-0" "justify-between" "text-3xl"
-                   "border" "rounded-lg" "border-gray-700" "py-2" "px-4"]}
-     [:div label]
-     [:div {:class ["text-gray-400"]} @time]]))
+(defn timer
+  ([id label]
+   (timer id label :relative))
+  ([id label mode]
+   (let [time (rf/subscribe [:timer/display id mode])]
+     [:div {:class ["flex" "flex-row" "space-x-5" "flex-grow-0" "justify-between" "text-3xl"
+                    "border" "rounded-lg" "border-gray-700" "py-2" "px-4"]}
+      [:div label]
+      [:div {:class ["text-gray-400"]} @time]])))
 
 (defn round-number []
   (let [number (rf/subscribe [:round/number])
@@ -28,6 +31,7 @@
   [:div {:class ["w-screen" "flex" "flex-row" "flex-shrink-0" "space-x-3" "justify-center" "border-b" "border-gray-700"]}
    [round-number]
    [:div {:class ["flex" "flex-row" "flex-nowrap" "flex-grow-0" "w-2/3" "justify-evenly" "items-center"]}
+    [timer :game "Total" :real]
     [timer :game "Game"]
     [timer :round "Round"]
     [timer :phase "Phase"]]])
