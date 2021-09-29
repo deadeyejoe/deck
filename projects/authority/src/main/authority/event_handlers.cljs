@@ -34,7 +34,7 @@
 (rf/reg-event-fx
  :refresh-shortcuts
  (fn [{db :db}]
-   {:fx (short/rp-dispatch-based-on-db db)}))
+   {:fx (short/update-hotkeys db)}))
 
 (rf/reg-event-db
  :save-name
@@ -77,7 +77,7 @@
                     (db/start-round now)
                     (db/start-strategy now))]
      {:db new-db
-      :fx (short/rp-dispatch-based-on-db new-db)})))
+      :fx (short/update-hotkeys new-db)})))
 
 (rf/reg-event-db
  :strategy/set
@@ -98,7 +98,7 @@
                     (db/start-action now)
                     (db/first-action now))]
      {:db new-db
-      :fx (short/rp-dispatch-based-on-db new-db)})))
+      :fx (short/update-hotkeys new-db)})))
 
 (rf/reg-event-fx
  :action/next-turn
@@ -137,7 +137,7 @@
                     (db/start-status now))]
      (merge
       {:db new-db
-       :fx (short/rp-dispatch-based-on-db new-db)}))))
+       :fx (short/update-hotkeys new-db)}))))
 
 (rf/reg-event-fx
  :agenda/start
@@ -148,7 +148,7 @@
                     (db/start-agenda now))]
      (merge
       {:db new-db
-       :fx (short/rp-dispatch-based-on-db new-db)}))))
+       :fx (short/update-hotkeys new-db)}))))
 
 (rf/reg-event-fx
  :round/end
@@ -158,7 +158,7 @@
                     (db/end-agenda now)
                     (db/end-round))]
      {:db new-db
-      :fx (short/rp-dispatch-based-on-db new-db)})))
+      :fx (short/update-hotkeys new-db)})))
 
 
 

@@ -41,7 +41,7 @@
 (def phase->re-pressed
   (util/transform-values phase->shortcuts shortcut->rpdispatch))
 
-(defn rp-dispatch-based-on-db [{:keys [:game/state :round/phase]}]
+(defn update-hotkeys [{:keys [:game/state :round/phase]}]
   (let [key [state phase]]
     (case key
       [:player-select nil] [(phase->re-pressed :player-select)]
