@@ -19,7 +19,7 @@
   ["rounded" "px-2" "py-1" "m-2" "bg-blue-800" "text-gray-200" "cursor-pointer"])
 
 (defn timer [id label]
-  (let [time (listen [:time/display id])]
+  (let [time (listen [:timer/display id])]
     [:div {:class ["flex" "flex-row" "space-x-5" "flex-grow-0" "justify-between" "text-3xl"
                    "border" "rounded-lg" "border-gray-700" "py-2" "px-4"]}
      [:div label]
