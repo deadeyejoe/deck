@@ -1,11 +1,13 @@
 (ns authority.timer.utils
   (:require [cuerdas.core :as str]))
 
-(defn difference [from to]
+(defn difference-ms [from to]
   (-> (- to from)
-      (/ 1000)
       int
       Math/abs))
+
+(defn ms->seconds [seconds]
+  (int (/ seconds 1000)))
 
 (defn decompose [seconds]
   [(quot seconds 3600)

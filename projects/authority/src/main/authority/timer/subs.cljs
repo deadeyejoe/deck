@@ -20,14 +20,6 @@
   (fn [[_ timer-id] _] (f timer-id)))
 
 (rf/reg-sub
- :timer/time-real
- (id-sub (fn [timer-id]
-           [(rf/subscribe [:timer/now])
-            (rf/subscribe [:timer/base timer-id])]))
- (fn [[now timer] _]
-   (timer/time-real timer now)))
-
-(rf/reg-sub
  :timer/time-total
  (id-sub (fn [timer-id]
            [(rf/subscribe [:timer/now])
@@ -47,13 +39,21 @@
            [(rf/subscribe [:timer/time-total timer-id])
             (rf/subscribe [:timer/offset timer-id])]))
  (fn [[total offset] _]
-   (- total offset)))
+   (utils/ms->seconds (- total offset))))
+
+(rf/reg-sub
+ :timer/elapsed-real
+ (id-sub (fn [timer-id]
+           [(rf/subscribe [:timer/now])
+            (rf/subscribe [:timer/base timer-id])]))
+ (fn [[now timer] _]
+   (utils/ms->seconds (timer/time-real timer now))))
 
 (rf/reg-sub
  :timer/display
  (fn [[_ timer-id mode] _]
    (if (= mode :real)
-     (rf/subscribe [:timer/time-real timer-id])
+     (rf/subscribe [:timer/elapsed-real timer-id])
      (rf/subscribe [:timer/elapsed timer-id])))
  (fn [elapsed _]
    (utils/seconds->display elapsed)))

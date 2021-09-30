@@ -39,19 +39,19 @@
     timer))
 
 (defn time-real [timer now]
-  (utils/difference now (:start-time timer)))
+  (utils/difference-ms now (:start-time timer)))
 
 (defn time-total
   "This name isn't totally correct..."
   [timer now]
   (if (running? timer)
     (time-real timer now)
-    (utils/difference (:pause-time timer) (:start-time timer))))
+    (utils/difference-ms (:pause-time timer) (:start-time timer))))
 
 (defn pair->offset [[first-event second-event]]
   (let [interval (vector (:action first-event) (:action second-event))]
     (if (= interval [:resume :pause])
-      (utils/difference (:time second-event) (:time first-event))
+      (utils/difference-ms (:time second-event) (:time first-event))
       0)))
 
 (defn
