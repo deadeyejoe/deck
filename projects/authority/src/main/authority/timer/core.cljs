@@ -72,7 +72,9 @@
            :events
            '({:time #inst "2021-09-29T20:47:17.514-00:00", :action :pause}
              {:time #inst "2021-09-29T20:47:16.327-00:00", :action :start})
-           :start #inst "2021-09-29T20:47:16.327-00:00"
+           :start-time #inst "2021-09-29T20:47:16.327-00:00"
+           :pause-time #inst "2021-09-29T20:47:17.514-00:00"
            :status :paused})
-  (elapsed ex (js/Date.))
-  (-> ex :events first :time))
+  (offset ex)
+  (time-real ex (js/Date.))
+  (time-total ex (js/Date.)))
