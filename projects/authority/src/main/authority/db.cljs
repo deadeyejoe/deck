@@ -3,7 +3,7 @@
             [authority.player.db :as player-db]
             [authority.player.core :as player]))
 
-;; UTIL ========================================================
+;; LOGGING ========================================================
 
 (defn build-log-event [state action]
   (let [current-player (:action/current-player state)]
@@ -47,7 +47,6 @@
 
 (defn end-round [state]
   (-> state
-      (update :stream conj (:round/stream state))
       (assoc :round/phase :round-summary)))
 
 ;; PHASE ========================================================

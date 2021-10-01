@@ -13,16 +13,12 @@
  (fn [db _] (:game/state db)))
 
 (rf/reg-sub
- :phase
+ :round/phase
  (fn [db _] (:round/phase db)))
 
 (rf/reg-sub
  :round/number
  (fn [db _] (:round/number db)))
-
-(rf/reg-sub
- :round/stream
- (fn [db _] (:round/stream db)))
 
 ;; STRATEGY
 

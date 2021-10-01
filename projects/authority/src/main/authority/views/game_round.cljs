@@ -19,7 +19,7 @@
 
 (defn round-number []
   (let [number (rf/subscribe [:round/number])
-        phase (rf/subscribe [:phase])]
+        phase (rf/subscribe [:round/phase])]
     [:div {:class ["p-3" "ml-3" "mt-3" "absolute" "top-0" "left-0"
                    "rounded-lg" "border-2" "border-gray-700" "w-32" "h-32" "bg-gray-800"]}
      [:div {:class ["flex" "flex-col" "justify-around" "items-center"]}
@@ -37,7 +37,7 @@
     [timer :phase "Phase"]]])
 
 (defn component []
-  (let [phase (rf/subscribe [:phase])]
+  (let [phase (rf/subscribe [:round/phase])]
     [:div {:class ["w-screen" "h-screen" "flex" "flex-col" "flex-nowrap"]}
      [:div {:class ["flex" "h-24" "flex-grow-0"]}
       [title-bar]]
