@@ -91,6 +91,8 @@
         (log-event :end)
         (start-player-turn next-player now))))
 
+(def all-paused? timer-db/all-paused?)
+
 (defn pause-turn [state now]
   (-> state
       (timer-db/pause-all now)
@@ -113,9 +115,7 @@
   (start-phase state :status-phase now))
 
 (defn end-status [state now]
-  (-> state
-      (dissoc :round/initiative-order)
-      (log-event :end)))
+  (log-event state :end))
 
 ;;  AGENDA
 

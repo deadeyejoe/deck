@@ -3,25 +3,34 @@
             [re-pressed.core :as rp]
             [authority.db :as db]
             [authority.timer.db :as timer-db]
-            [authority.shortcuts :as short]))
+            [authority.shortcuts :as short]
+            [authority.timer.event-handlers]))
+
+;; UTIL ====================================================================
+
+(rf/reg-event-fx
+ :refresh-shortcuts
+ (fn [{db :db}]
+   {:fx (short/update-hotkeys db)}))
+
+;; INIT ====================================================================
 
 (rf/reg-event-fx
  :initialize
  [(rf/inject-cofx :local-store)]
  (fn [{:keys [:local-store]}]
    (if local-store
-     {:db (assoc (db/init) :game/state :restore)
+     {:db (merge (db/init) {:game/state :restore})
       :fx [[:dispatch [::rp/add-keyboard-event-listener "keyup"]]]}
      {:fx [[:dispatch [:new-game]]
            [:dispatch [::rp/add-keyboard-event-listener "keyup"]]]})))
 
 (rf/reg-event-fx
  :new-game
- [(rf/inject-cofx :local-store)]
  (fn []
    {:db (db/init)
     :persist-local nil
-    :fx [[:dispatch [:heartbeat/start]]
+    :fx [[:dispatch [:timer/start-heartbeat]]
          [:dispatch [:refresh-shortcuts]]]}))
 
 (rf/reg-event-fx
@@ -29,18 +38,18 @@
  [(rf/inject-cofx :local-store)]
  (fn [{:keys [:local-store]}]
    {:db local-store
-    :fx [[:dispatch [:heartbeat/start]]
+    :fx [[:dispatch [:timer/start-heartbeat]]
          [:dispatch [:refresh-shortcuts]]]}))
 
-(rf/reg-event-fx
- :refresh-shortcuts
- (fn [{db :db}]
-   {:fx (short/update-hotkeys db)}))
+
+;; PLAYER SELECT ====================================================================
 
 (rf/reg-event-db
  :save-name
  (fn [db [_ position name]]
    (db/update-name db position name)))
+
+;; GAME ====================================================================
 
 (rf/reg-event-fx
  :start-game
@@ -50,25 +59,8 @@
             (db/start-game now))
     :fx [[:dispatch [:round/start]]]}))
 
-(rf/reg-event-fx
- :heartbeat/start
- (fn [_]
-   {:interval {:action :start
-               :id :heartbeat
-               :frequency 1000
-               :event [:heartbeat]}}))
 
-(rf/reg-event-fx
- :heartbeat/stop
- (fn [_]
-   {:interval {:action :stop
-               :id :heartbeat}}))
-
-(rf/reg-event-fx
- :heartbeat
- [(rf/inject-cofx :now)]
- (fn [{:keys [db now]} _]
-   {:db (assoc db :heartbeat now)}))
+;; ROUND ====================================================================
 
 (rf/reg-event-fx
  :round/start
@@ -80,6 +72,19 @@
      {:db new-db
       :fx (short/update-hotkeys new-db)})))
 
+
+(rf/reg-event-fx
+ :round/end
+ [(rf/inject-cofx :now)]
+ (fn [{:keys [:db :now]} _]
+   (let [new-db (-> db
+                    (db/end-agenda now)
+                    (db/end-round))]
+     {:db new-db
+      :fx (short/update-hotkeys new-db)})))
+
+;; STRATEGY ====================================================================
+
 (rf/reg-event-db
  :strategy/set
  (fn [db [_ position initiative]]
@@ -89,6 +94,8 @@
  :strategy/unset
  (fn [db [_ position]]
    (db/unset-strategy db position)))
+
+;; ACTION ====================================================================
 
 (rf/reg-event-fx
  :action/start
@@ -109,7 +116,7 @@
 (rf/reg-event-fx
  :action/toggle-turn
  (fn [{:keys [:db]} _]
-   (if (timer-db/all-paused? db)
+   (if (db/all-paused? db)
      {:fx [[:dispatch [:action/resume-turn]]]}
      {:fx [[:dispatch [:action/pause-turn]]]})))
 
@@ -125,6 +132,8 @@
  (fn [{:keys [:db :now]} _]
    {:db (db/resume-turn db now)}))
 
+;; STATUS ====================================================================
+
 (rf/reg-event-fx
  :status/start
  [(rf/inject-cofx :now)]
@@ -136,26 +145,18 @@
       {:db new-db
        :fx (short/update-hotkeys new-db)}))))
 
+;; AGENDA ====================================================================
+
 (rf/reg-event-fx
  :agenda/start
  [(rf/inject-cofx :now)]
  (fn [{:keys [:db :now]} _]
    (let [new-db (-> db
-                    (db/end-action now)
+                    (db/end-status now)
                     (db/start-agenda now))]
      (merge
       {:db new-db
        :fx (short/update-hotkeys new-db)}))))
-
-(rf/reg-event-fx
- :round/end
- [(rf/inject-cofx :now)]
- (fn [{:keys [:db :now]} _]
-   (let [new-db (-> db
-                    (db/end-agenda now)
-                    (db/end-round))]
-     {:db new-db
-      :fx (short/update-hotkeys new-db)})))
 
 
 
