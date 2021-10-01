@@ -2,6 +2,7 @@
   (:require [re-frame.core :as rf]
             [re-pressed.core :as rp]
             [authority.db :as db]
+            [authority.timer.db :as timer-db]
             [authority.shortcuts :as short]))
 
 (rf/reg-event-fx
@@ -95,8 +96,7 @@
  (fn [{:keys [:db :now]} _]
    (let [new-db (-> db
                     (db/end-strategy now)
-                    (db/start-action now)
-                    (db/first-action now))]
+                    (db/start-action now))]
      {:db new-db
       :fx (short/update-hotkeys new-db)})))
 
@@ -106,13 +106,10 @@
  (fn [{:keys [:db :now]} _]
    {:db (db/next-turn db now)}))
 
-(defn paused? [db]
-  (= :pause (-> db :round/stream first :action)))
-
 (rf/reg-event-fx
  :action/toggle-turn
  (fn [{:keys [:db]} _]
-   (if (paused? db)
+   (if (timer-db/all-paused? db)
      {:fx [[:dispatch [:action/resume-turn]]]}
      {:fx [[:dispatch [:action/pause-turn]]]})))
 

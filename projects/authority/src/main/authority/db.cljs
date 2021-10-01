@@ -1,5 +1,7 @@
 (ns authority.db
-  (:require [authority.timer.db :as timer-db]))
+  (:require [authority.timer.db :as timer-db]
+            [authority.player.db :as player-db]
+            [authority.player.core :as player]))
 
 ;; UTIL ========================================================
 
@@ -24,22 +26,17 @@
 ;; SETUP ========================================================
 
 (defn init []
-  {:game/state :player-select
-   :players {}})
+  {:game/state :player-select})
 
-(defn update-name [state position name]
-  (if (empty? name)
-    (update state :players dissoc position)
-    (assoc-in state [:players position] {:position position
-                                         :name name})))
+(def update-name player-db/update-name)
 
 (defn start-game [state now]
   (-> state
       (assoc :game/state :game-round
-             :game/start now
-             :positions (-> state :players keys sort))
-      (log-event :start)
-      (timer-db/create now {:id :game :label "Game"})))
+             :game/start now)
+      (player-db/lock-positions)
+      (timer-db/create now {:id :game :label "Game"})
+      (log-event :start)))
 
 (defn start-round [state now]
   (-> state
@@ -65,44 +62,21 @@
 
 ;; STRATEGY ========================================================
 
-(defn reset-initiative [players]
-  (transform-values players #(dissoc % :initiative)))
-
 (defn start-strategy [state now]
   (-> state
       (start-phase :strategy-phase now)
-      (update :players reset-initiative)))
+      (player-db/update-all player/reset-initiative)))
 
 (defn set-strategy [state position initiative]
-  (assoc-in state [:players position :initiative] initiative))
+  (player-db/update-at state position #(player/update-initiative % initiative)))
 
 (defn unset-strategy [state position]
-  (update-in state [:players position] dissoc :initiative))
+  (player-db/update-at state position player/reset-initiative))
 
 (defn end-strategy [state now]
   (log-event state :end))
 
 ;; ACTION ========================================================
-
-(defn in-initiative-order [players]
-  (->> players
-       vals
-       (sort-by :initiative)))
-
-(defn player= [player other]
-  (= (:position player) (:position other)))
-
-(defn next-player [state current-player]
-  (let [order (:round/initiative-order state)]
-    (loop [[next & rest] order]
-      (if (player= next current-player)
-        (or (first rest) (first order))
-        (recur rest)))))
-
-(defn start-action [state now]
-  (-> state
-      (start-phase :action-phase now)
-      (assoc :round/initiative-order (-> state :players in-initiative-order))))
 
 (defn start-player-turn [state player now]
   (-> state
@@ -111,13 +85,15 @@
       (timer-db/create now {:id :player})
       (log-event :start)))
 
-(defn first-action [state now]
-  (let [current (-> state :round/initiative-order first)]
-    (start-player-turn state current now)))
+(defn start-action [state now]
+  (-> state
+      (player-db/lock-initiative)
+      (start-phase :action-phase now)
+      (start-player-turn (player-db/first-player state) now)))
 
 (defn next-turn [state now]
   (let [current-player (:action/current-player state)
-        next-player (next-player state current-player)]
+        next-player (player-db/next-player state current-player)]
     (-> state
         (log-event :end)
         (start-player-turn next-player now))))

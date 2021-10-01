@@ -40,7 +40,7 @@
    [:div
     {:class ["w-1/2" "flex" "flex-col" "justify-center" "items-center" "bg-gray-800" "rounded-lg" "py-20"]}
     [:div {:class ["text-5xl"]} "Select Initiative Order"]
-    (doall (map player-initiative-select @(rf/subscribe [:positions])))
+    (doall (map player-initiative-select @(rf/subscribe [:player/position-order])))
     [:input {:type "button"
              :value "Start Action Phase"
              :disabled (listen [:strategy/pending])

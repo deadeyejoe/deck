@@ -33,3 +33,6 @@
     player
     (dissoc player :passed)))
 
+(defn eq [player other]
+  (= (:position player) (:position other)))
+

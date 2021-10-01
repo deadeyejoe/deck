@@ -18,14 +18,14 @@
      [:div name]]))
 
 (defn initiative-order []
-  (let [ordering (rf/subscribe [:initiative-order])]
+  (let [ordering (rf/subscribe [:player/initiative-order])]
     [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-center"
                    "w-1/6" "h-screen"]}
      [:div {:class ["bg-gray-800" "w-full" "border-gray-700" "py-20"
                     "border-r-2" "border-t-2" "border-b-2" "rounded-r-xl"
                     "flex" "flex-col" "justify-center" "items-start"]}
       (doall
-       (map (comp player-order :position) @ordering))]]))
+       (map player-order @ordering))]]))
 
 (defn timer-control []
   (let [paused? (listen [:timer/paused])

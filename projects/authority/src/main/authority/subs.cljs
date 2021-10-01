@@ -3,21 +3,14 @@
             [clojure.set :as set]
             [authority.constants :as const]
             [authority.utils :as utils]
-            [authority.timer.subs]))
+            [authority.timer.subs]
+            [authority.player.subs]))
 
 ;; COMMON
 
 (rf/reg-sub
  :game/state
  (fn [db _] (:game/state db)))
-
-(rf/reg-sub
- :positions
- (fn [db _] (:positions db)))
-
-(rf/reg-sub
- :players
- (fn [db _] (:players db)))
 
 (rf/reg-sub
  :phase
@@ -30,29 +23,6 @@
 (rf/reg-sub
  :round/stream
  (fn [db _] (:round/stream db)))
-
-(rf/reg-sub
- :initiative-order
- (fn [db _] (:round/initiative-order db)))
-
-;; PLAYER
-
-(rf/reg-sub
- :player
- (fn [db [_ position]] (get-in db [:players position])))
-
-(defn player-signal [[_ position] _]
-  (rf/subscribe [:player position]))
-
-(rf/reg-sub
- :player/name
- player-signal
- (fn [player _] (:name player)))
-
-(rf/reg-sub
- :player/initiative
- player-signal
- (fn [player _] (:initiative player)))
 
 ;; STRATEGY
 
@@ -74,7 +44,7 @@
 
 (rf/reg-sub
  :strategy/pending
- :<- [:positions]
+ :<- [:player/position-order]
  :<- [:strategy/picked]
  (fn [[positions picked] _]
    (< (count picked) (count positions))))
@@ -89,7 +59,7 @@
  :action/is-current
  (fn [[_ position] _]
    [(rf/subscribe [:action/current-player])
-    (rf/subscribe [:player position])])
+    (rf/subscribe [:player/at position])])
  (fn [[current other] _]
    (utils/player= current other)))
 

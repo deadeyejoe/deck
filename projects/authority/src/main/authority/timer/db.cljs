@@ -37,3 +37,6 @@
   (-> db
       (update :timer utils/transform-values (fn [timer] (timer/resume timer now)))
       (update :timer dissoc :paused)))
+
+(defn all-paused? [db]
+  (get-in db [:timer :paused]))
