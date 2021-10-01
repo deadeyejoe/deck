@@ -17,12 +17,6 @@
 (defn log-event [state action]
   (update state :stream conj (build-log-event state action)))
 
-(defn transform-values [m f]
-  (reduce-kv
-   (fn [m k v] (assoc m k (f v)))
-   {}
-   m))
-
 ;; SETUP ========================================================
 
 (defn init []
