@@ -9,28 +9,29 @@
             :keyname "Space"})
 (def p     {:code {:keyCode 80}
             :keyname "P"})
+(def x     {:code {:keyCode 88}
+            :keyname "X"})
 
-(def clear-keys (mapv (comp vector :code) [enter
-                                           space
-                                           p]))
 (def always-listen-keys (mapv :code [enter space]))
 
-(def phase->shortcuts {:player-select [(merge enter {:label "Start Game"
-                                                     :event [:start-game]})]
-                       :strategy-phase [(merge enter {:label "End Phase"
-                                                      :event [:action/start]})]
-                       :action-phase [(merge space {:label "Next"
-                                                    :event [:action/next-turn]})
-                                      (merge p {:label "Pause"
-                                                :event [:action/toggle-turn]})
-                                      (merge enter {:label "End Phase"
-                                                    :event [:status/start]})]
-                       :status-phase [(merge enter {:label "End Phase"
-                                                    :event [:agenda/start]})]
-                       :agenda-phase [(merge enter {:label "End Phase"
-                                                    :event [:round/end]})]
-                       :round-summary [(merge enter {:label "Start Next Round"
-                                                     :event [:round/start]})]})
+(def phase->shortcuts {:player-select  [(merge enter   {:label "Start Game"
+                                                        :event [:start-game]})]
+                       :strategy-phase [(merge enter   {:label "End Phase"
+                                                        :event [:action/start]})]
+                       :action-phase   [(merge space   {:label "Next"
+                                                        :event [:action/next-turn]})
+                                        (merge p       {:label "Pause/Resume"
+                                                        :event [:action/toggle-turn]})
+                                        (merge enter   {:label "End Phase"
+                                                        :event [:status/start]})
+                                        (merge x       {:label "Pass"
+                                                        :event [:action/pass]})]
+                       :status-phase   [(merge enter   {:label "End Phase"
+                                                        :event [:agenda/start]})]
+                       :agenda-phase   [(merge enter   {:label "End Phase"
+                                                        :event [:round/end]})]
+                       :round-summary  [(merge enter   {:label "Start Next Round"
+                                                        :event [:round/start]})]})
 
 (defn shortcut->rpdispatch [shortcuts]
   [:dispatch [::rp/set-keyup-rules
@@ -44,10 +45,10 @@
 (defn update-hotkeys [{:keys [:game/state :round/phase]}]
   (let [key [state phase]]
     (case key
-      [:player-select nil] [(phase->re-pressed :player-select)]
+      [:player-select nil]           [(phase->re-pressed :player-select)]
       [:game-round :strategy-phase]  [(phase->re-pressed :strategy-phase)]
-      [:game-round :action-phase]  [(phase->re-pressed :action-phase)]
-      [:game-round :status-phase]  [(phase->re-pressed :status-phase)]
-      [:game-round :agenda-phase]  [(phase->re-pressed :agenda-phase)]
-      [:game-round :round-summary]  [(phase->re-pressed :round-summary)]
+      [:game-round :action-phase]    [(phase->re-pressed :action-phase)]
+      [:game-round :status-phase]    [(phase->re-pressed :status-phase)]
+      [:game-round :agenda-phase]    [(phase->re-pressed :agenda-phase)]
+      [:game-round :round-summary]   [(phase->re-pressed :round-summary)]
       [:dispatch [::rp/set-keyup-rules {}]])))
