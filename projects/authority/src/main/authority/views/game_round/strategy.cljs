@@ -24,7 +24,7 @@
                    (const/strategy->bg initiative)]}])
 
 (defn player-initiative-select [position]
-  (let [{:keys [name initiative]} (listen [:player position])
+  (let [{:keys [name initiative]} (listen [:player/at position])
         available @(rf/subscribe [:strategy/available])]
     [:div {:key position
            :class ["flex" "flex-row" "w-1/2"]}

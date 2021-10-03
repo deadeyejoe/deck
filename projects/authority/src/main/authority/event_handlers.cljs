@@ -132,6 +132,19 @@
  (fn [{:keys [:db :now]} _]
    {:db (db/resume-turn db now)}))
 
+(rf/reg-event-fx
+ :action/pass
+ [(rf/inject-cofx :now)]
+ (fn [{:keys [:db :now]} _]
+   (let [new-db (db/pass db now)
+         current-player (db/current-player new-db)
+         next-player (db/next-player new-db current-player)]
+     (if (some? next-player)
+       {:db new-db
+        :fx [[:dispatch [:action/next-turn]]]}
+       {:db new-db
+        :fx [[:dispatch [:status/start]]]}))))
+
 ;; STATUS ====================================================================
 
 (rf/reg-event-fx

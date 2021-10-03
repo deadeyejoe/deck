@@ -78,18 +78,37 @@
       (timer-db/create now {:id :player})
       (log-event :start)))
 
+(defn end-player-turn [state]
+  (log-event state :end))
+
 (defn start-action [state now]
   (-> state
       (player-db/lock-initiative)
       (start-phase :action-phase now)
       (start-player-turn (player-db/first-player state) now)))
 
+(defn end-action [state now]
+  (-> state
+      (player-db/update-all player/ready)
+      (dissoc :action/current-player)
+      (timer-db/delete :player)
+      (log-event :end)))
+
+(defn current-player [state] (:action/current-player state))
+(def next-player player-db/next-player)
+
 (defn next-turn [state now]
-  (let [current-player (:action/current-player state)
-        next-player (player-db/next-player state current-player)]
+  (let [current-player (current-player state)
+        next-player (next-player state current-player)]
     (-> state
-        (log-event :end)
+        (end-player-turn)
         (start-player-turn next-player now))))
+
+(defn pass [state now]
+  (let [current-player (:action/current-player state)]
+    (-> state
+        (player-db/update-at (player/position current-player) player/pass)
+        (log-event :pass))))
 
 (def all-paused? timer-db/all-paused?)
 
@@ -102,12 +121,6 @@
   (-> state
       (timer-db/resume-all now)
       (log-event :resume)))
-
-(defn end-action [state now]
-  (-> state
-      (log-event :end)
-      (timer-db/delete :player)
-      (dissoc :action/current-player)))
 
 ;;  STATUS
 

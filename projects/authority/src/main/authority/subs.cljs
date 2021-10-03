@@ -4,7 +4,8 @@
             [authority.constants :as const]
             [authority.utils :as utils]
             [authority.timer.subs]
-            [authority.player.subs]))
+            [authority.player.subs]
+            [authority.player.core :as player]))
 
 ;; COMMON
 
@@ -24,11 +25,10 @@
 
 (rf/reg-sub
  :strategy/picked
- :<- [:players]
+ :<- [:player/all]
  (fn [players _]
    (->> players
-        vals
-        (map :initiative)
+        (map player/initiative)
         (remove nil?)
         set)))
 

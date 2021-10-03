@@ -1,18 +1,24 @@
 (ns authority.views.game-round.action
   (:require [re-frame.core :as rf]
             [authority.utils :as utils :refer [listen]]
+            [authority.player.core :as player]
             [authority.constants :as const]))
 
 (defn player-order [position]
   (let [name (listen [:player/name position])
         initiative (listen [:player/initiative position])
+        ready? (listen [:player/ready? position])
         current? (listen [:action/is-current position])]
     [:div {:key position
-           :class (into ["flex" "flex-row"  "p-2" "mb-1" "ml-2" "border-b" "w-5/6"
-                         (const/strategy->border initiative)]
-                        (if current?
-                          ["text-5xl"]
-                          ["text-3xl"]))}
+           :class (concat ["flex" "flex-row"  "p-2" "mb-1" "ml-2" "border-b" "w-5/6"]
+                          (if current?
+                            ["text-5xl"]
+                            ["text-3xl"])
+                          (if ready?
+                            [(const/strategy->border initiative)]
+                            ["border-gray-700"
+                             "text-gray-700"
+                             "line-through"]))}
      (when current? [:div ">"])
      [:div {:class ["mr-10"]} initiative]
      [:div name]]))
@@ -67,6 +73,10 @@
    [:input {:type "button"
             :value "Next Turn"
             :on-click #(rf/dispatch [:action/next-turn])
+            :class utils/primary-button}]
+   [:input {:type "button"
+            :value "Pass"
+            :on-click #(rf/dispatch [:action/pass])
             :class utils/primary-button}]
    [:input {:type "button"
             :value "End Action Phase"

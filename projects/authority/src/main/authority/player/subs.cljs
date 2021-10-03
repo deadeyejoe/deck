@@ -41,4 +41,3 @@
  :player/ready?
  player-signal
  (fn [player _] (player/ready? player)))
-

@@ -54,9 +54,11 @@
 
 (defn next-player [db current-player]
   (let [order (order-by core/initiative db)]
-    (loop [[next & rest] order]
-      (if (core/eq next current-player)
-        (or (first rest) (first order))
+    (loop [[head & rest] (concat order order)]
+      (if (and (some? head) (core/eq head current-player))
+        (->> rest
+             (filter core/ready?)
+             first)
         (recur rest)))))
 
 (comment
@@ -72,4 +74,15 @@
 
   (lock-positions ex)
   (lock-initiative ex)
-  (first (order-by core/initiative ex)))
+  (first (order-by core/initiative ex))
+  (def one-ready
+    (-> ex
+        (update-at 1 core/pass)
+        (update-at 2 core/pass)
+        (update-at 3 core/pass)
+        (update-at 5 core/pass)
+        (update-at 6 core/pass)
+        (update-at 7 core/pass)
+        (update-at 8 core/pass)))
+  (-> one-ready
+      (next-player {:position 4})))
