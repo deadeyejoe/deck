@@ -84,11 +84,13 @@
 
 (rf/reg-event-db
  :strategy/set
+ [(undoable "Pick Strategy")]
  (fn [db [_ position initiative]]
    (db/set-strategy db position initiative)))
 
 (rf/reg-event-db
  :strategy/unset
+ [(undoable "Unpick Strategy")]
  (fn [db [_ position]]
    (db/unset-strategy db position)))
 
