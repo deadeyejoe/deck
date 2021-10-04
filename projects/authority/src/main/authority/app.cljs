@@ -2,7 +2,6 @@
   (:require [reagent.dom]
             [re-frame.core :as rf]
             [authority.coeffects]
-            [authority.effects]
             [authority.interceptors]
             [authority.event-handlers]
             [authority.subs]

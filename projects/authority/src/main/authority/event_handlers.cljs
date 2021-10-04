@@ -3,8 +3,7 @@
             [re-pressed.core :as rp]
             [day8.re-frame.undo :as undo :refer [undoable]]
             [authority.db :as db]
-            [authority.shortcuts :as short]
-            [authority.timer.event-handlers]))
+            [authority.shortcuts :as short]))
 
 ;; UTIL ====================================================================
 
@@ -30,16 +29,14 @@
  (fn [_context _event]
    {:db (db/init)
     :persist-local nil
-    :fx [[:dispatch [:timer/start-heartbeat]]
-         [:dispatch [:refresh-shortcuts]]]}))
+    :fx [[:dispatch [:refresh-shortcuts]]]}))
 
 (rf/reg-event-fx
  :restore-game
  [(rf/inject-cofx :local-store)]
  (fn [{:keys [:local-store]} _event]
    {:db local-store
-    :fx [[:dispatch [:timer/start-heartbeat]]
-         [:dispatch [:refresh-shortcuts]]]}))
+    :fx [[:dispatch [:refresh-shortcuts]]]}))
 
 
 ;; PLAYER SELECT ====================================================================

@@ -1,16 +1,26 @@
 (ns authority.timer.subs
-  (:require [re-frame.core :as rf]
+  (:require [reagent.core :as reagent]
+            [re-frame.core :as rf]
             [authority.timer.core :as timer]
             [authority.timer.db :as timer-db]
-            [authority.timer.utils :as utils]))
+            [authority.timer.utils :as utils])
+  (:require-macros [reagent.ratom :refer [reaction]]))
+
+(defn now [] (js/Date.))
+
+(defonce time-now
+  (let [atom (reagent/atom (now))]
+    (js/setInterval #(reset! atom (now)) 1000)
+    atom))
+
+(rf/reg-sub-raw
+ :timer/now
+ (fn [_app-db _event]
+   (reaction @time-now)))
 
 (rf/reg-sub
  :timer/paused
  (fn [db _] (some? (get-in db [:timer :paused]))))
-
-(rf/reg-sub
- :timer/now
- (fn [db _] (:heartbeat db)))
 
 (rf/reg-sub
  :timer/base

@@ -5,17 +5,17 @@
 
 ;; LOGGING ========================================================
 
-(defn build-log-event [state action]
+(defn build-log-event [state action now]
   (let [current-player (:action/current-player state)]
     (merge
      (select-keys state [:game/state :round/phase :round/number])
-     {:time (:heartbeat state)
+     {:time now
       :player (:name current-player)
       :position (:position current-player)
       :action action})))
 
-(defn log-event [state action]
-  (update state :stream conj (build-log-event state action)))
+(defn log-event [state action now]
+  (update state :stream conj (build-log-event state action now)))
 
 ;; SETUP ========================================================
 
@@ -30,7 +30,7 @@
              :game/start now)
       (player-db/lock-positions)
       (timer-db/create now {:id :game :label "Game"})
-      (log-event :start)))
+      (log-event :start now)))
 
 (defn start-round [state now]
   (-> state
@@ -49,7 +49,7 @@
   (-> state
       (assoc :round/phase phase
              :phase/start now)
-      (log-event :start)
+      (log-event :start now)
       (timer-db/resume-all now)
       (timer-db/create now {:id :phase :label "Phase"})))
 
@@ -67,7 +67,7 @@
   (player-db/update-at state position player/reset-initiative))
 
 (defn end-strategy [state now]
-  (log-event state :end))
+  (log-event state :end now))
 
 ;; ACTION ========================================================
 
@@ -76,10 +76,10 @@
       (assoc :action/current-player player)
       (timer-db/resume-all now)
       (timer-db/create now {:id :player})
-      (log-event :start)))
+      (log-event :start now)))
 
-(defn end-player-turn [state]
-  (log-event state :end))
+(defn end-player-turn [state now]
+  (log-event state :end now))
 
 (defn start-action [state now]
   (-> state
@@ -92,7 +92,7 @@
       (player-db/update-all player/ready)
       (dissoc :action/current-player)
       (timer-db/delete :player)
-      (log-event :end)))
+      (log-event :end now)))
 
 (defn current-player [state] (:action/current-player state))
 (def next-player player-db/next-player)
@@ -101,26 +101,26 @@
   (let [current-player (current-player state)
         next-player (next-player state current-player)]
     (-> state
-        (end-player-turn)
+        (end-player-turn now)
         (start-player-turn next-player now))))
 
 (defn pass [state now]
   (let [current-player (:action/current-player state)]
     (-> state
         (player-db/update-at (player/position current-player) player/pass)
-        (log-event :pass))))
+        (log-event :pass now))))
 
 (def all-paused? timer-db/all-paused?)
 
 (defn pause-turn [state now]
   (-> state
       (timer-db/pause-all now)
-      (log-event :pause)))
+      (log-event :pause now)))
 
 (defn resume-turn [state now]
   (-> state
       (timer-db/resume-all now)
-      (log-event :resume)))
+      (log-event :resume now)))
 
 ;;  STATUS
 
@@ -128,7 +128,7 @@
   (start-phase state :status-phase now))
 
 (defn end-status [state now]
-  (log-event state :end))
+  (log-event state :end now))
 
 ;;  AGENDA
 
@@ -136,4 +136,4 @@
   (start-phase state :agenda-phase now))
 
 (defn end-agenda [state now]
-  (log-event state :end))
+  (log-event state :end now))
