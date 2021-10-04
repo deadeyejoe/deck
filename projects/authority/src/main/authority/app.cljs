@@ -11,11 +11,6 @@
             [authority.views.players :as players]
             [authority.views.game-round :as game-round]))
 
-(defn debug-buttons []
-  [:div
-   [:input {:type "button" :value "Initial" :on-click #(rf/dispatch [:initialize])}]
-   [:input {:type "button" :value "Start Game" :on-click #(rf/dispatch [:start-game])}]])
-
 (defn ui []
   [:div {:class ["font-sans" "text-xl" "text-gray-300" "bg-gray-800"]}
    (let [state @(rf/subscribe [:game/state])]

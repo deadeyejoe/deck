@@ -1,7 +1,7 @@
 (ns authority.event-handlers
   (:require [re-frame.core :as rf]
             [re-pressed.core :as rp]
-            [day8.re-frame.undo :as undo :refer [undoable]]
+            [day8.re-frame.undo :refer [undoable]]
             [authority.db :as db]
             [authority.shortcuts :as short]))
 
