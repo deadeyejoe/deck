@@ -1,6 +1,7 @@
 (ns authority.event-handlers
   (:require [re-frame.core :as rf]
             [re-pressed.core :as rp]
+            [day8.re-frame.undo :as undo :refer [undoable]]
             [authority.db :as db]
             [authority.timer.db :as timer-db]
             [authority.shortcuts :as short]
@@ -10,7 +11,7 @@
 
 (rf/reg-event-fx
  :refresh-shortcuts
- (fn [{db :db}]
+ (fn [{db :db} _event]
    {:fx (short/update-hotkeys db)}))
 
 ;; INIT ====================================================================
@@ -18,7 +19,7 @@
 (rf/reg-event-fx
  :initialize
  [(rf/inject-cofx :local-store)]
- (fn [{:keys [:local-store]}]
+ (fn [{:keys [:local-store]} _event]
    (if local-store
      {:db (merge (db/init) {:game/state :restore})
       :fx [[:dispatch [::rp/add-keyboard-event-listener "keyup"]]]}
@@ -27,7 +28,7 @@
 
 (rf/reg-event-fx
  :new-game
- (fn []
+ (fn [_context _event]
    {:db (db/init)
     :persist-local nil
     :fx [[:dispatch [:timer/start-heartbeat]]
@@ -36,7 +37,7 @@
 (rf/reg-event-fx
  :restore-game
  [(rf/inject-cofx :local-store)]
- (fn [{:keys [:local-store]}]
+ (fn [{:keys [:local-store]} _event]
    {:db local-store
     :fx [[:dispatch [:timer/start-heartbeat]]
          [:dispatch [:refresh-shortcuts]]]}))
@@ -75,7 +76,7 @@
 
 (rf/reg-event-fx
  :round/end
- [(rf/inject-cofx :now)]
+ [(rf/inject-cofx :now) (undoable "End Round")]
  (fn [{:keys [:db :now]} _]
    (let [new-db (-> db
                     (db/end-agenda now)
@@ -99,7 +100,7 @@
 
 (rf/reg-event-fx
  :action/start
- [(rf/inject-cofx :now)]
+ [(rf/inject-cofx :now) (undoable "Start Action Phase")]
  (fn [{:keys [:db :now]} _]
    (let [new-db (-> db
                     (db/end-strategy now)
@@ -110,8 +111,11 @@
 (rf/reg-event-fx
  :action/next-turn
  [(rf/inject-cofx :now)]
- (fn [{:keys [:db :now]} _]
-   {:db (db/next-turn db now)}))
+ (fn [{:keys [:db :now]} [_ suppress-undo]]
+   (merge
+    {:db (db/next-turn db now)}
+    (when-not suppress-undo
+      {:undo "Next Turn"}))))
 
 (rf/reg-event-fx
  :action/toggle-turn
@@ -134,35 +138,37 @@
 
 (rf/reg-event-fx
  :action/pass
- [(rf/inject-cofx :now)]
+ [(rf/inject-cofx :now) (undoable "Pass")]
  (fn [{:keys [:db :now]} _]
    (let [new-db (db/pass db now)
          current-player (db/current-player new-db)
          next-player (db/next-player new-db current-player)]
      (if (some? next-player)
        {:db new-db
-        :fx [[:dispatch [:action/next-turn]]]}
+        :fx [[:dispatch [:action/next-turn :suppress-undo]]]}
        {:db new-db
-        :fx [[:dispatch [:status/start]]]}))))
+        :fx [[:dispatch [:status/start :suppress-undo]]]}))))
 
 ;; STATUS ====================================================================
 
 (rf/reg-event-fx
  :status/start
  [(rf/inject-cofx :now)]
- (fn [{:keys [:db :now]} _]
+ (fn [{:keys [:db :now]} [_ suppress-undo]]
    (let [new-db (-> db
                     (db/end-action now)
                     (db/start-status now))]
      (merge
       {:db new-db
-       :fx (short/update-hotkeys new-db)}))))
+       :fx (short/update-hotkeys new-db)}
+      (when-not suppress-undo
+        {:undo "Start Status"})))))
 
 ;; AGENDA ====================================================================
 
 (rf/reg-event-fx
  :agenda/start
- [(rf/inject-cofx :now)]
+ [(rf/inject-cofx :now) (undoable "Start Agenda")]
  (fn [{:keys [:db :now]} _]
    (let [new-db (-> db
                     (db/end-status now)
