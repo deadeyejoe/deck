@@ -3,7 +3,6 @@
             [re-pressed.core :as rp]
             [day8.re-frame.undo :as undo :refer [undoable]]
             [authority.db :as db]
-            [authority.timer.db :as timer-db]
             [authority.shortcuts :as short]
             [authority.timer.event-handlers]))
 

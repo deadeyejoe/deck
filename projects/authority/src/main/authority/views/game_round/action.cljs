@@ -1,7 +1,6 @@
 (ns authority.views.game-round.action
   (:require [re-frame.core :as rf]
             [authority.utils :as utils :refer [listen]]
-            [authority.player.core :as player]
             [authority.constants :as const]))
 
 (defn player-order [position]
