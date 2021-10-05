@@ -40,11 +40,11 @@
      (if-not paused?
        [:input {:type "button"
                 :value "Pause"
-                :on-click #(rf/dispatch [:action/pause-turn])
+                :on-click #(rf/dispatch [:timer/pause-all])
                 :class classes}]
        [:input {:type "button"
                 :value "Resume"
-                :on-click #(rf/dispatch [:action/resume-turn])
+                :on-click #(rf/dispatch [:timer/resume-all])
                 :class classes}])]))
 
 (defn time-display []

@@ -21,7 +21,7 @@
                     (merge r {:label "Redo"
                               :event [:redo]})
                     (merge p {:label "Pause/Resume"
-                              :event [:action/toggle-turn]})])
+                              :event [:timer/toggle-all]})])
 
 (def phase->shortcuts {:player-select  [(merge enter   {:label "Start Game"
                                                         :event [:start-game]})]

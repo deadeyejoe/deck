@@ -56,6 +56,26 @@
             (db/start-game now))
     :fx [[:dispatch [:round/start]]]}))
 
+;; TIMERS ====================================================================
+
+(rf/reg-event-fx
+ :timer/toggle-all
+ (fn [{:keys [:db]} _]
+   (if (db/all-paused? db)
+     {:fx [[:dispatch [:timer/resume-all]]]}
+     {:fx [[:dispatch [:timer/pause-all]]]})))
+
+(rf/reg-event-fx
+ :timer/pause-all
+ [(rf/inject-cofx :now)]
+ (fn [{:keys [:db :now]} _]
+   {:db (db/pause-turn db now)}))
+
+(rf/reg-event-fx
+ :timer/resume-all
+ [(rf/inject-cofx :now)]
+ (fn [{:keys [:db :now]} _]
+   {:db (db/resume-turn db now)}))
 
 ;; ROUND ====================================================================
 
@@ -114,25 +134,6 @@
     {:db (db/next-turn db now)}
     (when-not suppress-undo
       {:undo "Next Turn"}))))
-
-(rf/reg-event-fx
- :action/toggle-turn
- (fn [{:keys [:db]} _]
-   (if (db/all-paused? db)
-     {:fx [[:dispatch [:action/resume-turn]]]}
-     {:fx [[:dispatch [:action/pause-turn]]]})))
-
-(rf/reg-event-fx
- :action/pause-turn
- [(rf/inject-cofx :now)]
- (fn [{:keys [:db :now]} _]
-   {:db (db/pause-turn db now)}))
-
-(rf/reg-event-fx
- :action/resume-turn
- [(rf/inject-cofx :now)]
- (fn [{:keys [:db :now]} _]
-   {:db (db/resume-turn db now)}))
 
 (rf/reg-event-fx
  :action/pass
