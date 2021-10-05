@@ -16,38 +16,34 @@
 (def r     {:code {:keyCode 82}
             :keyname "R"})
 
-(def undo (merge u {:label "Undo"
-                    :event [:undo]}))
-
-(def redo (merge r {:label "Redo"
-                    :event [:redo]}))
+(def standard-keys [(merge u {:label "Undo"
+                              :event [:undo]})
+                    (merge r {:label "Redo"
+                              :event [:redo]})
+                    (merge p {:label "Pause/Resume"
+                              :event [:action/toggle-turn]})])
 
 (def phase->shortcuts {:player-select  [(merge enter   {:label "Start Game"
                                                         :event [:start-game]})]
-                       :strategy-phase [(merge enter   {:label "End Phase"
-                                                        :event [:action/start]})]
-                       :action-phase   [(merge space   {:label "Next"
-                                                        :event [:action/next-turn]})
-                                        (merge p       {:label "Pause/Resume"
-                                                        :event [:action/toggle-turn]})
-                                        (merge enter   {:label "End Phase"
-                                                        :event [:status/start]})
-                                        (merge x       {:label "Pass"
-                                                        :event [:action/pass]})
-                                        undo
-                                        redo]
-                       :status-phase   [(merge enter   {:label "End Phase"
-                                                        :event [:agenda/start]})
-                                        undo
-                                        redo]
-                       :agenda-phase   [(merge enter   {:label "End Phase"
-                                                        :event [:round/end]})
-                                        undo
-                                        redo]
-                       :round-summary  [(merge enter   {:label "Start Next Round"
-                                                        :event [:round/start]})
-                                        undo
-                                        redo]})
+                       :strategy-phase (into standard-keys
+                                             [(merge enter   {:label "Action Phase"
+                                                              :event [:action/start]})])
+                       :action-phase   (into standard-keys
+                                             [(merge space   {:label "Next Turn"
+                                                              :event [:action/next-turn]})
+                                              (merge x       {:label "Pass"
+                                                              :event [:action/pass]})
+                                              (merge enter   {:label "Status Phase"
+                                                              :event [:status/start]})])
+                       :status-phase   (into standard-keys
+                                             [(merge enter   {:label "Agenda Phase"
+                                                              :event [:agenda/start]})])
+                       :agenda-phase   (into standard-keys
+                                             [(merge enter   {:label "End Round"
+                                                              :event [:round/end]})])
+                       :round-summary  (into standard-keys
+                                             [(merge enter   {:label "Next Round"
+                                                              :event [:round/start]})])})
 
 (defn shortcut->rp-event-key
   "Takes a shortcut descriptor and returns a vector for configuring re-pressed.
@@ -72,18 +68,29 @@
 (def phase->re-pressed
   (util/transform-values phase->shortcuts shortcuts->rp-dispatch))
 
+(defn resolve-phase [key]
+  (case key
+    [:player-select nil]           :player-select
+    [:game-round :strategy-phase]  :strategy-phase
+    [:game-round :action-phase]    :action-phase
+    [:game-round :status-phase]    :status-phase
+    [:game-round :agenda-phase]    :agenda-phase
+    [:game-round :round-summary]   :round-summary
+    nil))
+
 (defn update-hotkeys [{:keys [:game/state :round/phase]}]
-  (let [key [state phase]]
-    (case key
-      [:player-select nil]           [(phase->re-pressed :player-select)]
-      [:game-round :strategy-phase]  [(phase->re-pressed :strategy-phase)]
-      [:game-round :action-phase]    [(phase->re-pressed :action-phase)]
-      [:game-round :status-phase]    [(phase->re-pressed :status-phase)]
-      [:game-round :agenda-phase]    [(phase->re-pressed :agenda-phase)]
-      [:game-round :round-summary]   [(phase->re-pressed :round-summary)]
-      [:dispatch [::rp/set-keyup-rules {}]])))
+  (if-let [phase (resolve-phase [state phase])]
+    [(phase->re-pressed phase)]
+    [:dispatch [::rp/set-keyup-rules {}]]))
 
 (rf/reg-event-fx
  ::handle
  (fn [_context [_event-name to-handle _rp-junk]]
    {:fx [[:dispatch to-handle]]}))
+
+(rf/reg-sub
+ :shortcuts/active
+ :<- [:game/state]
+ :<- [:round/phase]
+ (fn [key]
+   (-> key resolve-phase phase->shortcuts)))
