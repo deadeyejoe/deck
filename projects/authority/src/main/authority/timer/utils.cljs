@@ -9,6 +9,8 @@
 (defn ms->seconds [seconds]
   (int (/ seconds 1000)))
 
+(def difference-s (comp ms->seconds difference-ms))
+
 (defn decompose [seconds]
   [(quot seconds 3600)
    (mod (quot seconds 60) 60)
