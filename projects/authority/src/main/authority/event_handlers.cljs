@@ -126,14 +126,18 @@
      {:db new-db
       :fx (short/update-hotkeys new-db)})))
 
+(defn next-turn-handler [{:keys [:db :now]} _]
+  {:db (db/next-turn db now)})
+
 (rf/reg-event-fx
  :action/next-turn
+ [(rf/inject-cofx :now) (undoable "Next Turn")]
+ next-turn-handler)
+
+(rf/reg-event-fx
+ :action/next-turn-suppress
  [(rf/inject-cofx :now)]
- (fn [{:keys [:db :now]} [_ suppress-undo]]
-   (merge
-    {:db (db/next-turn db now)}
-    (when-not suppress-undo
-      {:undo "Next Turn"}))))
+ next-turn-handler)
 
 (rf/reg-event-fx
  :action/pass
@@ -144,24 +148,28 @@
          next-player (db/next-player new-db current-player)]
      (if (some? next-player)
        {:db new-db
-        :fx [[:dispatch [:action/next-turn :suppress-undo]]]}
+        :fx [[:dispatch [:action/next-turn-suppress]]]}
        {:db new-db
-        :fx [[:dispatch [:status/start :suppress-undo]]]}))))
+        :fx [[:dispatch [:status/start-suppress]]]}))))
 
 ;; STATUS ====================================================================
 
+(defn status-start-handler [{:keys [:db :now]} _]
+  (let [new-db (-> db
+                   (db/end-action now)
+                   (db/start-status now))]
+    {:db new-db
+     :fx (short/update-hotkeys new-db)}))
+
 (rf/reg-event-fx
  :status/start
+ [(rf/inject-cofx :now) (undoable "Start Status")]
+ status-start-handler)
+
+(rf/reg-event-fx
+ :status/start-suppress
  [(rf/inject-cofx :now)]
- (fn [{:keys [:db :now]} [_ suppress-undo]]
-   (let [new-db (-> db
-                    (db/end-action now)
-                    (db/start-status now))]
-     (merge
-      {:db new-db
-       :fx (short/update-hotkeys new-db)}
-      (when-not suppress-undo
-        {:undo "Start Status"})))))
+ status-start-handler)
 
 ;; AGENDA ====================================================================
 
