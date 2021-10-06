@@ -1,5 +1,6 @@
 (ns authority.utils
-  (:require [re-frame.core :as rf]))
+  (:require [re-frame.core :as rf]
+            [clojure.string :as str]))
 
 (defn transform-values [m f]
   (reduce
@@ -37,6 +38,38 @@
                    "border" "rounded-lg" "border-gray-700" "py-2" "px-4"]}
      [:div label]
      [:div {:class ["text-gray-400"]} time]]))
+
+(defn corner [location percentage]
+  (let [break-1 percentage
+        break-2 (- 100 percentage)]
+    (case location
+      :top-left  [[0 break-1] [break-1 0]]
+      :top-right [[break-2 0] [100 break-1]]
+      :bottom-right [[100 break-2] [break-2 100]]
+      :bottom-left [[break-1 100] [0 break-2]])))
+
+(defn polygon-points [location->percentage]
+  (->> [:top-left :top-right :bottom-right :bottom-left]
+       (map (fn [location] (corner location (location->percentage location))))
+       (apply concat)))
+
+(defn polygon [top-left top-right bottom-right bottom-left]
+  (let [location->percentage {:top-left top-left
+                              :top-right top-right
+                              :bottom-right bottom-right
+                              :bottom-left bottom-left}
+        n->percent (fn [n] (str n "%"))]
+    (str "polygon("
+         (->> location->percentage
+              polygon-points
+              (map (comp (partial str/join " ")
+                         (partial map n->percent)))
+              (str/join ", "))
+         ")")))
+
+(comment
+  (polygon 10 10 10 10)
+  (polygon 30 10 30 10))
 
 
 
