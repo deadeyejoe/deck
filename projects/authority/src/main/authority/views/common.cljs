@@ -25,10 +25,11 @@
 (defn initiative-badge [{:keys [initiative state click-handler content]}]
   (let [border (border-colour initiative state)
         bg     (bg-colour initiative state)
-        text   (text-colour initiative state)]
+        text   (text-colour initiative state)
+        pointer (and click-handler (not= state :disabled))]
     [:div {:key content
            :on-click click-handler
-           :class ["m-2" "cursor-pointer" border text]
+           :class ["m-2" (when pointer "cursor-pointer") border text]
            :style poly-mod}
      [:div {:class ["m-0.5" "px-2" "py-0.5" bg]
             :style poly-mod}

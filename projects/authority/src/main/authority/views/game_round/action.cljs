@@ -1,6 +1,7 @@
 (ns authority.views.game-round.action
   (:require [re-frame.core :as rf]
             [authority.utils :as utils :refer [listen]]
+            [authority.views.common :as common]
             [authority.constants :as const]))
 
 (defn player-order [position]
@@ -9,24 +10,22 @@
         ready? (listen [:player/ready? position])
         current? (listen [:action/is-current position])]
     [:div {:key position
-           :class (concat ["flex" "flex-row"  "p-2" "mb-1" "ml-2" "border-b" "w-5/6"]
-                          (if current?
-                            ["text-5xl"]
-                            ["text-3xl"])
-                          (if ready?
-                            [(const/strategy->border initiative)]
-                            ["border-gray-700"
-                             "text-gray-700"
-                             "line-through"]))}
-     (when current? [:div ">"])
-     [:div {:class ["mr-10"]} initiative]
-     [:div name]]))
+           :class (concat ["flex" "flex-row" "justify-between" "items-center" "p-1" "ml-2" "w-11/12"])}
+     [:div {:class (concat (if current?
+                             ["text-6xl"]
+                             ["text-3xl"])
+                           (when-not ready? ["text-gray-700" "line-through"]))} name]
+     (common/initiative-badge {:initiative initiative
+                               :state (if current?
+                                        :selected
+                                        (if ready? :unselected :disabled))
+                               :content initiative})]))
 
 (defn initiative-order []
   (let [ordering (rf/subscribe [:player/initiative-order])]
     [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-center"
                    "w-1/6" "h-screen"]}
-     [:div {:class ["bg-gray-800" "w-full" "border-gray-700" "py-20"
+     [:div {:class ["bg-gray-800" "w-full" "border-gray-700" "py-5"
                     "border-r-2" "border-t-2" "border-b-2" "rounded-r-xl"
                     "flex" "flex-col" "justify-center" "items-start"]}
       (doall
