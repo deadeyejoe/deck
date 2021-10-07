@@ -98,8 +98,7 @@
 
 (comment
   (polygon 10 10 10 10)
-  (polygon 30 10 30 10)
-  (poly-px 5 0 0 0))
+  (polygon 30 10 30 10))
 
 
 

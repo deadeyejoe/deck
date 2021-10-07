@@ -6,25 +6,29 @@
 (def poly-inner (utils/polygon 35 15))
 
 (defn border-colour [initiative state]
-  (if (= state :disabled)
-    "bg-gray-400"
+  (case state
+    :disabled "bg-gray-400"
+    :exhausted "bg-gray-700"
     (const/strategy->border initiative :bg)))
 
 (defn bg-colour [initiative state]
   (case state
     :disabled "bg-gray-500"
+    :exhausted "bg-gray-800"
     :unselected "bg-gray-800"
     :selected (const/strategy->bg initiative)))
 
 (defn text-colour [_initiative state]
   (case state
     :disabled "text-gray-800"
+    :exhausted "text-gray-700"
     :unselected "text-white"
     :selected "text-black"))
 
-(defn poly-badge [{:keys [content poly-outer poly-inner border fill]}]
+(defn poly-badge [{:keys [content poly-outer poly-inner border fill border-padding]
+                   :or {border-padding "p-0.5"}}]
   [:div {:key content
-         :class ["p-0.5" border]
+         :class [border-padding border]
          :style  {:clip-path poly-outer}}
    [:div {:class [fill]
           :style {:clip-path (or poly-inner poly-outer)}}

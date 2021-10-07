@@ -59,6 +59,10 @@
  (fn [[current other] _]
    (utils/player= current other)))
 
+(rf/reg-sub
+ :action/strategizing?
+ (fn [db _] (:action/strategizing? db)))
+
 
 
 

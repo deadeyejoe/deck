@@ -17,7 +17,10 @@
 
 (rf/reg-sub
  :player/at
- (fn [db [_ position]] (player-db/find-by db position)))
+ (fn [db [_ position]]
+   (if (= position :current)
+     (player-db/find-by db (-> db :action/current-player :position))
+     (player-db/find-by db position))))
 
 (defn player-signal [[_ position] _]
   (rf/subscribe [:player/at position]))
@@ -41,3 +44,8 @@
  :player/ready?
  player-signal
  (fn [player _] (player/ready? player)))
+
+(rf/reg-sub
+ :player/strategized?
+ player-signal
+ (fn [player _] (player/strategized? player)))

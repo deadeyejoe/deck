@@ -28,10 +28,20 @@
     player
     (assoc player :passed true)))
 
+(defn strategized? [player]
+  (:strategized player))
+
+(defn strategize [player]
+  (if (strategized? player)
+    player
+    (assoc player :strategized true)))
+
 (defn ready [player]
   (if (ready? player)
     player
-    (dissoc player :passed)))
+    (-> player
+        (dissoc :passed)
+        (dissoc :strategized))))
 
 (defn eq [player other]
   (= (:position player) (:position other)))

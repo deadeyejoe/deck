@@ -8,6 +8,7 @@
   (let [name (listen [:player/name position])
         initiative (listen [:player/initiative position])
         ready? (listen [:player/ready? position])
+        strategized? (listen [:player/strategized? position])
         current? (listen [:action/is-current position])]
     [:div {:key position
            :class (concat ["flex" "flex-row" "justify-between" "items-center" "p-1" "ml-2" "w-11/12"])}
@@ -17,8 +18,8 @@
                            (when-not ready? ["text-gray-700" "line-through"]))} name]
      (common/initiative-badge {:initiative initiative
                                :state (if current?
-                                        :selected
-                                        (if ready? :unselected :disabled))
+                                        (if strategized? :disabled :selected)
+                                        (if strategized? :exhausted :unselected))
                                :content initiative})]))
 
 (defn initiative-order []
@@ -57,29 +58,46 @@
                               (and danger? (odd? elapsed)) ["text-red-900"]))}
      display]))
 
+(defn strategy-name [initiative strategizing?]
+  [:div {:class ["text-5xl" "mb-20" (when-not strategizing? (const/strategy->text initiative))]}
+   [common/poly-badge {:poly-outer (utils/polygon-px 10)
+                       :border-padding "p-1"
+                       :border (when strategizing? (const/strategy->border initiative :bg))
+                       :fill   (when strategizing? (const/strategy->bg initiative))
+                       :content [:div {:class ["p-2"]} (const/strategy->title initiative)]}]])
+
 (defn big-timer []
-  (let [{:keys [:name :initiative]}  (listen [:action/current-player])]
+  (let [name (listen [:player/name :current])
+        initiative (listen [:player/initiative :current])
+        strategizing? (listen [:action/strategizing?])]
     [:div {:class ["flex" "flex-col" "h-1/2" "justify-between" "items-center"]}
      [:div {:class ["text-7xl"]} name]
-     [:div {:class ["text-5xl" "mb-20" (const/strategy->text initiative)]}
-      (const/strategy->title initiative)]
+     [strategy-name initiative strategizing?]
      [time-display]
      [timer-control]]))
 
 (defn turn-controls []
-  [:div
-   [:input {:type "button"
-            :value "Next Turn"
-            :on-click #(rf/dispatch [:action/next-turn])
-            :class utils/primary-button}]
-   [:input {:type "button"
-            :value "Pass"
-            :on-click #(rf/dispatch [:action/pass])
-            :class utils/primary-button}]
-   [:input {:type "button"
-            :value "End Action Phase"
-            :on-click #(rf/dispatch [:status/start])
-            :class utils/primary-button}]])
+  (let [strategized? (listen [:player/strategized? :current])
+        strategizing? (listen [:action/strategizing?])]
+    [:div
+     [:input {:type "button"
+              :value "Next Turn"
+              :on-click #(rf/dispatch [:action/next-turn])
+              :class utils/primary-button}]
+     (when-not strategizing?
+       (if strategized?
+         [:input {:type "button"
+                  :value "Pass"
+                  :on-click #(rf/dispatch [:action/pass])
+                  :class utils/primary-button}]
+         [:input {:type "button"
+                  :value "Strategize"
+                  :on-click #(rf/dispatch [:action/strategize])
+                  :class utils/primary-button}]))
+     [:input {:type "button"
+              :value "End Action Phase"
+              :on-click #(rf/dispatch [:status/start])
+              :class utils/primary-button}]]))
 
 (defn component []
   [:div {:class ["w-screen" "h-full" "flex" "flex-col" "justify-around" "items-center"]}

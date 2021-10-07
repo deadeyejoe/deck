@@ -143,14 +143,21 @@
  :action/pass
  [(rf/inject-cofx :now) (undoable "Pass")]
  (fn [{:keys [:db :now]} _]
-   (let [new-db (db/pass db now)
-         current-player (db/current-player new-db)
-         next-player (db/next-player new-db current-player)]
-     (if (some? next-player)
-       {:db new-db
-        :fx [[:dispatch [:action/next-turn-suppress]]]}
-       {:db new-db
-        :fx [[:dispatch [:status/start-suppress]]]}))))
+   (if (db/can-pass? db)
+     (let [new-db (db/pass db now)
+           current-player (db/current-player new-db)
+           next-player (db/next-player new-db current-player)]
+       (if (some? next-player)
+         {:db new-db
+          :fx [[:dispatch [:action/next-turn-suppress]]]}
+         {:db new-db
+          :fx [[:dispatch [:status/start-suppress]]]})))))
+
+(rf/reg-event-fx
+ :action/strategize
+ [(rf/inject-cofx :now) (undoable "Pass")]
+ (fn [{:keys [:db :now]} _]
+   {:db (db/strategize db now)}))
 
 ;; STATUS ====================================================================
 

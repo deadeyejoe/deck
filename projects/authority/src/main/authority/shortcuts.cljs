@@ -15,6 +15,8 @@
             :keyname "U"})
 (def r     {:code {:keyCode 82}
             :keyname "R"})
+(def s     {:code {:keyCode 83}
+            :keyname "S"})
 
 (def standard-keys [(merge u {:label "Undo"
                               :event [:undo]})
@@ -31,6 +33,8 @@
                        :action-phase   (into standard-keys
                                              [(merge space   {:label "Next Turn"
                                                               :event [:action/next-turn]})
+                                              (merge s       {:label "Strategize"
+                                                              :event [:action/strategize]})
                                               (merge x       {:label "Pass"
                                                               :event [:action/pass]})
                                               (merge enter   {:label "Status Phase"

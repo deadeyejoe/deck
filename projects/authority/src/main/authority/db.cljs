@@ -102,13 +102,30 @@
         next-player (next-player state current-player)]
     (-> state
         (end-player-turn now)
+        (dissoc :action/strategizing?)
         (start-player-turn next-player now))))
 
+(defn can-pass? [state]
+  (let [{current-position :position} (:action/current-player state)]
+    (and (not (:action/strategizing? state))
+         (player/strategized? (player-db/find-by state current-position)))))
+
 (defn pass [state now]
-  (let [current-player (:action/current-player state)]
-    (-> state
-        (player-db/update-at (player/position current-player) player/pass)
-        (log-event :pass now))))
+  (let [{current-position :position} (:action/current-player state)]
+    (if (player/strategized? (player-db/find-by state current-position))
+      (-> state
+          (player-db/update-at current-position player/pass)
+          (log-event :pass now))
+      state)))
+
+(defn strategize [state now]
+  (let [{current-position :position} (:action/current-player state)]
+    (if (:action/strategizing? state)
+      state
+      (-> state
+          (assoc :action/strategizing? true)
+          (player-db/update-at current-position player/strategize)
+          (log-event :strategize now)))))
 
 (def all-paused? timer-db/all-paused?)
 
