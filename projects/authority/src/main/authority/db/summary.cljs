@@ -6,7 +6,7 @@
   (fn [event] (-> event :round/number (= number))))
 
 (comment
-  (defn app-db [] @re-frame.db/app-db))
+  (defn app-db [] #_@re-frame.db/app-db))
 
 (defn round-stream [db number]
   (->> db :stream (filter (is-round? number)) reverse))

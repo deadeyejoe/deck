@@ -143,7 +143,7 @@
  :action/pass
  [(rf/inject-cofx :now) (undoable "Pass")]
  (fn [{:keys [:db :now]} _]
-   (if (db/can-pass? db)
+   (when (db/can-pass? db)
      (let [new-db (db/pass db now)
            current-player (db/current-player new-db)
            next-player (db/next-player new-db current-player)]
