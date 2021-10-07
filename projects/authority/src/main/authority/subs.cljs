@@ -5,7 +5,8 @@
             [authority.utils :as utils]
             [authority.timer.subs]
             [authority.player.subs]
-            [authority.player.core :as player]))
+            [authority.player.core :as player]
+            [authority.db.summary :as summary]))
 
 ;; COMMON
 
@@ -62,6 +63,13 @@
 (rf/reg-sub
  :action/strategizing?
  (fn [db _] (:action/strategizing? db)))
+
+;; SUMMARY
+
+(rf/reg-sub
+ :round/summary
+ (fn [db _]
+   (summary/round-summary db (:round/number db))))
 
 
 
