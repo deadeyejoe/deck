@@ -2,8 +2,10 @@
   (:require [re-frame.core :as rf]
             [re-pressed.core :as rp]
             [day8.re-frame.undo :refer [undoable]]
+            [authority.utils :as utils]
             [authority.db :as db]
-            [authority.shortcuts :as short]))
+            [authority.shortcuts :as short]
+            [clojure.pprint :as pprint]))
 
 ;; UTIL ====================================================================
 
@@ -26,6 +28,14 @@
 
 (rf/reg-event-fx
  :new-game
+ (fn [_context _event]
+   {:db (db/init)
+    :persist-local nil
+    :fx [[:dispatch [:refresh-shortcuts]]]}))
+
+(rf/reg-event-fx
+ :new-game-undoable
+ [(undoable "Reset Game")]
  (fn [_context _event]
    {:db (db/init)
     :persist-local nil
@@ -191,6 +201,8 @@
       {:db new-db
        :fx (short/update-hotkeys new-db)}))))
 
+;; MISC ====================================================================
 
-
-
+(rf/reg-event-fx
+ :copy-db
+ (fn [{db :db}] (utils/copy-to-clipboard (with-out-str (pprint/pprint db)))))

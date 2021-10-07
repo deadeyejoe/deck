@@ -96,6 +96,17 @@
                (str/join ", "))
           ")"))))
 
+(defn copy-to-clipboard
+  [text]
+  (let [el (.createElement js/document "textarea")]
+    (set! (.-value el) text)
+    (set! (-> el .-style .-position) "absolute")
+    (set! (-> el .-style .-left) "-9999px")
+    (.appendChild (.-body js/document) el)
+    (.select el)
+    (.execCommand js/document "copy")
+    (.removeChild (.-body js/document) el)))
+
 (comment
   (polygon 10 10 10 10)
   (polygon 30 10 30 10))

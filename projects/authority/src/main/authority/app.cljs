@@ -12,6 +12,13 @@
             [authority.views.game-round :as game-round]
             [authority.views.shortcuts :as shortcut]))
 
+(defn hidden-button [label dispatch]
+  [:div {:class ["flex" "justify-center" "items-center"
+                 "cursor-pointer" "text-gray-800"
+                 "hover:bg-gray-700"]
+         :on-click #(rf/dispatch dispatch)}
+   label])
+
 (defn ui []
   [:div {:class ["font-sans" "text-xl" "text-gray-300" "bg-gray-800"]}
    (let [state @(rf/subscribe [:game/state])]
@@ -20,7 +27,11 @@
        :player-select [players/component]
        :game-round [game-round/component]
        (str "Unrecognized state")))
-   [shortcut/component]])
+   [shortcut/component]
+   [:div {:class ["absolute" "top-0" "right-0" "m-5" "flex"]}
+    [hidden-button "DB" [:db-copy]]
+    [hidden-button "RE" [:new-game-undoable]]
+    [hidden-button "UN" [:undo]]]])
 
 (defn render []
   (reagent.dom/render [ui]
