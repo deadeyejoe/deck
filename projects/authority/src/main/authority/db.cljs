@@ -120,7 +120,8 @@
 
 (defn strategize [state now]
   (let [{current-position :position} (:action/current-player state)]
-    (if (:action/strategizing? state)
+    (if (or (:action/strategizing? state)
+            (-> state (player-db/find-by current-position) player/strategized?))
       state
       (-> state
           (assoc :action/strategizing? true)
