@@ -1,5 +1,6 @@
 (ns authority.views.game-round
   (:require [re-frame.core :as rf]
+            [authority.utils :as utils]
             [authority.constants :as const]
             [authority.views.game-round.strategy :as strategy]
             [authority.views.game-round.action :as action]
@@ -13,7 +14,8 @@
   ([id label mode]
    (let [time (rf/subscribe [:timer/display id mode])]
      [:div {:class ["flex" "flex-row" "space-x-5" "flex-grow-0" "justify-between" "text-3xl"
-                    "border" "rounded-lg" "border-gray-700" "py-2" "px-4"]}
+                    "bg-gray-700" "py-2" "px-4"]
+            :style {:clip-path (utils/polygon-px 15 0 15 0)}}
       [:div label]
       [:div {:class ["text-gray-400"]} @time]])))
 

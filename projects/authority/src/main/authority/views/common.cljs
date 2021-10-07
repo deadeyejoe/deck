@@ -1,6 +1,5 @@
 (ns authority.views.common
-  (:require [re-frame.core :as rf]
-            [authority.utils :as utils]
+  (:require [authority.utils :as utils]
             [authority.constants :as const]))
 
 (def poly-outer (utils/polygon 25 5))
