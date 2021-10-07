@@ -64,7 +64,7 @@
    3
    {:title "Politics"
     :colour {:bg "bg-yellow-300", :text "text-yellow-300", :border "border-yellow-300"}
-    :bg-colour {:bg "bg-yellow-400", :text "text-yellow-400", :border "border-yellow-400"}
+    :bg-colour {:bg "bg-yellow-500", :text "text-yellow-500", :border "border-yellow-500"}
     :text-colour {:bg "bg-yellow-400", :text "text-yellow-400", :border "border-yellow-400"}
     :border-colour {:bg "bg-yellow-300", :text "text-yellow-300", :border "border-yellow-300"}}
    4

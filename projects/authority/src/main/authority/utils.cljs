@@ -53,19 +53,22 @@
        (map (fn [location] (corner location (location->percentage location))))
        (apply concat)))
 
-(defn polygon [top-left top-right bottom-right bottom-left]
-  (let [location->percentage {:top-left top-left
-                              :top-right top-right
-                              :bottom-right bottom-right
-                              :bottom-left bottom-left}
-        n->percent (fn [n] (str n "%"))]
-    (str "polygon("
-         (->> location->percentage
-              polygon-points
-              (map (comp (partial str/join " ")
-                         (partial map n->percent)))
-              (str/join ", "))
-         ")")))
+(defn polygon
+  ([all] (polygon all all all all))
+  ([tl-br tr-bl] (polygon tl-br tr-bl tl-br tr-bl))
+  ([top-left top-right bottom-right bottom-left]
+   (let [location->percentage {:top-left top-left
+                               :top-right top-right
+                               :bottom-right bottom-right
+                               :bottom-left bottom-left}
+         n->percent (fn [n] (str n "%"))]
+     (str "polygon("
+          (->> location->percentage
+               polygon-points
+               (map (comp (partial str/join " ")
+                          (partial map n->percent)))
+               (str/join ", "))
+          ")"))))
 
 (comment
   (polygon 10 10 10 10)

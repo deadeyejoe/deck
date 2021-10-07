@@ -3,7 +3,8 @@
             [authority.utils :as utils]
             [authority.constants :as const]))
 
-(def poly-mod {:clip-path (utils/polygon 25 5 25 5)})
+(def poly-outer (utils/polygon 25 5))
+(def poly-inner (utils/polygon 35 15))
 
 (defn border-colour [initiative state]
   (if (= state :disabled)
@@ -22,6 +23,14 @@
     :unselected "text-white"
     :selected "text-black"))
 
+(defn poly-badge [{:keys [content poly-outer poly-inner border fill]}]
+  [:div {:key content
+         :class ["p-0.5" border]
+         :style  {:clip-path poly-outer}}
+   [:div {:class [fill]
+          :style {:clip-path (or poly-inner poly-outer)}}
+    content]])
+
 (defn initiative-badge [{:keys [initiative state click-handler content]}]
   (let [border (border-colour initiative state)
         bg     (bg-colour initiative state)
@@ -29,8 +38,9 @@
         pointer (and click-handler (not= state :disabled))]
     [:div {:key content
            :on-click click-handler
-           :class ["m-2" (when pointer "cursor-pointer") border text]
-           :style poly-mod}
-     [:div {:class ["m-0.5" "px-2" "py-0.5" bg]
-            :style poly-mod}
-      content]]))
+           :class [(when pointer "cursor-pointer") text "m-2" "flex-shrink-0" "self-center"]}
+     (poly-badge {:border border
+                  :fill bg
+                  :poly-outer poly-outer
+                  :poly-inner poly-inner
+                  :content [:div {:class ["w-7" "h-8" "flex" "justify-center" "items-center"]} content]})]))
