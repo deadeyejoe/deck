@@ -6,7 +6,7 @@
   (fn [event] (-> event :round/number (= number))))
 
 (comment
-  (defn app-db [] #_@re-frame.db/app-db))
+  (defn app-db [] @re-frame.db/app-db))
 
 (defn round-stream [db number]
   (->> db :stream (filter (is-round? number)) reverse))
@@ -37,14 +37,14 @@
 (defn stream-time [events]
   (let [total (total-time events)
         offset (offset events)]
-    {:total total
-     :offset offset
-     :elapsed (- total offset)}))
+    {:time/total total
+     :time/offset offset
+     :time/elapsed (- total offset)}))
 
 (defn phase-summary [stream]
   (utils/transform-values
    (group-by :round/phase stream)
-   (comp :elapsed stream-time)))
+   (comp :time/elapsed stream-time)))
 
 (comment
   (-> (app-db)
@@ -53,7 +53,9 @@
 
 (defn player-summary [turns]
   (let [number (count turns)
-        turn-totals (map (comp :elapsed stream-time) turns)
+        turn-totals (->> turns
+                         (remove :pass?)
+                         (map :time/elapsed))
         total-time (apply + turn-totals)]
     {:turn/count number
      :turn/total total-time
@@ -61,14 +63,29 @@
      :turn/min (apply min turn-totals)
      :turn/max (apply max turn-totals)}))
 
-(defn players-summary [stream]
-  (let [player-map (->> stream
-                        (filter :position)
-                        (utils/segment (comp (partial = :start) :action))
-                        (group-by (comp :position first)))]
+(defn process-turn [turn]
+  (merge {:player/position (-> turn first :position)
+          :player/name (-> turn first :player)
+          :pass? (some (comp (partial = :pass) :action) turn)
+          :strategize? (some (comp (partial = :strategize) :action) turn)}
+         (stream-time turn)))
+
+(defn player-turns [stream]
+  (->> stream
+       (filter :position)
+       (utils/segment (comp (partial = :start) :action))
+       (map process-turn)))
+
+(defn players-summary [turns]
+  (let [player-map (group-by :player/position turns)]
     (utils/transform-values player-map player-summary)))
 
 (comment
+  (->> (round-stream (app-db) 1)
+       (filter :position)
+       (utils/segment (comp (partial = :start) :action))
+       first
+       process-turn)
   (-> (app-db)
       (round-stream 1)
       (players-summary)))
@@ -76,13 +93,24 @@
 (defn round-summary [db number]
   (let [stream (round-stream db number)
         phases (phase-summary stream)
-        players (players-summary stream)]
+        player-turns (player-turns stream)
+        players (players-summary player-turns)]
     {:total-time (total-time stream)
-     :elapsed-time ((comp :elapsed stream-time) stream)
+     :elapsed-time ((comp :time/elapsed stream-time) stream)
      :number-of-rounds (->> players
                             vals
                             (map :turn/count)
                             (apply max))
+     :longest-turn (->> player-turns
+                        (sort-by (comp - :time/elapsed))
+                        first)
+     :shortest-turn (->> player-turns
+                         (remove :pass?)
+                         (sort-by :time/elapsed)
+                         first)
      :phases phases
      :players players}))
 
+(comment
+  (-> (app-db)
+      (round-summary 1)))
