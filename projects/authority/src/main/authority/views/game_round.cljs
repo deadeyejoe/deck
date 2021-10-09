@@ -14,7 +14,7 @@
   ([id label mode]
    (let [time (rf/subscribe [:timer/display id mode])]
      [:div {:class ["flex" "flex-row" "space-x-5" "flex-grow-0" "justify-between" "text-3xl"
-                    "bg-gray-700" "py-2" "px-4"]
+                    "bg-gray-700" "py-2" "px-4" "mx-2"]
             :style {:clip-path (utils/polygon-px 15 0 15 0)}}
       [:div label]
       [:div {:class ["text-gray-400"]} @time]])))

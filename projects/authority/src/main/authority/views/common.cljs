@@ -1,5 +1,6 @@
 (ns authority.views.common
-  (:require [authority.utils :as utils]
+  (:require [re-frame.core :as rf]
+            [authority.utils :as utils]
             [authority.constants :as const]))
 
 (def poly-outer (utils/polygon 25 5))
@@ -47,3 +48,17 @@
                   :poly-outer poly-outer
                   :poly-inner poly-inner
                   :content [:div {:class ["w-7" "h-8" "flex" "justify-center" "items-center"]} content]})]))
+
+(defn primary-button [{:keys [label dispatch disabled? content]}]
+  (let [pointer (and dispatch (not disabled?))
+        poly (utils/polygon-px 15 0)]
+    [:div {:key label
+           :class [(if pointer "cursor-pointer" "cursor-not-allowed") "bg-blue-800" "p-0.5"]
+           :on-click #(when-not disabled? (rf/dispatch dispatch))
+           :style {:clip-path poly}}
+     [:div {:class ["bg-blue-700" "hover:bg-blue-600" "active:bg-blue-100" "p-0.5"]
+            :style {:clip-path poly}}
+      [:div {:class ["bg-blue-800"]
+             :style {:clip-path poly}}
+       [:div {:class ["px-5" "py-2" "flex" "justify-center" "items-center"]}
+        (or content label)]]]]))
