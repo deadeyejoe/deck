@@ -205,4 +205,5 @@
 
 (rf/reg-event-fx
  :copy-db
- (fn [{db :db}] (utils/copy-to-clipboard (with-out-str (pprint/pprint db)))))
+ (fn [{db :db}] (utils/copy-to-clipboard
+                 (with-out-str (pprint/pprint db)))))

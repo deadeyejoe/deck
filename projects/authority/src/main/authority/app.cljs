@@ -29,7 +29,7 @@
        (str "Unrecognized state")))
    [shortcut/component]
    [:div {:class ["absolute" "top-0" "right-0" "m-5" "flex"]}
-    [hidden-button "DB" [:db-copy]]
+    [hidden-button "DB" [:copy-db]]
     [hidden-button "RE" [:new-game-undoable]]
     [hidden-button "UN" [:undo]]]])
 

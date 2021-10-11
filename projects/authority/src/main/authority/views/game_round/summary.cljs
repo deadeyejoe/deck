@@ -23,8 +23,8 @@
         duration (-> turn :time/elapsed timer-utils/seconds->display)]
     [label-with-content label (str player " (" duration ")")]))
 
-(defn player-row [name count average]
-  [:div {:key name
+(defn player-row [position name count average]
+  [:div {:key position
          :class ["flex" "flex-row" "justify-between" "w-full" "my-1"]}
    [:div {:class ["w-1/3" "flex" "justify-start"]} name]
    [:div {:class ["w-1/3" "flex" "justify-center"]} count]
@@ -33,7 +33,7 @@
 (defn player-summary [summary position]
   (let [name (utils/listen [:player/name position])
         {:keys [:turn/count :turn/average]} (get-in summary [:players position])]
-    [player-row name count (timer-utils/seconds->display average)]))
+    (player-row position name count (timer-utils/seconds->display average))))
 
 (defn component []
   (let [round-number (utils/listen [:round/number])
