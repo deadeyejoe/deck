@@ -1,0 +1,17 @@
+node_modules/
+public/assets/
+public/css/
+release/
+
+/target
+/checkouts
+/src/gen
+
+pom.xml
+pom.xml.asc
+*.iml
+*.jar
+*.log
+.shadow-cljs
+.lein-*
+.nrepl-*

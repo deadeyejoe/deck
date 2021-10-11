@@ -1,0 +1,19 @@
+;; shadow-cljs configuration
+{:dev-http {8080 "public"}
+ :builds
+ {:app
+  {:target :browser
+   :output-dir "public/assets/app/js"
+   :asset-path "assets/app/js"
+   :modules {:main {:init-fn ur.app/init}}
+;;    :devtools {:preloads [day8.re-frame-10x.preload]}
+;;    :dev {:compiler-options
+;;          {:closure-defines
+;;           {re-frame.trace.trace-enabled? true
+;;            day8.re-frame.tracing.trave-enabled? true}}}
+   :release {:output-dir "release"
+             :asset-path "/"}}
+  :test
+  {:target :node-test
+   :output-to "target/node-test"
+   :autorun true}}}
