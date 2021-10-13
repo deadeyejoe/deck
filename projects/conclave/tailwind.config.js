@@ -22,6 +22,10 @@ module.exports = {
       },
       fontSize: {
         'hueg': '10rem',
+      },
+      rotate: {
+        "60": "60deg",
+        "-60": "-60deg"
       }
     },
     variants: {},
