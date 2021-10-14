@@ -1,4 +1,5 @@
-(ns conclave.hex)
+(ns conclave.hex
+  (:require [conclave.vector :as vect]))
 
 (def sqr3 (Math/sqrt 3))
 
@@ -15,15 +16,6 @@
 (defn r-basis [size]
   [0
    (* sqr3 size)])
-
-(defn scale [point v]
-  (mapv (partial * v) point))
-
-(defn add [& points]
-  (->> points
-       (apply interleave)
-       (partition (count points))
-       (mapv (partial apply +))))
 
 (defn cube->axial [[x _y z]]
   [x z])
@@ -56,17 +48,34 @@
 (defn ring-steps [radius]
   (mapcat (fn [direction] (repeat radius direction)) walk-perimeter))
 
+(comment
+  (ring-steps 1))
+
 (defn ring-coordinates [radius]
   (if (pos? radius)
-    (reductions (fn [p direction] (add p direction))
-                (scale walk-radius radius)
+    (reductions vect/add
+                (vect/scale walk-radius radius)
                 (->> radius ring-steps butlast))
-    origin))
+    (list origin)))
+
+(defn neighbours [coordinate]
+  (let [steps (ring-steps 1)]
+    (reductions vect/add
+                coordinate
+                steps)))
+
+(comment (neighbours [0 4 -4]))
+
+(comment
+  (ring-coordinates 2))
+
+(defn map-coordinates [radius]
+  (mapcat ring-coordinates (range (inc radius))))
+
+(comment
+  (map-coordinates 3))
 
 (defn coordinate->offset [size cube]
   (let [[q r] (cube->axial cube)]
-    (add (scale (q-basis size) q)
-         (scale (r-basis size) r))))
-
-(ring-steps 1)
-(ring-coordinates 2)
+    (vect/add (vect/scale (q-basis size) q)
+              (vect/scale (r-basis size) r))))
