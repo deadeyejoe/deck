@@ -4,7 +4,7 @@
             [conclave.hex :as hex]
             [conclave.handlers]
             [conclave.subs]
-            [conclave.tiles.core :as tile :refer [tiles]]
+            [conclave.tiles.core :as tile]
             [conclave.map.layout :as layout]
             [conclave.map.core :as map]))
 

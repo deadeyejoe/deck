@@ -23,17 +23,29 @@
            (when (some :legendary planets)
              {:legendary true}))))
 
-(def tiles (reduce-kv #(assoc %1 %2 (enrich %2 %3))
-                      {}
-                      data/tiles-raw))
+(def key->tiles (reduce-kv #(assoc %1 %2 (enrich %2 %3))
+                           {}
+                           data/tiles-raw))
 
-(def mecatol (:18 tiles))
+(def tiles (vals tiles))
+
+(def mecatol (:18 key->tiles))
 (defn mecatol? [tile] (= tile mecatol))
 
-(def nexus   (:82 tiles))
+(def nexus   (:82 key->tiles))
 (defn nexus? [tile] (= tile nexus))
 
 (defn home? [tile] (= (:type tile) :green))
+
+(def wormholes (->> tiles
+                    (filter :wormhole)
+                    (map :key)))
+(def wormholes-alpha (->> tiles
+                          (filter (comp (partial = :alpha) :wormhole))
+                          (map :key)))
+(def wormholes-beta (->> tiles
+                         (filter (comp (partial = :beta) :wormhole))
+                         (map :key)))
 
 (defn default? [tile]
   (and (-> tile :type #{:blue :red})
@@ -41,9 +53,7 @@
        (not (mecatol? tile))
        (not (nexus? tile))))
 
-(def default-set (->> tiles
-                      vals
-                      (filter default?)))
+(def default-set (filter default? tiles))
 
 (defn image [tile]
   (or (:image tile) (str "ST_" (-> tile :key name) ".png")))

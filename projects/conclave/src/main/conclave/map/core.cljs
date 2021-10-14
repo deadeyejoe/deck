@@ -1,8 +1,7 @@
 (ns conclave.map.core
   (:require [conclave.random :as rand]
             [conclave.map.layout :as layout]
-            [conclave.tiles.static :refer [green]]
-            [conclave.tiles.core :refer [tiles]]))
+            [conclave.tiles.static :refer [green]]))
 
 (defn set-coordinate [map coordinate tile]
   (update map :tiles assoc coordinate tile))
@@ -23,9 +22,6 @@
         sampled-tiles (rand/sample tileset (count free-spaces) seed)]
     (update map :tiles merge (zipmap free-spaces sampled-tiles))))
 
-(comment (-> (build layout/eight-player)
-             (populate "ABCD" tiles)))
+(defn lookup [map coordinate]
+  (get-in map [:tiles coordinate]))
 
-
-
-(defn adjacent [map coordinate])
