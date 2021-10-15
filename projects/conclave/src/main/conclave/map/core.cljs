@@ -3,7 +3,9 @@
             [conclave.map.layout :as layout]))
 
 (defn set-coordinate [map coordinate tile]
-  (update map :tiles assoc coordinate tile))
+  (-> map
+      (assoc-in [:tiles coordinate] tile)
+      (assoc-in [:tiles-reverse (:key tile)] coordinate)))
 
 (defn import-coordinate-map [map coordinates]
   (reduce-kv set-coordinate
