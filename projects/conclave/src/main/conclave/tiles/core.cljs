@@ -27,7 +27,7 @@
                            {}
                            data/tiles-raw))
 
-(def tiles (vals tiles))
+(def tiles (vals key->tiles))
 
 (def mecatol (:18 key->tiles))
 (defn mecatol? [tile] (= tile mecatol))
