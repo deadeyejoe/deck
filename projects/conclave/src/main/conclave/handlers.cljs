@@ -20,9 +20,9 @@
 (rf/reg-event-db
  :hover/start
  (fn [db [_name coordinate]]
-   (assoc db :highlighted coordinate)))
+   (assoc db :hovered coordinate)))
 
 (rf/reg-event-db
  :hover/clear
  (fn [db _event]
-   (dissoc db :highlighted)))
+   (dissoc db :hovered)))

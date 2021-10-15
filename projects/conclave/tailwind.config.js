@@ -26,8 +26,18 @@ module.exports = {
       rotate: {
         "60": "60deg",
         "-60": "-60deg"
+      },
+      zIndex: {
+        "base": 0,
+        "highlight" : 1,
+        "overlay" : 2,
+        
       }
     },
-    variants: {},
+    variants: {
+      extend: {
+        zIndex: ["hover"]
+      }
+    },
   }
 }

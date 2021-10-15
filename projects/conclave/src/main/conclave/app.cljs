@@ -45,10 +45,11 @@
 
 (defn hex-tile [size coordinate]
   (let [[x-offset y-offset] (hex/coordinate->offset (epsilon size) coordinate)
-        tile (get-in galaxy-map [:tiles coordinate])]
-    [:div {:class ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2"]
+        tile (get-in galaxy-map [:tiles coordinate])
+        highlighted? @(rf/subscribe [:highlighted? coordinate])]
+    [:div {:class ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2" "hover:z-highlight"]
            :on-mouse-enter #(rf/dispatch [:hover/start coordinate])
-           :style (merge (hex-style size)
+           :style (merge (hex-style (if highlighted? (+ size 5) size))
                          {:margin-left (str x-offset "mm")
                           :margin-top (str y-offset "mm")
                           :clip-path hex-path})}
@@ -63,7 +64,7 @@
 
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])
-        target @(rf/subscribe [:highlighted])]
+        target @(rf/subscribe [:hovered])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Highlight Mode: " mode]
      [:div "Target: " (coordinate->display target)]

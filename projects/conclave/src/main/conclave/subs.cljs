@@ -3,12 +3,18 @@
 
 (rf/reg-sub
  :overlay/mode
- (fn [db _query] (:overlay/mode db)))
+ (fn [db _qv] (:overlay/mode db)))
 
 (rf/reg-sub
  :highlight/mode
- (fn [db _query] (:highlight/mode db)))
+ (fn [db _qv] (:highlight/mode db)))
 
 (rf/reg-sub
- :highlighted
- (fn [db _q] (:highlighted db)))
+ :hovered
+ (fn [db _qv] (:hovered db)))
+
+(rf/reg-sub
+ :highlighted?
+ :<- [:hovered]
+ (fn [hovered-coordinate [_q coordinate]]
+   (= hovered-coordinate coordinate)))
