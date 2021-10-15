@@ -2,6 +2,7 @@
   (:require [reagent.dom]
             [re-frame.core :as rf]
             [conclave.hex :as hex]
+            [conclave.vector :as vect]
             [conclave.handlers]
             [conclave.subs]
             [conclave.tiles.core :as tile]))
@@ -48,17 +49,12 @@
            :class ["m-1" "text-gray-900"]
            :on-click #(rf/dispatch dispatch)}])
 
-(defn coordinate->display [coordinate]
-  (->> coordinate
-       (interpose ", ")
-       (apply str)))
-
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])
         target @(rf/subscribe [:hovered])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Highlight Mode: " mode]
-     [:div "Target: " (coordinate->display target)]
+     [:div "Target: " (vect/->display target)]
      [button "Single" [:set-highlight :single]]
      [button "Adjacent" [:set-highlight :adjacent]]]))
 

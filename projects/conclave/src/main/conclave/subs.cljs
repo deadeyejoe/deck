@@ -1,7 +1,8 @@
 (ns conclave.subs
   (:require [re-frame.core :as rf]
             [conclave.map.core :as map]
-            [conclave.map.score :as map-score]))
+            [conclave.map.score :as map-score]
+            [conclave.vector :as vect]))
 
 (rf/reg-sub
  :galaxy-map
@@ -18,11 +19,6 @@
  :overlay/mode
  (fn [db _qv] (:overlay/mode db)))
 
-(defn coordinate->display [coordinate]
-  (->> coordinate
-       (interpose ", ")
-       (apply str)))
-
 (rf/reg-sub
  :overlay/content
  (fn [[_q coordinate] _dv]
@@ -31,7 +27,7 @@
     (rf/subscribe [:tile coordinate])])
  (fn [[galaxy-map mode tile] [_q coordinate]]
    (case mode
-     :coordinates (coordinate->display coordinate)
+     :coordinates (vect/->display coordinate)
      :tile-number (:key tile)
      :res-inf     (str (:total/resources tile)
                        "/"

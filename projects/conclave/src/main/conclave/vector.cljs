@@ -1,10 +1,15 @@
 (ns conclave.vector)
 
-(defn scale [point v]
-  (mapv (partial * v) point))
+(defn scale [v scale]
+  (mapv (partial * s) v))
 
-(defn add [& points]
-  (->> points
+(defn add [& vs]
+  (->> vs
        (apply interleave)
-       (partition (count points))
+       (partition (count vs))
        (mapv (partial apply +))))
+
+(defn ->display [v]
+  (->> v
+       (interpose ", ")
+       (apply str)))
