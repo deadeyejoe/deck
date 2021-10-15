@@ -1,6 +1,7 @@
 (ns conclave.subs
   (:require [re-frame.core :as rf]
-            [conclave.map.core :as map]))
+            [conclave.map.core :as map]
+            [conclave.map.score :as map-score]))
 
 (rf/reg-sub
  :galaxy-map
@@ -16,6 +17,28 @@
 (rf/reg-sub
  :overlay/mode
  (fn [db _qv] (:overlay/mode db)))
+
+(defn coordinate->display [coordinate]
+  (->> coordinate
+       (interpose ", ")
+       (apply str)))
+
+(rf/reg-sub
+ :overlay/content
+ (fn [[_q coordinate] _dv]
+   [(rf/subscribe [:galaxy-map])
+    (rf/subscribe [:overlay/mode])
+    (rf/subscribe [:tile coordinate])])
+ (fn [[galaxy-map mode tile] [_q coordinate]]
+   (case mode
+     :coordinates (coordinate->display coordinate)
+     :tile-number (:key tile)
+     :res-inf     (str (:total/resources tile)
+                       "/"
+                       (:total/influence tile))
+     :wormhole    (case (:wormhole tile) :alpha "Alpha" :beta "Beta" nil)
+     :p1          ((map-score/distance-to-other-tiles galaxy-map [0 4 -4]) coordinate)
+     nil)))
 
 (rf/reg-sub
  :highlight/mode

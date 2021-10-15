@@ -20,23 +20,11 @@
 
 (defn epsilon [v] (* v 0.99))
 
-(defn coordinate->display [coordinate]
-  (->> coordinate
-       (interpose ", ")
-       (apply str)))
-
-(defn hex-overlay [coordinate tile]
-  (let [mode @(rf/subscribe [:overlay/mode])]
+(defn hex-overlay [coordinate]
+  (let [content @(rf/subscribe [:overlay/content coordinate])]
     [:div {:class ["absolute" "bg-black" "text-white"
                    "top-1/2" "left-1/2" "transform" "-translate-x-1/2" "-translate-y-1/2"]}
-     (case mode
-       :coordinates (coordinate->display coordinate)
-       :tile-number (:key tile)
-       :res-inf     (str (:total/resources tile)
-                         "/"
-                         (:total/influence tile))
-       :wormhole    (case (:wormhole tile) :alpha "Alpha" :beta "Beta" nil)
-       nil)]))
+     content]))
 
 (defn hex-tile [size coordinate]
   (let [[x-offset y-offset] (hex/coordinate->offset (epsilon size) coordinate)
@@ -50,7 +38,7 @@
                          {:margin-left (str x-offset "mm")
                           :margin-top (str y-offset "mm")
                           :clip-path hex-path})}
-     [hex-overlay coordinate tile]
+     [hex-overlay coordinate]
      [:img (merge {:src (str "images/" (tile/image tile))}
                   (when highlighted? {:height "95%" :width "95%"}))]]))
 
@@ -59,6 +47,11 @@
            :value value
            :class ["m-1" "text-gray-900"]
            :on-click #(rf/dispatch dispatch)}])
+
+(defn coordinate->display [coordinate]
+  (->> coordinate
+       (interpose ", ")
+       (apply str)))
 
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])
@@ -77,7 +70,8 @@
      [button "Tile Number" [:set-overlay :tile-number]]
      [button "Coordinates" [:set-overlay :coordinates]]
      [button "Res/Inf" [:set-overlay :res-inf]]
-     [button "Wormhole" [:set-overlay :wormhole]]]))
+     [button "Wormhole" [:set-overlay :wormhole]]
+     [button "P1" [:set-overlay :p1]]]))
 
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}

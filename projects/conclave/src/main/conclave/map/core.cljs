@@ -46,3 +46,19 @@
                (filter (partial coordinate->tile galaxy-map) neighbours) ;; remove out-of-bounds
                wormhole-neighbours))))
 
+(defn walk [galaxy-map start-coordinate f init]
+  (loop [state init
+         [current-visit & rest-visit] (adjacent galaxy-map start-coordinate)
+         visited #{start-coordinate}]
+    (cond
+      (nil? current-visit) state
+      (visited current-visit) (recur state rest-visit visited)
+      :else (let [new-state (f state current-visit (coordinate->tile galaxy-map current-visit))
+                  new-visited (conj visited current-visit)
+                  unvisited-neighbours (->> current-visit
+                                            (adjacent galaxy-map)
+                                            (remove new-visited))]
+              (recur new-state
+                     (concat rest-visit unvisited-neighbours)
+                     new-visited)))))
+
