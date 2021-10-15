@@ -1,26 +1,26 @@
 (ns conclave.map.core
   (:require [conclave.random :as rand]
-            [conclave.map.layout :as layout]
-            [conclave.tiles.static :refer [green]]))
+            [conclave.map.layout :as layout]))
 
 (defn set-coordinate [map coordinate tile]
   (update map :tiles assoc coordinate tile))
 
+(defn import-coordinate-map [map coordinates]
+  (reduce-kv set-coordinate
+             map
+             coordinates))
+
 (defn build [layout]
-  (let [home-map (->> layout
-                      :home-coordinates
-                      (reduce #(assoc %1 %2 green) {}))]
-    (reduce-kv set-coordinate
-               {:layout layout
-                :tiles (:fixed-tiles layout)}
-               home-map)))
+  (-> {:layout layout}
+      (import-coordinate-map (:fixed-tiles layout))
+      (import-coordinate-map (:home-tiles layout))))
 
 (comment (build layout/eight-player))
 
 (defn populate [map seed tileset]
   (let [free-spaces   (layout/free-spaces (:layout map))
         sampled-tiles (rand/sample tileset (count free-spaces) seed)]
-    (update map :tiles merge (zipmap free-spaces sampled-tiles))))
+    (import-coordinate-map map (zipmap free-spaces sampled-tiles))))
 
 (defn lookup [map coordinate]
   (get-in map [:tiles coordinate]))

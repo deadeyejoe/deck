@@ -1,5 +1,6 @@
 (ns conclave.tiles.core
-  (:require [conclave.data :as data]))
+  (:require [conclave.data :as data]
+            [conclave.tiles.static :refer [green-tile]]))
 
 (defn enrich [key raw-tile]
   (let [planets (:planets raw-tile)]
@@ -28,6 +29,9 @@
                            data/tiles-raw))
 
 (def tiles (vals key->tiles))
+
+(defn blank-home-tile [player-id]
+  (merge green-tile {:key player-id}))
 
 (def mecatol (:18 key->tiles))
 (defn mecatol? [tile] (= tile mecatol))

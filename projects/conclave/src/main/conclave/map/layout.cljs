@@ -5,19 +5,19 @@
 (def eight-player {:name "8 Player"
                    :radius 4
                    :fixed-tiles {[0 0 0] tiles/mecatol}
-                   :home-coordinates [[0   4 -4]
-                                      [3   1 -4]
-                                      [4  -2 -2]
-                                      [3  -4  1]
-                                      [0  -4  4]
-                                      [-3 -1  4]
-                                      [-4  2  2]
-                                      [-3  4 -1]]})
+                   :home-tiles {[0   4 -4] (tiles/blank-home-tile :p1)
+                                [3   1 -4] (tiles/blank-home-tile :p2)
+                                [4  -2 -2] (tiles/blank-home-tile :p3)
+                                [3  -4  1] (tiles/blank-home-tile :p4)
+                                [0  -4  4] (tiles/blank-home-tile :p5)
+                                [-3 -1  4] (tiles/blank-home-tile :p6)
+                                [-4  2  2] (tiles/blank-home-tile :p7)
+                                [-3  4 -1] (tiles/blank-home-tile :p8)}})
 
 (defn fixed-set [layout]
   (->> layout
        ((juxt (comp keys :fixed-tiles)
-              :home-coordinates))
+              (comp keys :home-tiles)))
        (apply concat)
        (into #{})))
 
