@@ -70,7 +70,7 @@
      [button "Coordinates" [:set-overlay :coordinates]]
      [button "Res/Inf" [:set-overlay :res-inf]]
      [button "Wormhole" [:set-overlay :wormhole]]
-     [button "P1" [:set-overlay :p1]]]))
+     [button "Distance Score" [:set-overlay :distance-score]]]))
 
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
