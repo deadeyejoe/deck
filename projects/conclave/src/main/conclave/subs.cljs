@@ -1,5 +1,6 @@
 (ns conclave.subs
   (:require [re-frame.core :as rf]
+            [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
             [conclave.map.score :as map-score]
             [conclave.vector :as vect]))
@@ -28,11 +29,9 @@
  (fn [[galaxy-map mode tile] [_q coordinate]]
    (case mode
      :coordinates (vect/->display coordinate)
-     :tile-number (:key tile)
-     :res-inf     (str (:total/resources tile)
-                       "/"
-                       (:total/influence tile))
-     :wormhole    (case (:wormhole tile) :alpha "Alpha" :beta "Beta" nil)
+     :tile-number (tiles-view/number tile)
+     :res-inf     (tiles-view/res-inf tile)
+     :wormhole    (tiles-view/wormhole tile)
      :p1          ((map-score/distance-to-other-tiles galaxy-map [0 4 -4]) coordinate)
      nil)))
 
