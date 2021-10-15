@@ -22,14 +22,17 @@
 
 (defn epsilon [v] (* v 0.99))
 
+(defn coordinate->display [coordinate]
+  (->> coordinate
+       (interpose ", ")
+       (apply str)))
+
 (defn hex-overlay [coordinate tile]
   (let [mode @(rf/subscribe [:overlay/mode])]
     [:div {:class ["absolute" "bg-black" "text-white"
                    "top-1/2" "left-1/2" "transform" "-translate-x-1/2" "-translate-y-1/2"]}
      (case mode
-       :coordinates (->> coordinate
-                         (interpose ", ")
-                         (apply str))
+       :coordinates (coordinate->display coordinate)
        :tile-number (:key tile)
        :res-inf     (str (:total/resources tile)
                          "/"
@@ -44,6 +47,7 @@
   (let [[x-offset y-offset] (hex/coordinate->offset (epsilon size) coordinate)
         tile (get-in galaxy-map [:tiles coordinate])]
     [:div {:class ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2"]
+           :on-mouse-enter #(rf/dispatch [:hover/start coordinate])
            :style (merge (hex-style size)
                          {:margin-left (str x-offset "mm")
                           :margin-top (str y-offset "mm")
@@ -54,13 +58,21 @@
 (defn button [value dispatch]
   [:input {:type "button"
            :value value
-           :class ["m-1"]
+           :class ["m-1" "text-gray-900"]
            :on-click #(rf/dispatch dispatch)}])
 
-(defn controls []
+(defn highlight-controls []
+  (let [mode @(rf/subscribe [:highlight/mode])
+        target @(rf/subscribe [:highlighted])]
+    [:div {:class ["flex" "flex-col" "justify-center"]}
+     [:div "Highlight Mode: " mode]
+     [:div "Target: " (coordinate->display target)]
+     [button "Single" [:set-highlight :single]]]))
+
+(defn overlay-controls []
   (let [mode @(rf/subscribe [:overlay/mode])]
-    [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-center"]}
-     [:div "Mode: " mode]
+    [:div {:class ["flex" "flex-col" "justify-center"]}
+     [:div "Overlay Mode: " mode]
      [button "None" [:set-overlay :none]]
      [button "Tile Number" [:set-overlay :tile-number]]
      [button "Coordinates" [:set-overlay :coordinates]]
@@ -68,8 +80,10 @@
      [button "Wormhole" [:set-overlay :wormhole]]]))
 
 (defn ui []
-  [:div {:class ["h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
-   [controls]
+  [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
+   [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-around"]}
+    [highlight-controls]
+    [overlay-controls]]
    [origin
     (into
      [:<> [hex-tile 17 [0 0 0]]]
