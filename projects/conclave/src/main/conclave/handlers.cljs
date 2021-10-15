@@ -31,3 +31,8 @@
  :hover/clear
  (fn [db _event]
    (dissoc db :hovered)))
+
+(rf/reg-event-db
+ :tile/select
+ (fn [db [_en coordinate]]
+   (assoc db :selected coordinate)))

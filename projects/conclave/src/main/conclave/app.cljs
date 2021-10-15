@@ -30,18 +30,21 @@
 (defn hex-tile [size coordinate]
   (let [[x-offset y-offset] (hex/coordinate->offset (epsilon size) coordinate)
         tile @(rf/subscribe [:tile coordinate])
-        highlighted? @(rf/subscribe [:highlighted? coordinate])]
+        highlighted? @(rf/subscribe [:highlighted? coordinate])
+        selected? @(rf/subscribe [:selected? coordinate])]
     [:div {:class (concat ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2"
                            "flex" "justify-center" "items-center"]
-                          (when highlighted?  ["bg-blue-600" "z-highlight"]))
+                          (when highlighted?  ["bg-blue-600" "z-highlight"])
+                          (when selected? ["bg-white" "z-highlight"]))
            :on-mouse-enter #(rf/dispatch [:hover/start coordinate])
-           :style (merge (hex-style size)
+           :on-click #(rf/dispatch [:tile/select coordinate])
+           :style (merge (hex-style (if selected? (* size 1.1) size))
                          {:margin-left (str x-offset "mm")
                           :margin-top (str y-offset "mm")
                           :clip-path hex-path})}
      [hex-overlay coordinate]
      [:img (merge {:src (str "images/" (tile/image tile))}
-                  (when highlighted? {:height "95%" :width "95%"}))]]))
+                  (when (or highlighted? selected?) {:height "95%" :width "95%"}))]]))
 
 (defn button [value dispatch]
   [:input {:type "button"

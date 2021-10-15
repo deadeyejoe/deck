@@ -58,3 +58,14 @@
  :<- [:highlight-set]
  (fn [highlight-set [_q coordinate]]
    (contains? highlight-set coordinate)))
+
+(rf/reg-sub
+ :selected
+ (fn [db _qv]
+   (:selected db)))
+
+(rf/reg-sub
+ :selected?
+ :<- [:selected]
+ (fn [selected [_q coordinate]]
+   (= selected coordinate)))
