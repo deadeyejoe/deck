@@ -51,6 +51,13 @@
                          (filter (comp (partial = :beta) :wormhole))
                          (map :key)))
 
+(defn matching-wormholes [tile]
+  (let [wormhole (:wormhole tile)]
+    (case wormhole
+      :alpha wormholes-alpha
+      :beta wormholes-beta
+      (list))))
+
 (defn default? [tile]
   (and (-> tile :type #{:blue :red})
        (-> tile :race nil?)

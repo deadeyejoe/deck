@@ -61,7 +61,7 @@
 (defn neighbours [coordinate]
   (let [steps (ring-steps 1)]
     (reductions vect/add
-                coordinate
+                (vect/add coordinate walk-radius)
                 steps)))
 
 (comment (neighbours [0 4 -4]))
