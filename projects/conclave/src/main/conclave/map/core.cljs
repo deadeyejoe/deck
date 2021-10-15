@@ -24,6 +24,9 @@
         sampled-tiles (rand/sample tileset (count free-spaces) seed)]
     (import-coordinate-map map (zipmap free-spaces sampled-tiles))))
 
-(defn lookup [map coordinate]
+(defn coordinate->tile [map coordinate]
   (get-in map [:tiles coordinate]))
+
+(defn tile->coordinate [map tile]
+  (get-in map [:tiles-reverse (:key tile)]))
 
