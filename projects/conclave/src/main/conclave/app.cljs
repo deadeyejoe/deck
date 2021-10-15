@@ -47,14 +47,17 @@
   (let [[x-offset y-offset] (hex/coordinate->offset (epsilon size) coordinate)
         tile (get-in galaxy-map [:tiles coordinate])
         highlighted? @(rf/subscribe [:highlighted? coordinate])]
-    [:div {:class ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2" "hover:z-highlight"]
+    [:div {:class (concat ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2"
+                           "flex" "justify-center" "items-center"]
+                          (when highlighted?  ["bg-blue-600" "z-highlight"]))
            :on-mouse-enter #(rf/dispatch [:hover/start coordinate])
-           :style (merge (hex-style (if highlighted? (+ size 5) size))
+           :style (merge (hex-style (if highlighted? (* size 1.2) size))
                          {:margin-left (str x-offset "mm")
                           :margin-top (str y-offset "mm")
                           :clip-path hex-path})}
      [hex-overlay coordinate tile]
-     [:img {:src (str "images/" (tile/image tile))}]]))
+     [:img (merge {:src (str "images/" (tile/image tile))}
+                  (when highlighted? {:height "95%" :width "95%"}))]]))
 
 (defn button [value dispatch]
   [:input {:type "button"
