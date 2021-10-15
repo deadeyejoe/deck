@@ -1,5 +1,17 @@
 (ns conclave.subs
-  (:require [re-frame.core :as rf]))
+  (:require [re-frame.core :as rf]
+            [conclave.map.core :as map]))
+
+(rf/reg-sub
+ :galaxy-map
+ (fn [db _qv]
+   (:map db)))
+
+(rf/reg-sub
+ :tile
+ :<- [:galaxy-map]
+ (fn [galaxy-map [_q coordinate]]
+   (map/coordinate->tile galaxy-map coordinate)))
 
 (rf/reg-sub
  :overlay/mode
@@ -14,7 +26,17 @@
  (fn [db _qv] (:hovered db)))
 
 (rf/reg-sub
- :highlighted?
+ :highlight-set
+ :<- [:galaxy-map]
+ :<- [:highlight/mode]
  :<- [:hovered]
- (fn [hovered-coordinate [_q coordinate]]
-   (= hovered-coordinate coordinate)))
+ (fn [[galaxy-map mode hovered] _qv]
+   (case mode
+     :adjacent (into #{} (map/adjacent galaxy-map hovered))
+     #{hovered})))
+
+(rf/reg-sub
+ :highlighted?
+ :<- [:highlight-set]
+ (fn [highlight-set [_q coordinate]]
+   (contains? highlight-set coordinate)))

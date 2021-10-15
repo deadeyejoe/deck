@@ -1,11 +1,16 @@
 (ns conclave.handlers
-  (:require [re-frame.core :as rf]))
+  (:require [re-frame.core :as rf]
+            [conclave.tiles.core :as tile]
+            [conclave.map.core :as map]
+            [conclave.map.layout :as layout]))
 
 (rf/reg-event-db
  :initialize
- (fn [_db _event]
+ (fn [_db [_en seed]]
    {:overlay/mode :none
-    :highlight/mode :single}))
+    :highlight/mode :single
+    :map (-> (map/build layout/eight-player)
+             (map/populate seed tile/default-set))}))
 
 (rf/reg-event-db
  :set-overlay

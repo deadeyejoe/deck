@@ -4,9 +4,7 @@
             [conclave.hex :as hex]
             [conclave.handlers]
             [conclave.subs]
-            [conclave.tiles.core :as tile]
-            [conclave.map.layout :as layout]
-            [conclave.map.core :as map]))
+            [conclave.tiles.core :as tile]))
 
 ;; Assume flat top.
 ;; Size is length of side, or center to corner
@@ -40,18 +38,15 @@
        :wormhole    (case (:wormhole tile) :alpha "Alpha" :beta "Beta" nil)
        nil)]))
 
-(def galaxy-map (-> (map/build layout/eight-player)
-                    (map/populate "ABCDE" tile/default-set)))
-
 (defn hex-tile [size coordinate]
   (let [[x-offset y-offset] (hex/coordinate->offset (epsilon size) coordinate)
-        tile (get-in galaxy-map [:tiles coordinate])
+        tile @(rf/subscribe [:tile coordinate])
         highlighted? @(rf/subscribe [:highlighted? coordinate])]
     [:div {:class (concat ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2"
                            "flex" "justify-center" "items-center"]
                           (when highlighted?  ["bg-blue-600" "z-highlight"]))
            :on-mouse-enter #(rf/dispatch [:hover/start coordinate])
-           :style (merge (hex-style (if highlighted? (* size 1.2) size))
+           :style (merge (hex-style size)
                          {:margin-left (str x-offset "mm")
                           :margin-top (str y-offset "mm")
                           :clip-path hex-path})}
@@ -71,7 +66,8 @@
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Highlight Mode: " mode]
      [:div "Target: " (coordinate->display target)]
-     [button "Single" [:set-highlight :single]]]))
+     [button "Single" [:set-highlight :single]]
+     [button "Adjacent" [:set-highlight :adjacent]]]))
 
 (defn overlay-controls []
   (let [mode @(rf/subscribe [:overlay/mode])]
@@ -106,5 +102,5 @@
   (render))
 
 (defn init []
-  (rf/dispatch-sync [:initialize])
+  (rf/dispatch-sync [:initialize "ABCDE"])
   (render))
