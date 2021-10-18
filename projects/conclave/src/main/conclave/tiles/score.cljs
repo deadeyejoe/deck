@@ -9,3 +9,12 @@
     :nebula 2
     :supernova 9000.1
     1))
+
+(defn naive-score [tile]
+  (+ (:total/resources tile)
+     (* (:total/influence tile) 0.667)
+     (when (:specialty tile) 1)))
+
+(defn stake? [tile]
+  (and (not (core/home? tile))
+       (seq (:planets tile))))
