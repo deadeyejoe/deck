@@ -70,7 +70,8 @@
      [button "Coordinates" [:set-overlay :coordinates]]
      [button "Res/Inf" [:set-overlay :res-inf]]
      [button "Wormhole" [:set-overlay :wormhole]]
-     [button "Distance Score" [:set-overlay :distance-score]]]))
+     [button "Distance Score" [:set-overlay :distance-score]]
+     [button "Highest Stake" [:set-overlay :highest-stake]]]))
 
 (defn stake-controls []
   (let [mode @(rf/subscribe [:stake/mode])]

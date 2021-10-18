@@ -45,7 +45,7 @@
 (defn closest-hs [hs->distance]
   (let [[min-distance closest-entries] (->> hs->distance
                                             (group-by val)
-                                            (apply min-key first))]
+                                            (apply min-key key))]
     [min-distance (map key closest-entries)]))
 
 (defn discrete-stakes [hs->distance]

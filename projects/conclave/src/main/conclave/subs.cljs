@@ -41,6 +41,35 @@
    (distance-map coordinate)))
 
 (rf/reg-sub
+ :tile/stake-map
+ :<- [:stake/mode]
+ :<- [:galaxy-map]
+ (fn [[mode galaxy-map] _qv]
+   (map-score/stakes galaxy-map (case mode
+                                  :discrete map-score/discrete-stakes
+                                  :continuous map-score/continuous-stakes))))
+
+(rf/reg-sub
+ :tile/highest-stake
+ :<- [:galaxy-map]
+ :<- [:tile/stake-map]
+ (fn [[galaxy-map stake-map]  [_q coordinate]]
+   (if (stake-map coordinate)
+     (let [hs->stake (stake-map coordinate)
+           [highest-stake highest-entries] (->> hs->stake
+                                                (group-by val)
+                                                (apply max-key key))]
+       (str (->> highest-entries
+                 (map (comp
+                       :key
+                       (partial map/coordinate->tile galaxy-map)
+                       key))
+                 (interpose ", ")
+                 (apply str))
+            ": " (.toLocaleString highest-stake "en-IN" {:maximumFractionDigits 2})))
+     "")))
+
+(rf/reg-sub
  :overlay/mode
  (fn [db _qv] (:overlay/mode db)))
 
@@ -49,14 +78,16 @@
  (fn [[_q coordinate] _dv]
    [(rf/subscribe [:overlay/mode])
     (rf/subscribe [:tile coordinate])
-    (rf/subscribe [:tile/distance-score coordinate])])
- (fn [[mode tile distance-score] [_q coordinate]]
+    (rf/subscribe [:tile/distance-score coordinate])
+    (rf/subscribe [:tile/highest-stake coordinate])])
+ (fn [[mode tile distance-score highest-stake] [_q coordinate]]
    (case mode
      :coordinates (vect/->display coordinate)
      :tile-number (tiles-view/number tile)
      :res-inf     (tiles-view/res-inf tile)
      :wormhole    (tiles-view/wormhole tile)
      :distance-score          distance-score
+     :highest-stake           highest-stake
      nil)))
 
 (rf/reg-sub

@@ -17,4 +17,5 @@
 
 (defn stake? [tile]
   (and (not (core/home? tile))
+       (not (core/mecatol? tile))
        (seq (:planets tile))))
