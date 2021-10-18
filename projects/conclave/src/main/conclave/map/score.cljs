@@ -3,7 +3,8 @@
             [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
             [conclave.tiles.score :as tile-score]
-            [conclave.utils :refer [transform-values]]))
+            [conclave.utils :refer [transform-values]]
+            [conclave.score :as util-score]))
 
 
 (defn distance-to-other-tiles [galaxy-map start-coordinate]
@@ -55,24 +56,69 @@
              (select-keys hs->distance closest-hss))
       (continuous-stakes hs->distance))))
 
-(defn stakes [galaxy-map stake-fn]
-  (let [stakeable-coordinates (core/select-by-tile galaxy-map tile-score/stake?)
-        hs->coordinate->distance (hs-distances galaxy-map)]
+(defn compute-stakeable [galaxy-map f]
+  (let [stakeable-coordinates (core/select-by-tile galaxy-map tile-score/stake?)]
     (zipmap stakeable-coordinates
-            (map (fn [stakeable]
-                   (-> hs->coordinate->distance
-                       (restrict-to-target stakeable)
-                       (stake-fn)
-                       (normalize-stakes)))
-                 stakeable-coordinates))))
+            (map f stakeable-coordinates))))
+
+(defn compute-stake [galaxy-map stake-fn]
+  (let [hs->coordinate->distance (hs-distances galaxy-map)]
+    (fn [stakeable]
+      (-> hs->coordinate->distance
+          (restrict-to-target stakeable)
+          (stake-fn)
+          (normalize-stakes)))))
+
+(defn stakes [galaxy-map stake-fn]
+  (compute-stakeable galaxy-map (compute-stake galaxy-map stake-fn)))
+
+(defn multiply-key [key tile]
+  (partial * (key tile)))
+
+(defn exist-key [key tile]
+  (if (key tile)
+    identity
+    (constantly {})))
+
+(defn tile-share [hs->stake tile]
+  {:share/resource (transform-values hs->stake (multiply-key :total/resources tile))
+   :share/influence (transform-values hs->stake (multiply-key :total/influence tile))
+   :share/tech (if (seq (:total/specialty tile))
+                 hs->stake
+                 {})
+   :share/cultural (transform-values hs->stake (multiply-key :total/cultural tile))
+   :share/industrial (transform-values hs->stake (multiply-key :total/industrial tile))
+   :share/hazardous (transform-values hs->stake (multiply-key :total/hazardous tile))
+   :share/legendary (if (:legendary tile)
+                      hs->stake
+                      {})})
+
+(defn compute-share [galaxy-map stake-fn]
+  (let [hs->coordinate->distance (hs-distances galaxy-map)]
+    (fn [stakeable]
+      (let [tile (core/coordinate->tile galaxy-map stakeable)]
+        (-> hs->coordinate->distance
+            (restrict-to-target stakeable)
+            stake-fn
+            normalize-stakes
+            (tile-share tile))))))
+
+(defn shares [galaxy-map stake-fn]
+  (->>
+   (compute-stakeable galaxy-map (compute-share galaxy-map stake-fn))
+   vals
+   (apply merge-with (partial merge-with +))))
+
+(defn variances [share-map]
+  (transform-values share-map (fn [m] (-> m
+                                          vals
+                                          util-score/variation))))
 
 (comment
   (def sample-map (-> (core/build layout/eight-player)
                       (core/populate "ABCDE" tile/default-set)))
   (hs-distances sample-map)
   (stakes sample-map continuous-stakes)
-  ((stakes sample-map discrete-stakes) [-2 2 0])
-  (->>
-   {:a 1 :b 2 :c 3 :d 2 :e 5 :f 1 :g 2}
-   (closest-hs)))
-
+  (shares sample-map discrete-stakes)
+  (shares sample-map continuous-stakes)
+  (transform-values (shares sample-map discrete-stakes) (fn [m] (-> m vals util-score/variation))))

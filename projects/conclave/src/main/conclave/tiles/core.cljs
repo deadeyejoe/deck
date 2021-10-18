@@ -3,24 +3,33 @@
             [conclave.tiles.static :refer [green-tile]]))
 
 (defn enrich [key raw-tile]
-  (let [planets (:planets raw-tile)]
+  (let [planets (:planets raw-tile)
+        all-traits (->> planets
+                        (map :trait)
+                        (remove nil?)
+                        (into []))]
     (merge raw-tile
            {:key key
-            :total/planets   (count planets)
-            :total/resources (->> planets
-                                  (map :resources)
-                                  (apply +))
-            :total/influence (->> planets
-                                  (map :influence)
-                                  (apply +))
-            :total/traits    (->> planets
-                                  (map :trait)
-                                  (remove nil?)
-                                  (into []))
-            :total/specialty (->> planets
-                                  (map :specialty)
-                                  (remove nil?)
-                                  (into #{}))}
+            :total/planets    (count planets)
+            :total/resources  (->> planets
+                                   (map :resources)
+                                   (apply +))
+            :total/influence  (->> planets
+                                   (map :influence)
+                                   (apply +))
+            :total/cultural   (->> all-traits
+                                   (filter #{:cultural})
+                                   count)
+            :total/industrial (->> all-traits
+                                   (filter #{:industrial})
+                                   count)
+            :total/hazardous  (->> all-traits
+                                   (filter #{:hazardous})
+                                   count)
+            :total/specialty  (->> planets
+                                   (map :specialty)
+                                   (remove nil?)
+                                   (into #{}))}
            (when (some :legendary planets)
              {:legendary true}))))
 
