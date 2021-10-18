@@ -9,6 +9,7 @@
  (fn [_db [_en seed]]
    {:overlay/mode :none
     :highlight/mode :single
+    :stake/mode :discrete
     :map (-> (map/build layout/eight-player)
              (map/populate seed tile/default-set))}))
 
@@ -21,6 +22,11 @@
  :set-highlight
  (fn [db [_ mode]]
    (assoc db :highlight/mode mode)))
+
+(rf/reg-event-db
+ :set-stake
+ (fn [db [_ mode]]
+   (assoc db :stake/mode mode)))
 
 (rf/reg-event-db
  :hover/start

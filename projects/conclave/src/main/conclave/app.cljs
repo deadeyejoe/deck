@@ -72,11 +72,19 @@
      [button "Wormhole" [:set-overlay :wormhole]]
      [button "Distance Score" [:set-overlay :distance-score]]]))
 
+(defn stake-controls []
+  (let [mode @(rf/subscribe [:stake/mode])]
+    [:div {:class ["flex" "flex-col" "justify-center"]}
+     [:div "Stake Mode: " mode]
+     [button "Discrete" [:set-stake :discrete]]
+     [button "Continuous" [:set-stake :continuous]]]))
+
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
    [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-around"]}
     [highlight-controls]
-    [overlay-controls]]
+    [overlay-controls]
+    [stake-controls]]
    [origin
     (into
      [:<> [hex-tile 17 [0 0 0]]]

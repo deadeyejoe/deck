@@ -82,3 +82,8 @@
  :<- [:highlight-set]
  (fn [highlight-set [_q coordinate]]
    (contains? highlight-set coordinate)))
+
+
+(rf/reg-sub
+ :stake/mode
+ (fn [db _qv] (:stake/mode db)))
