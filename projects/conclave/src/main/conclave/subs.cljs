@@ -1,5 +1,7 @@
 (ns conclave.subs
-  (:require [re-frame.core :as rf]
+  (:require [clojure.string :as str]
+            [re-frame.core :as rf]
+            [conclave.tiles.core :as tile]
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
             [conclave.map.score :as map-score]
@@ -81,14 +83,18 @@
     (rf/subscribe [:tile/distance-score coordinate])
     (rf/subscribe [:tile/highest-stake coordinate])])
  (fn [[mode tile distance-score highest-stake] [_q coordinate]]
-   (case mode
-     :coordinates (vect/->display coordinate)
-     :tile-number (tiles-view/number tile)
-     :res-inf     (tiles-view/res-inf tile)
-     :wormhole    (tiles-view/wormhole tile)
-     :distance-score          distance-score
-     :highest-stake           highest-stake
-     nil)))
+   (if (= mode :coordinates)
+     (vect/->display coordinate)
+     (if (tile/home? tile)
+       (-> tile :key str str/upper-case)
+       (case mode
+         :coordinates (vect/->display coordinate)
+         :tile-number (tiles-view/number tile)
+         :res-inf     (tiles-view/res-inf tile)
+         :wormhole    (tiles-view/wormhole tile)
+         :distance-score          distance-score
+         :highest-stake           highest-stake
+         nil)))))
 
 (rf/reg-sub
  :highlight/mode
