@@ -4,14 +4,24 @@
             [conclave.map.core :as map]
             [conclave.map.layout :as layout]))
 
-(rf/reg-event-db
+(defn new-map [seed]
+  (let [new-map (-> (map/build layout/eight-player)
+                    (map/populate seed tile/default-set))]
+    {:map new-map
+     :swaps (map/generate-swap-list new-map seed)}))
+
+(rf/reg-event-fx
  :initialize
- (fn [_db [_en seed]]
-   {:overlay/mode :none
-    :highlight/mode :single
-    :stake/mode :discrete
-    :map (-> (map/build layout/eight-player)
-             (map/populate seed tile/default-set))}))
+ (fn [_con [_en seed]]
+   {:db (merge {:overlay/mode :none
+                :highlight/mode :single
+                :stake/mode :discrete}
+               (new-map seed))}))
+
+(rf/reg-event-db
+ :map/generate
+ (fn [db [_en seed]]
+   (merge db (new-map seed))))
 
 (rf/reg-event-db
  :set-overlay

@@ -1,5 +1,6 @@
 (ns conclave.map.core
-  (:require [conclave.random :as rand]
+  (:require [clojure.math.combinatorics :as comb]
+            [conclave.random :as rand]
             [conclave.tiles.core :as tile]
             [conclave.map.layout :as layout]
             [conclave.hex :as hex]))
@@ -21,8 +22,11 @@
 
 (comment (build layout/eight-player))
 
+(defn free-spaces [galaxy-map]
+  (layout/free-spaces (:layout galaxy-map)))
+
 (defn populate [galaxy-map seed tileset]
-  (let [free-spaces   (layout/free-spaces (:layout galaxy-map))
+  (let [free-spaces   (free-spaces galaxy-map)
         sampled-tiles (rand/sample tileset (count free-spaces) seed)]
     (import-coordinate-map galaxy-map (zipmap free-spaces sampled-tiles))))
 
@@ -58,6 +62,11 @@
     (-> galaxy-map
         (set-coordinate c1 t2)
         (set-coordinate c2 t1))))
+
+(defn generate-swap-list [galaxy-map seed]
+  (rand/seed-shuffle seed
+                     (-> (free-spaces galaxy-map)
+                         (comb/combinations 2))))
 
 
 

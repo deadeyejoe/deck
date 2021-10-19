@@ -7,7 +7,8 @@
                          day8.re-frame/undo {:mvn/version "0.3.3"}
                          re-pressed/re-pressed {:mvn/version "0.3.1"}
                          inflections/inflections {:mvn/version "0.13.2"}
-                         funcool/cuerdas {:mvn/version "2.2.1"}}}
+                         funcool/cuerdas {:mvn/version "2.2.1"}
+                         org.clojure/math.combinatorics {:mvn/version "0.1.6"}}}
            :shadow
            {:main-opts ["-m" "shadow.cljs.devtools.cli" "watch" ":app"]}
            :test {:extra-paths ["src/test"]}
