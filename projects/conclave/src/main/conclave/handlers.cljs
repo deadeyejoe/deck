@@ -24,6 +24,15 @@
    (merge db (new-map seed))))
 
 (rf/reg-event-db
+ :map/swap
+ (fn [db _ev]
+   (let [[first & rest] (get db :swaps)
+         new-map (apply map/swap-tiles (get db :map) first)]
+     (assoc db
+            :map new-map
+            :swaps rest))))
+
+(rf/reg-event-db
  :set-overlay
  (fn [db [_ mode]]
    (assoc db :overlay/mode mode)))

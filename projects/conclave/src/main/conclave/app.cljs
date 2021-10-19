@@ -52,6 +52,12 @@
            :class ["m-1" "text-gray-900"]
            :on-click #(rf/dispatch dispatch)}])
 
+(defn map-controls []
+  [:div {:class ["flex" "flex-col" "justify-center"]}
+   [:div "Map controls"]
+   [button "Reset" [:map/generate "ABCDE"]]
+   [button "Swap" [:map/swap]]])
+
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])
         target @(rf/subscribe [:hovered])]
@@ -110,6 +116,7 @@
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
    [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-around"]}
+    [map-controls]
     [highlight-controls]
     [overlay-controls]
     [stake-controls]]
