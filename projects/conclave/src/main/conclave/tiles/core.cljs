@@ -7,7 +7,8 @@
         all-traits (->> planets
                         (map :trait)
                         (remove nil?)
-                        (into []))]
+                        (sort)
+                        (vec))]
     (merge raw-tile
            {:key key
             :total/planets    (count planets)
@@ -17,6 +18,7 @@
             :total/influence  (->> planets
                                    (map :influence)
                                    (apply +))
+            :total/traits     all-traits
             :total/cultural   (->> all-traits
                                    (filter #{:cultural})
                                    count)
@@ -29,7 +31,8 @@
             :total/specialty  (->> planets
                                    (map :specialty)
                                    (remove nil?)
-                                   (into #{}))}
+                                   sort
+                                   vec)}
            (when (some :legendary planets)
              {:legendary true}))))
 

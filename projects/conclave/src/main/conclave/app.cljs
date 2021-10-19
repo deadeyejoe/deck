@@ -5,7 +5,8 @@
             [conclave.vector :as vect]
             [conclave.handlers]
             [conclave.subs]
-            [conclave.tiles.core :as tile]))
+            [conclave.tiles.core :as tile]
+            [conclave.view.player-summary :as player-summary]))
 
 ;; Assume flat top.
 ;; Size is length of side, or center to corner
@@ -124,6 +125,7 @@
     [overlay-controls]
     [stake-controls]]
    [:div {:class ["absolute" "right-0" "inset-y-0" "flex" "flex-col" "justify-around" "w-1/6" "mr-10"]}
+    [player-summary/component]
     [constraints]
     [variances]]
    [origin

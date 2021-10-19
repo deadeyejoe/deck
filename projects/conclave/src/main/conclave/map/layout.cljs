@@ -28,5 +28,11 @@
         fixed-set (fixed-set layout)]
     (remove fixed-set all-coordinates)))
 
+(defn player-keys [layout]
+  (->> (get layout :home-tiles)
+       vals
+       (map :key)
+       sort))
+
 (comment
   (count (free-spaces eight-player)))

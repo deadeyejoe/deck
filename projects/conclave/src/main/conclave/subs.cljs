@@ -4,7 +4,9 @@
             [conclave.tiles.core :as tile]
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
+            [conclave.map.layout :as layout]
             [conclave.map.score :as map-score]
+            [conclave.map.summary :as map-summary]
             [conclave.map.constraints :as constraints]
             [conclave.vector :as vect]))
 
@@ -175,4 +177,16 @@
                       (get variances field))
                     "en-IN"
                     {:maximumFractionDigits 2})))
+
+(rf/reg-sub
+ :player/keys
+ :<- [:galaxy-map]
+ (fn [galaxy-map _qv]
+   (-> galaxy-map :layout layout/player-keys)))
+
+(rf/reg-sub
+ :player/summary
+ :<- [:galaxy-map]
+ (fn [galaxy-map [_q player-key]]
+   (map-summary/player-summary galaxy-map player-key)))
 
