@@ -14,6 +14,11 @@
    (:map db)))
 
 (rf/reg-sub
+ :swap/count
+ (fn [db _qv]
+   (-> db :swaps count)))
+
+(rf/reg-sub
  :tile
  :<- [:galaxy-map]
  (fn [galaxy-map [_q coordinate]]

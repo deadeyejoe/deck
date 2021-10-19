@@ -22,17 +22,18 @@
 (defn adjacent-anomalies? [galaxy-map]
   (< 0 (count-adjacent-anomalies galaxy-map)))
 
-(defn count-adjacent-wormholes [galaxy-map type]
-  (-> galaxy-map
-      (core/select-by-tile (case type
-                             :alpha tile/alpha-wormhole?
-                             :beta tile/beta-wormhole?))
-      count-adjacent))
+(defn count-adjacent-wormholes
+  ([galaxy-map] (+ (count-adjacent-wormholes galaxy-map :alpha)
+                   (count-adjacent-wormholes galaxy-map :beta)))
+  ([galaxy-map type]
+   (-> galaxy-map
+       (core/select-by-tile (case type
+                              :alpha tile/alpha-wormhole?
+                              :beta tile/beta-wormhole?))
+       count-adjacent)))
 
 (defn adjacent-wormholes? [galaxy-map]
-  (or
-   (< 0 (count-adjacent-wormholes galaxy-map :alpha))
-   (< 0 (count-adjacent-wormholes galaxy-map :beta))))
+  (< 0 (count-adjacent-wormholes galaxy-map)))
 
 (defn zero-adjacent-planets? [galaxy-map coords]
   (->> coords

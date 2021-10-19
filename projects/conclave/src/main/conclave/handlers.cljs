@@ -2,7 +2,8 @@
   (:require [re-frame.core :as rf]
             [conclave.tiles.core :as tile]
             [conclave.map.core :as map]
-            [conclave.map.layout :as layout]))
+            [conclave.map.layout :as layout]
+            [conclave.map.optimization :as opt]))
 
 (defn new-map [seed]
   (let [new-map (-> (map/build layout/eight-player)
@@ -31,6 +32,24 @@
      (assoc db
             :map new-map
             :swaps rest))))
+
+(rf/reg-event-db
+ :map/step
+ (fn [{:keys [map swaps] :as db} _ev]
+   (let [[new-map remaining-swaps] (opt/step map swaps)]
+     (assoc db
+            :map new-map
+            :swaps remaining-swaps))))
+
+(rf/reg-event-fx
+ :map/optimize
+ (fn [{:keys [db]} _ev]
+   (let [{:keys [map swaps]} db
+         [new-map remaining-swaps] (opt/step map swaps)]
+     {:db (assoc db
+                 :map new-map
+                 :swaps remaining-swaps)
+      :fx [(when (seq remaining-swaps) [:dispatch [:map/optimize]])]})))
 
 (rf/reg-event-db
  :set-overlay

@@ -52,11 +52,21 @@
            :class ["m-1" "text-gray-900"]
            :on-click #(rf/dispatch dispatch)}])
 
+(defn value [label query-vector]
+  (let [sub @(rf/subscribe query-vector)]
+    [:div
+     {:class ["flex" "justify-between"]}
+     [:div (str label ":")]
+     [:div sub]]))
+
 (defn map-controls []
   [:div {:class ["flex" "flex-col" "justify-center"]}
    [:div "Map controls"]
+   [value "Swaps remaining" [:swap/count]]
    [button "Reset" [:map/generate "ABCDE"]]
-   [button "Swap" [:map/swap]]])
+   [button "Swap" [:map/swap]]
+   [button "Step" [:map/step]]
+   [button "Optimize" [:map/optimize]]])
 
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])
@@ -85,13 +95,6 @@
      [:div "Stake Mode: " mode]
      [button "Discrete" [:set-stake :discrete]]
      [button "Continuous" [:set-stake :continuous]]]))
-
-(defn value [label query-vector]
-  (let [sub @(rf/subscribe query-vector)]
-    [:div
-     {:class ["flex" "justify-between"]}
-     [:div (str label ":")]
-     [:div sub]]))
 
 (defn constraints []
   [:div {:class ["flex" "flex-col" "justify-center"]}
