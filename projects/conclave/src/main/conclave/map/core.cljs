@@ -52,5 +52,12 @@
        (filter (comp f second))
        (map first)))
 
+(defn swap-tiles [galaxy-map c1 c2]
+  (let [t1 (coordinate->tile galaxy-map c1)
+        t2 (coordinate->tile galaxy-map c2)]
+    (-> galaxy-map
+        (set-coordinate c1 t2)
+        (set-coordinate c2 t1))))
+
 
 
