@@ -50,8 +50,13 @@
 
 (defn home? [tile] (= (:type tile) :green))
 
+(defn wormhole? [tile] (contains? tile :wormhole))
+
+(defn alpha-wormhole? [tile] (= :alpha (:wormhole tile)))
+(defn beta-wormhole? [tile] (= :beta (:wormhole tile)))
+
 (def wormholes (->> tiles
-                    (filter :wormhole)
+                    (filter wormhole?)
                     (map :key)))
 (def wormholes-alpha (->> tiles
                           (filter (comp (partial = :alpha) :wormhole))
@@ -59,6 +64,12 @@
 (def wormholes-beta (->> tiles
                          (filter (comp (partial = :beta) :wormhole))
                          (map :key)))
+
+
+(defn anomaly? [tile] (contains? tile :anomaly))
+
+(defn has-planets? [tile] (-> tile :planets seq))
+(defn no-planets? [tile] (-> tile :planets empty?))
 
 (defn matching-wormholes [tile]
   (let [wormhole (:wormhole tile)]

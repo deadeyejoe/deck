@@ -296,19 +296,14 @@
         :anomaly :asteroid-field
         :planets []}
    :46 {:type :red
-        :anomaly :empty
         :planets []}
    :47 {:type :red
-        :anomaly :empty
         :planets []}
    :48 {:type :red
-        :anomaly :empty
         :planets []}
    :49 {:type :red
-        :anomaly :empty
         :planets []}
    :50 {:type :red
-        :anomaly :empty
         :planets []}
    :51 {:type :green
         :wormhole :delta
@@ -530,11 +525,9 @@
                    :specialty :biotic}]}
    :77 {:type :red
         :pok true
-        :anomaly :empty
         :planets []}
    :78 {:type :red
         :pok true
-        :anomaly :empty
         :planets []}
    :79 {:type :red
         :pok true

@@ -121,4 +121,4 @@
   (stakes sample-map continuous-stakes)
   (shares sample-map discrete-stakes)
   (shares sample-map continuous-stakes)
-  (transform-values (shares sample-map discrete-stakes) (fn [m] (-> m vals util-score/variation))))
+  (variances (shares sample-map continuous-stakes)))
