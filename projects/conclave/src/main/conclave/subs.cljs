@@ -5,6 +5,7 @@
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
             [conclave.map.score :as map-score]
+            [conclave.map.constraints :as constraints]
             [conclave.vector :as vect]))
 
 (rf/reg-sub
@@ -124,3 +125,49 @@
 (rf/reg-sub
  :stake/mode
  (fn [db _qv] (:stake/mode db)))
+
+(rf/reg-sub
+ :constraint/anomalies
+ :<- [:galaxy-map]
+ (fn [galaxy-map _qv]
+   (constraints/count-adjacent-anomalies galaxy-map)))
+
+(rf/reg-sub
+ :constraint/wormholes
+ :<- [:galaxy-map]
+ (fn [galaxy-map _qv]
+   (+
+    (constraints/count-adjacent-wormholes galaxy-map :alpha)
+    (constraints/count-adjacent-wormholes galaxy-map :beta))))
+
+(rf/reg-sub
+ :constraint/zero-start
+ :<- [:galaxy-map]
+ (fn [galaxy-map _qv]
+   (constraints/count-zero-starts galaxy-map)))
+
+(rf/reg-sub
+ :score/shares
+ :<- [:galaxy-map]
+ :<- [:stake/mode]
+ (fn [[galaxy-map stake-mode] _qv]
+   (map-score/shares galaxy-map (case stake-mode
+                                  :discrete map-score/discrete-stakes
+                                  :continuous map-score/continuous-stakes))))
+
+(rf/reg-sub
+ :score/variances
+ :<- [:score/shares]
+ (fn [shares _qv]
+   (map-score/variances shares)))
+
+(rf/reg-sub
+ :score/variance
+ :<- [:score/variances]
+ (fn [variances [_q field]]
+   (.toLocaleString (if (= :total field)
+                      (->> variances vals (apply +))
+                      (get variances field))
+                    "en-IN"
+                    {:maximumFractionDigits 2})))
+

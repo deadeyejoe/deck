@@ -80,12 +80,42 @@
      [button "Discrete" [:set-stake :discrete]]
      [button "Continuous" [:set-stake :continuous]]]))
 
+(defn value [label query-vector]
+  (let [sub @(rf/subscribe query-vector)]
+    [:div
+     {:class ["flex" "justify-between"]}
+     [:div (str label ":")]
+     [:div sub]]))
+
+(defn constraints []
+  [:div {:class ["flex" "flex-col" "justify-center"]}
+   [:div "Constraints"]
+   [value "Adjacent Anomalies" [:constraint/anomalies]]
+   [value "Adjacent Wormholes" [:constraint/wormholes]]
+   [value "Zero Starts" [:constraint/zero-start]]])
+
+(defn variances []
+  [:div {:class ["flex" "flex-col" "justify-center" "w-full"]}
+   [:div "Variances"]
+   [value "Resource" [:score/variance :share/resource]]
+   [value "Influence" [:score/variance :share/influence]]
+   [value "Tech" [:score/variance :share/tech]]
+   [value "Cultural" [:score/variance :share/cultural]]
+   [value "Industrial" [:score/variance :share/industrial]]
+   [value "Hazardous" [:score/variance :share/hazardous]]
+   [value "Legendary" [:score/variance :share/legendary]]
+   [:div {:class ["h-2" "w-full" "border-b-1" "rounded" "border-white"]}]
+   [value "Naive Total" [:score/variance :total]]])
+
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
    [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-around"]}
     [highlight-controls]
     [overlay-controls]
     [stake-controls]]
+   [:div {:class ["absolute" "right-0" "inset-y-0" "flex" "flex-col" "justify-around" "w-1/6" "mr-10"]}
+    [constraints]
+    [variances]]
    [origin
     (into
      [:<> [hex-tile 17 [0 0 0]]]
