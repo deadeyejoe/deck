@@ -52,6 +52,8 @@
 (defn nexus? [tile] (= tile nexus))
 
 (defn home? [tile] (= (:type tile) :green))
+(defn blue? [tile] (= (:type tile) :blue))
+(defn red? [tile] (= (:type tile) :red))
 
 (defn wormhole? [tile] (contains? tile :wormhole))
 
