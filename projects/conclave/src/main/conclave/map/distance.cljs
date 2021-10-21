@@ -1,5 +1,6 @@
 (ns conclave.map.distance
-  (:require [conclave.map.core :as core]
+  (:require [taoensso.tufte :as tufte :refer-macros (defnp)]
+            [conclave.map.core :as core]
             [conclave.tiles.core :as tile]
             [conclave.utils :refer [transform-values]]))
 
@@ -25,43 +26,26 @@
        (reduce (fn [r c] (assoc r c (core/adjacent galaxy-map c)))
                {})))
 
-(defn to-other-tiles [galaxy-map start-coordinate]
-  (loop [result {}
-         [current-visit & rest-visit] [[0 start-coordinate]]]
-    (if current-visit
-      (let [[distance current-coordinate] current-visit
-            previous-distance (get result current-coordinate)]
-        (if (or (nil? previous-distance) (< distance previous-distance))
-          (let [neighbours (core/adjacent galaxy-map current-coordinate)
-                move-cost  (->> current-coordinate
-                                (core/coordinate->tile galaxy-map)
-                                (move-cost))]
-            (recur (assoc result current-coordinate distance)
-                   (concat rest-visit (map (partial list (+ distance move-cost)) neighbours))))
-          (recur result
-                 rest-visit)))
-      result)))
-
-(defn from
+(defnp from
   ([galaxy-map start-coordinate] (from (adjacent-map galaxy-map)
                                        (move-cost-map galaxy-map)
                                        start-coordinate))
-  ([neighbours move-costs start-coordinate]
+  ([neighbour-map move-cost-map start-coordinate]
    (loop [result {}
-          [current-visit & rest-visit] [[0 start-coordinate]]]
-     (if (= (count result) (count neighbours))
-       result
-       (let [[distance current-coordinate] current-visit
-             previous-distance (get result current-coordinate ##Inf)]
-         (if (< distance previous-distance)
-           (let [neighbours (get neighbours current-coordinate)
-                 move-cost  (get move-costs current-coordinate)]
-             (recur (assoc result current-coordinate distance)
-                    (concat rest-visit (map (partial list (+ distance move-cost)) neighbours))))
+          visit-queue #queue [[0 start-coordinate (get neighbour-map start-coordinate)]]]
+     (let [[distance coordinate neighbours :as current-visit] (peek visit-queue)]
+       (if (nil? current-visit)
+         result
+         (if (< distance (get result coordinate ##Inf))
+           (let [updated-distance (+ (get move-cost-map coordinate) distance)]
+               (recur (assoc result coordinate distance)
+                      (reduce (fn [q coord] (conj q [updated-distance coord (get neighbour-map coord)]))
+                              (pop visit-queue)
+                              neighbours)))
            (recur result
-                  rest-visit)))))))
+                  (pop visit-queue))))))))
 
-(defn from-all [galaxy-map coords]
+(defnp from-all [galaxy-map coords]
   (let [neighbours (adjacent-map galaxy-map)
         move-costs (move-cost-map galaxy-map)]
     (reduce (fn [r home-c] (assoc r home-c (from neighbours move-costs home-c)))

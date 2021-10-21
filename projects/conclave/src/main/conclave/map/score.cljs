@@ -9,9 +9,7 @@
 
 (defn hs-distances [galaxy-map]
   (let [home-coordinates (-> galaxy-map :layout :home-tiles keys)]
-    (reduce (fn [result home] (assoc result home (distance/to-other-tiles galaxy-map home)))
-            {}
-            home-coordinates)))
+    (distance/from-all galaxy-map home-coordinates)))
 
 (defn inverse-square [n]
   (/ 1.0 (Math/pow n 2)))

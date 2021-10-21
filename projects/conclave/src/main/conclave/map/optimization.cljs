@@ -3,9 +3,10 @@
             [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
             [conclave.map.score :as score]
-            [conclave.map.constraints :as constraints]))
+            [conclave.map.constraints :as constraints]
+            [taoensso.tufte :as tufte :refer-macros (defnp p profiled profile)]))
 
-(defn calculate-constraint-score [galaxy-map]
+(defnp calculate-constraint-score [galaxy-map]
   (let [anomalies (constraints/count-adjacent-anomalies galaxy-map)
         wormholes (constraints/count-adjacent-wormholes galaxy-map)
         zero-start (constraints/count-zero-starts galaxy-map)]
@@ -13,14 +14,14 @@
        (* 2 wormholes)
        (* 4 zero-start))))
 
-(defn calculate-variance-score [galaxy-map]
+(defnp calculate-variance-score [galaxy-map]
   (-> galaxy-map
       (score/shares score/discrete-stakes)
       (score/variances)
       (vals)
       ((partial apply +))))
 
-(defn step
+(defnp step
   ([galaxy-map swaps]
    (step galaxy-map swaps (calculate-constraint-score galaxy-map) (calculate-variance-score galaxy-map)))
   ([galaxy-map swaps constraint-score variance-score]
@@ -40,13 +41,16 @@
 (comment
   (def sample-map (-> (core/build layout/eight-player)
                       (core/populate "ABCDE" tile/default-set)))
+  (count (prn-str sample-map))
   (def swaps (core/generate-swap-list sample-map "ABCDE"))
   (def cs (calculate-constraint-score sample-map))
   (def vs (calculate-variance-score sample-map))
 
-  (let [swaps (core/generate-swap-list sample-map "ABCDE")
-        new-map (apply core/swap-tiles sample-map (first swaps))
-        ncs (calculate-constraint-score new-map)
-        nvs (calculate-variance-score new-map)]
-    [ncs nvs]))
+  (let [sample-map (-> (core/build layout/eight-player)
+                       (core/populate "ABCDE" tile/default-set))
+        swaps (core/generate-swap-list sample-map "ABCDE")]
+    (-> (profiled {} (dotimes [_ 5] (step sample-map swaps)))
+        second
+        (tufte/format-pstats {:columns [:n-calls :p50 :mean :clock :total]})
+        println)))
 

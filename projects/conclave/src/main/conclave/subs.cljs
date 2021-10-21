@@ -43,7 +43,7 @@
  :<- [:galaxy-map]
  :<- [:selected]
  (fn [[galaxy-map selected] _qv]
-   (distance/to-other-tiles galaxy-map selected)))
+   (distance/from galaxy-map selected)))
 
 (rf/reg-sub
  :tile/distance-score
