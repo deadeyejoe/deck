@@ -4,6 +4,7 @@
             [conclave.tiles.core :as tile]
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
+            [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
             [conclave.map.score :as map-score]
             [conclave.map.summary :as map-summary]
@@ -42,7 +43,7 @@
  :<- [:galaxy-map]
  :<- [:selected]
  (fn [[galaxy-map selected] _qv]
-   (map-score/distance-to-other-tiles galaxy-map selected)))
+   (distance/to-other-tiles galaxy-map selected)))
 
 (rf/reg-sub
  :tile/distance-score
