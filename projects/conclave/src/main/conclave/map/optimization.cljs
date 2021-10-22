@@ -38,6 +38,24 @@
                (recur current-map rest)))
            (recur current-map rest)))))))
 
+(defnp go 
+  ([galaxy-map swaps] (go galaxy-map swaps ##Inf))
+  ([galaxy-map swaps limit]
+   (loop [current-map galaxy-map
+          [current-swap & rest] swaps
+          constraint-score  (calculate-constraint-score galaxy-map)
+          variance-score    (calculate-variance-score   galaxy-map)
+          iteration 1]
+     (if (or (< limit iteration) (nil? current-swap))
+       [current-map [] constraint-score variance-score]
+       (let [new-map (apply core/swap-tiles current-map current-swap)
+             new-constraint-score (calculate-constraint-score new-map)
+             new-variance-score (calculate-variance-score new-map)]
+         (if (and (<= new-constraint-score constraint-score)
+                  (<= new-variance-score variance-score))
+           (recur new-map     rest new-constraint-score new-variance-score (inc iteration))
+           (recur current-map rest constraint-score     variance-score (inc iteration))))))))
+
 (comment
   (def sample-map (-> (core/build layout/eight-player)
                       (core/populate "ABCDE" tile/default-set)))
@@ -45,11 +63,14 @@
   (def swaps (core/generate-swap-list sample-map "ABCDE"))
   (def cs (calculate-constraint-score sample-map))
   (def vs (calculate-variance-score sample-map))
-
+(tufte/add-basic-println-handler!
+ {:format-pstats-opts {:columns [:n-calls :p50 :mean :clock :total]
+                       :format-id-fn name}})
   (let [sample-map (-> (core/build layout/eight-player)
                        (core/populate "ABCDE" tile/default-set))
         swaps (core/generate-swap-list sample-map "ABCDE")]
-    (-> (profiled {} (dotimes [_ 5] (step sample-map swaps)))
+    (profile {} (go sample-map swaps 100))
+    #_(-> (profiled {} (go sample-map swaps))
         second
         (tufte/format-pstats {:columns [:n-calls :p50 :mean :clock :total]})
         println)))
