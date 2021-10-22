@@ -5,7 +5,8 @@
             [conclave.tiles.core :as tile]
             [conclave.tiles.score :as tile-score]
             [conclave.utils :refer [transform-values]]
-            [conclave.score :as util-score]))
+            [conclave.score :as util-score]
+            [taoensso.tufte :as tufte :refer-macros (defnp p profiled profile)]))
 
 (defn hs-distances [galaxy-map]
   (let [home-coordinates (-> galaxy-map :layout :home-tiles keys)]
@@ -14,7 +15,7 @@
 (defn inverse-square [n]
   (/ 1.0 (Math/pow n 2)))
 
-(defn normalize-stakes [hs->stake]
+(defnp normalize-stakes [hs->stake]
   (let [total (->> hs->stake vals (apply +))]
     (transform-values hs->stake #(/ % total))))
 
@@ -30,7 +31,7 @@
                                             (apply min-key key))]
     [min-distance (map key closest-entries)]))
 
-(defn discrete-stakes [hs->distance]
+(defnp discrete-stakes [hs->distance]
   (let [[min-distance closest-hss] (closest-hs hs->distance)]
     (if (< min-distance 3)
       (merge (transform-values hs->distance (constantly 0))
@@ -74,21 +75,22 @@
                       hs->stake
                       {})})
 
-(defn compute-share [galaxy-map stake-fn]
-  (let [hs->coordinate->distance (hs-distances galaxy-map)]
-    (fn [stakeable]
-      (let [tile (core/coordinate->tile galaxy-map stakeable)]
-        (-> hs->coordinate->distance
-            (restrict-to-target stakeable)
-            stake-fn
-            normalize-stakes
-            (tile-share tile))))))
+(defn compute-share [galaxy-map hs->coordinate->distance stake-fn]
+  (fn [stakeable]
+    (p ::compute-share
+       (let [tile (core/coordinate->tile galaxy-map stakeable)]
+         (-> hs->coordinate->distance
+             (restrict-to-target stakeable)
+             stake-fn
+             normalize-stakes
+             (tile-share tile))))))
 
-(defn shares [galaxy-map stake-fn]
-  (->>
-   (compute-stakeable galaxy-map (compute-share galaxy-map stake-fn))
-   vals
-   (apply merge-with (partial merge-with +))))
+(defnp shares [galaxy-map stake-fn]
+  (let [hs->coordinate->distance (hs-distances galaxy-map)]
+    (->>
+     (compute-stakeable galaxy-map (compute-share galaxy-map hs->coordinate->distance stake-fn))
+     vals
+     (apply merge-with (partial merge-with +)))))
 
 (defn variances [share-map]
   (transform-values share-map (fn [m] (-> m

@@ -69,8 +69,9 @@
   (let [sample-map (-> (core/build layout/eight-player)
                        (core/populate "ABCDE" tile/default-set))
         swaps (core/generate-swap-list sample-map "ABCDE")]
-    (profile {} (go sample-map swaps 100))
-    #_(-> (profiled {} (go sample-map swaps))
+    #_(profile {} (go sample-map swaps 50))
+    (binding [tufte/*ns-filter* "conclave.map.score"])
+    (-> (profiled {} (go sample-map swaps 10))
         second
         (tufte/format-pstats {:columns [:n-calls :p50 :mean :clock :total]})
         println)))
