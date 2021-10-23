@@ -32,15 +32,15 @@
 (defn adjacent-wormholes? [galaxy-map]
   (< 0 (count-adjacent-wormholes galaxy-map)))
 
-(defn zero-adjacent-planets? [galaxy-map coords]
-  (->> coords
+(defn zero-adjacent-planets? [galaxy-map coord]
+  (->> coord
+       (core/adjacent galaxy-map)
        (map (partial core/coordinate->tile galaxy-map))
        (not-any? tile/has-planets?)))
 
 (defn count-zero-starts [galaxy-map]
   (let [home-tiles (core/select-by-tile galaxy-map tile/home?)]
     (->> home-tiles
-         (map (partial core/adjacent galaxy-map))
          (filter (partial zero-adjacent-planets? galaxy-map))
          count)))
 
