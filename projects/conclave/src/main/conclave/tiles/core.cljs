@@ -64,14 +64,17 @@
                     (filter wormhole?)
                     (map :key)))
 (def wormholes-alpha (->> tiles
-                          (filter (comp (partial = :alpha) :wormhole))
+                          (filter alpha-wormhole?)
                           (map :key)))
 (def wormholes-beta (->> tiles
-                         (filter (comp (partial = :beta) :wormhole))
+                         (filter beta-wormhole?)
                          (map :key)))
 
-
 (defn anomaly? [tile] (contains? tile :anomaly))
+
+(def anomalies (->> tiles
+                    (filter anomaly?)
+                    (map :key)))
 
 (defn has-planets? [tile] (-> tile :planets seq))
 (defn no-planets? [tile] (-> tile :planets empty?))

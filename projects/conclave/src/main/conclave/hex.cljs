@@ -64,6 +64,9 @@
                 (vect/add coordinate walk-radius)
                 steps)))
 
+(defn neighbours? [c1 c2]
+  (= 1 (vect/distance c1 c2)))
+
 (comment (neighbours [0 4 -4]))
 
 (comment

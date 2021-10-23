@@ -1,23 +1,19 @@
 (ns conclave.map.constraints
-  (:require [clojure.set :as set]
-            [conclave.map.core :as core]
+  (:require [conclave.map.core :as core]
             [conclave.hex :as hex]
             [conclave.map.layout :as layout]
-            [conclave.tiles.core :as tile]))
+            [conclave.tiles.core :as tile]
+            [clojure.math.combinatorics :as comb]))
 
 (defn count-adjacent [coordinates]
-  (let [coordinate-set (into #{} coordinates)]
-    (->> coordinate-set
-         (map (comp (partial into #{})
-                    hex/neighbours))
-         (remove (fn [s]
-                   (empty? (set/intersection s coordinate-set))))
-         count)))
+  (let [pairs (comb/combinations coordinates 2)]
+    (count (filter (partial apply hex/neighbours?) pairs))))
 
 (defn count-adjacent-anomalies [galaxy-map]
-  (-> galaxy-map
-      (core/select-by-tile tile/anomaly?)
-      (count-adjacent)))
+  (->> tile/anomalies
+       (map (partial core/tile->coordinate galaxy-map))
+       (remove nil?)
+       (count-adjacent)))
 
 (defn adjacent-anomalies? [galaxy-map]
   (< 0 (count-adjacent-anomalies galaxy-map)))
@@ -26,11 +22,12 @@
   ([galaxy-map] (+ (count-adjacent-wormholes galaxy-map :alpha)
                    (count-adjacent-wormholes galaxy-map :beta)))
   ([galaxy-map type]
-   (-> galaxy-map
-       (core/select-by-tile (case type
-                              :alpha tile/alpha-wormhole?
-                              :beta tile/beta-wormhole?))
-       count-adjacent)))
+   (->> (case type
+          :alpha tile/wormholes-alpha
+          :beta tile/wormholes-beta)
+        (map (partial core/tile->coordinate galaxy-map))
+        (remove nil?)
+        (count-adjacent))))
 
 (defn adjacent-wormholes? [galaxy-map]
   (< 0 (count-adjacent-wormholes galaxy-map)))
