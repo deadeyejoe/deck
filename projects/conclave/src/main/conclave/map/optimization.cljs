@@ -3,6 +3,7 @@
             [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
             [conclave.map.score :as score]
+            [conclave.map.distance :as distance]
             [conclave.map.constraints :as constraints]
             [taoensso.tufte :as tufte :refer-macros (defnp p profiled profile)]))
 
@@ -15,11 +16,12 @@
        (* 4 zero-start))))
 
 (defnp calculate-variance-score [galaxy-map]
-  (-> galaxy-map
-      (score/shares score/discrete-stakes)
-      (score/variances)
-      (vals)
-      ((partial apply +))))
+  (let [distances (score/hs-distances galaxy-map)
+        shares    (score/shares galaxy-map distances score/discrete-stakes)
+        variances (score/variances shares)]
+    (-> variances
+        (vals)
+        ((partial apply +)))))
 
 (defnp step
   ([galaxy-map swaps]

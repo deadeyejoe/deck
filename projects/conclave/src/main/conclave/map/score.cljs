@@ -85,12 +85,15 @@
              normalize-stakes
              (tile-share tile))))))
 
-(defnp shares [galaxy-map stake-fn]
-  (let [hs->coordinate->distance (hs-distances galaxy-map)]
-    (->>
-     (compute-stakeable galaxy-map (compute-share galaxy-map hs->coordinate->distance stake-fn))
-     vals
-     (apply merge-with (partial merge-with +)))))
+(defnp combine-shares [coordinate->hs->share]
+  (apply merge-with (partial merge-with +) coordinate->hs->share))
+
+(defnp shares
+  ([galaxy-map stake-fn] (shares galaxy-map (hs-distances galaxy-map) stake-fn))
+  ([galaxy-map distance-measures stake-fn]
+   (->> (core/select-by-tile galaxy-map tile-score/stake?)
+        (map (compute-share galaxy-map distance-measures stake-fn))
+        combine-shares)))
 
 (defn variances [share-map]
   (transform-values share-map (fn [m] (-> m
