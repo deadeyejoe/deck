@@ -9,7 +9,8 @@
                          inflections/inflections {:mvn/version "0.13.2"}
                          funcool/cuerdas {:mvn/version "2.2.1"}
                          org.clojure/math.combinatorics {:mvn/version "0.1.6"}
-                         com.taoensso/tufte {:mvn/version "2.2.0"}}}
+                         com.taoensso/tufte {:mvn/version "2.2.0"}
+                         com.cognitect/transit-cljs {:mvn/version "0.8.269"}}}
            :shadow
            {:main-opts ["-m" "shadow.cljs.devtools.cli" "watch" ":app"]}
            :test {:extra-paths ["src/test"]}

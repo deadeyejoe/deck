@@ -23,8 +23,8 @@
 
 (defn- handle-request [event]
   (try
-    (let [{:keys [handler arguments] :as request} (core/unwrap event)
-          handler-fn   (get @handlers (keyword handler))
+    (let [{:keys [handler arguments]} (core/unwrap event)
+          handler-fn   (get @handlers handler)
           result    (assoc (handler-fn arguments) :state :success)]
       (if (chan? result)
         (go (respond! (<! result)))

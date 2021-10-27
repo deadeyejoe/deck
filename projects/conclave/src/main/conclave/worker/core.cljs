@@ -1,6 +1,5 @@
 (ns conclave.worker.core
-  (:require [cljs.core.async :refer [chan sliding-buffer <! >! put!]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+  (:require [cognitect.transit :as t]))
 
 (defn supported? []
   (-> js/self
@@ -20,10 +19,15 @@
   (js/Worker. script))
 
 (defn unwrap [event]
-  (-> event
-      .-data
-      (js->clj :keywordize-keys true)))
+  (let [reader (t/reader :json)]
+    (->> event
+         .-data
+         (t/read reader))))
 
 (defn post-message
-  ([data] (.postMessage js/self (clj->js data)))
-  ([target data] (.postMessage target (clj->js data))))
+  ([data] (post-message js/self data))
+  ([target data]
+   (let [writer (t/writer :json)]
+     (->> data
+          (t/write writer)
+          (.postMessage target)))))
