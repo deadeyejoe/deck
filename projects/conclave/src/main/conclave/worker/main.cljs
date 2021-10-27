@@ -2,13 +2,16 @@
   (:require [conclave.worker.instance :as worker]
             [conclave.map.core :as map]
             [conclave.map.layout :as layout]
+            [conclave.map.optimization :as opt]
             [conclave.tiles.core :as tile]
             [taoensso.tufte :as tufte :refer-macros [defnp profiled]]))
 
 (defnp generate [{:keys [seed]}]
-  (let [map (-> (map/build layout/eight-player)
-                (map/populate seed tile/default-set))]
-    {:map map}))
+  (let [galaxy-map (-> (map/build layout/eight-player)
+                       (map/populate seed tile/default-set))
+        swaps (map/generate-swap-list galaxy-map seed)
+        optimized (opt/go galaxy-map swaps)]
+    {:map optimized}))
 
 (defn profile-request [f]
   (let [[result pstats] (profiled {} (f))]

@@ -18,5 +18,4 @@
   (spawn {:handler :generate :arguments {:seed seed :profile true}}
          (constantly nil)))
 
-(comment (generate "ABCDE")
-         (+ 1 1))
+(comment (generate "FGHIJ"))
