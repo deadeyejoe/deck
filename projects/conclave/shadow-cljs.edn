@@ -5,7 +5,12 @@
   {:target :browser
    :output-dir "public/assets/app/js"
    :asset-path "assets/app/js"
-   :modules {:main {:init-fn conclave.app/init}}
+   :modules {:shared {:entries []}
+             :main {:init-fn conclave.app/init
+                    :depends-on #{:shared}}
+             :worker {:init-fn conclave.worker.main/main
+                      :depends-on #{:shared}
+                      :web-worker true}}
 ;;    :devtools {:preloads [day8.re-frame-10x.preload]}
 ;;    :dev {:compiler-options
 ;;          {:closure-defines

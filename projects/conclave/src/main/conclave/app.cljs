@@ -5,6 +5,7 @@
             [conclave.vector :as vect]
             [conclave.handlers]
             [conclave.subs]
+            [conclave.worker]
             [conclave.tiles.core :as tile]
             [conclave.view.player-summary :as player-summary]))
 
