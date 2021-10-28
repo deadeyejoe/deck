@@ -8,48 +8,26 @@
 (defn new-map [seed]
   (let [new-map (-> (map/build layout/eight-player)
                     (map/populate seed tile/default-set))]
-    {:map new-map
-     :swaps (map/generate-swap-list new-map seed)}))
+    {:map new-map}))
 
 (rf/reg-event-fx
  :initialize
  (fn [_con [_en seed]]
    {:db (merge {:overlay/mode :none
                 :highlight/mode :single
-                :stake/mode :discrete}
+                :stake/mode :discrete
+                :seed seed}
                (new-map seed))}))
 
 (rf/reg-event-db
- :map/generate
+ :seed/set
  (fn [db [_en seed]]
-   (merge db (new-map seed))))
+   (assoc db :seed seed)))
 
 (rf/reg-event-db
- :map/swap
+ :map/generate
  (fn [db _ev]
-   (let [[first & rest] (get db :swaps)
-         new-map (apply map/swap-tiles (get db :map) first)]
-     (assoc db
-            :map new-map
-            :swaps rest))))
-
-(rf/reg-event-db
- :map/step
- (fn [{:keys [map swaps] :as db} _ev]
-   (let [[new-map remaining-swaps] (opt/step map swaps)]
-     (assoc db
-            :map new-map
-            :swaps remaining-swaps))))
-
-(rf/reg-event-fx
- :map/optimize
- (fn [{:keys [db]} _ev]
-   (let [{:keys [map swaps]} db
-         [new-map remaining-swaps] (opt/step map swaps)]
-     {:db (assoc db
-                 :map new-map
-                 :swaps remaining-swaps)
-      :fx [(when (seq remaining-swaps) [:dispatch [:map/optimize]])]})))
+   (merge db (new-map (:seed db)))))
 
 (rf/reg-event-db
  :set-overlay

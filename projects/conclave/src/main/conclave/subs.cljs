@@ -12,14 +12,14 @@
             [conclave.vector :as vect]))
 
 (rf/reg-sub
+ :seed
+ (fn [db]
+   (:seed db)))
+
+(rf/reg-sub
  :galaxy-map
  (fn [db _qv]
    (:map db)))
-
-(rf/reg-sub
- :swap/count
- (fn [db _qv]
-   (-> db :swaps count)))
 
 (rf/reg-sub
  :tile

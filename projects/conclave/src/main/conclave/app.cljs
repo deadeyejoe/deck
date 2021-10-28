@@ -61,14 +61,19 @@
      [:div (str label ":")]
      [:div sub]]))
 
+(defn text-input [sub-query build-dispatch]
+  (let [sub @(rf/subscribe sub-query)]
+    [:input {:type "text"
+             :value sub
+             :on-change #(rf/dispatch-sync (-> % .-target .-value build-dispatch))
+             :class ["rounded" "back" "text-gray-200" "bg-gray-600"]}]))
+
 (defn map-controls []
   [:div {:class ["flex" "flex-col" "justify-center"]}
    [:div "Map controls"]
-   [value "Swaps remaining" [:swap/count]]
-   [button "Reset" [:map/generate "ABCDE"]]
-   [button "Swap" [:map/swap]]
-   [button "Step" [:map/step]]
-   [button "Optimize" [:map/optimize]]])
+   [:div "Seed: "
+    [text-input [:seed] #(vector :seed/set %)]]
+   [button "Generate" [:map/generate]]])
 
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])
