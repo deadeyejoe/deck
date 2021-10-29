@@ -3,21 +3,21 @@
             [conclave.tiles.core :as tile]
             [conclave.map.core :as map]
             [conclave.map.layout :as layout]
+            [conclave.worker :as worker]
             [conclave.map.optimization :as opt]))
 
 (defn new-map [seed]
-  (let [new-map (-> (map/build layout/eight-player)
-                    (map/populate seed tile/default-set))]
-    {:map new-map}))
+  (-> (map/build layout/eight-player)
+      (map/populate seed tile/default-set)))
 
 (rf/reg-event-fx
  :initialize
  (fn [_con [_en seed]]
-   {:db (merge {:overlay/mode :none
-                :highlight/mode :single
-                :stake/mode :discrete
-                :seed seed}
-               (new-map seed))}))
+   {:db  {:overlay/mode :none
+          :highlight/mode :single
+          :stake/mode :discrete
+          :seed seed
+          :map (new-map seed)}}))
 
 (rf/reg-event-db
  :seed/set
@@ -25,9 +25,23 @@
    (assoc db :seed seed)))
 
 (rf/reg-event-db
- :map/generate
+ :map/generate-raw
  (fn [db _ev]
-   (merge db (new-map (:seed db)))))
+   (assoc db :map (new-map (:seed db)))))
+
+(rf/reg-event-db
+ :map/generate-optimized
+ (fn [db _ev]
+   (worker/generate (:seed db)
+                    #(rf/dispatch [:map/set (:map %)]))
+   (assoc db :processing true)))
+
+(rf/reg-event-db
+ :map/set
+ (fn [db [_en map]]
+   (-> db
+       (assoc :map map)
+       (dissoc :processing))))
 
 (rf/reg-event-db
  :set-overlay

@@ -14,8 +14,8 @@
         (.terminate worker)
         result))))
 
-(defn generate [seed]
+(defn generate [seed result-handler]
   (spawn {:handler :generate :arguments {:seed seed :profile true}}
-         (constantly nil)))
+         result-handler))
 
-(comment (generate "FGHIJ"))
+(comment (generate "FGHIJ" (constantly nil)))

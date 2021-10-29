@@ -69,11 +69,14 @@
              :class ["rounded" "back" "text-gray-200" "bg-gray-600"]}]))
 
 (defn map-controls []
-  [:div {:class ["flex" "flex-col" "justify-center"]}
-   [:div "Map controls"]
-   [:div "Seed: "
-    [text-input [:seed] #(vector :seed/set %)]]
-   [button "Generate" [:map/generate]]])
+  (let [processing? @(rf/subscribe [:processing?])]
+    [:div {:class ["flex" "flex-col" "justify-center"]}
+     [:div "Map controls"]
+     [:div "Seed: "
+      [text-input [:seed] #(vector :seed/set %)]]
+     [button "Generate Raw" [:map/generate-raw]]
+     [button "Generate Optimized" [:map/generate-optimized]]
+     (when processing? [:div "Processing"])]))
 
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])

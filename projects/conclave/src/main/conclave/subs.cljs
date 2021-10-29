@@ -17,6 +17,10 @@
    (:seed db)))
 
 (rf/reg-sub
+ :processing?
+ (fn [db] (:processing db)))
+
+(rf/reg-sub
  :galaxy-map
  (fn [db _qv]
    (:map db)))

@@ -10,7 +10,7 @@
   (let [galaxy-map (-> (map/build layout/eight-player)
                        (map/populate seed tile/default-set))
         swaps (map/generate-swap-list galaxy-map seed)
-        optimized (opt/go galaxy-map swaps)]
+        [optimized & _] (opt/go galaxy-map swaps)]
     {:map optimized}))
 
 (defn profile-request [f]
