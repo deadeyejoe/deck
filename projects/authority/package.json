@@ -10,7 +10,7 @@
     "postcss:release": "cross-env NODE_ENV=production postcss src/css/tailwind.css -o ./release/main.css --verbose",
     "dev": "run-p -l *:watch",
     "release": "run-s *:release",
-    "deploy": "aws s3 sync --profile personal --acl public-read release/ s3://galactic-council"
+    "deploy": "aws s3 sync --profile personal --acl public-read release/ s3://authority.mistake-not.net"
   },
   "devDependencies": {
     "@tailwindcss/jit": "^0.1.18",
