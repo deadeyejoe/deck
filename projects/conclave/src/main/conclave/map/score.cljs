@@ -95,10 +95,21 @@
         (map (compute-share galaxy-map distance-measures stake-fn))
         combine-shares)))
 
-(defn variances [share-map]
-  (transform-values share-map (fn [m] (-> m
-                                          vals
-                                          util-score/variation))))
+(defn variances
+  ([share-map]
+   (let [weights {:share/resource 8
+                  :share/influence 6
+                  :share/tech 4
+                  :share/cultural 2
+                  :share/industrial 2
+                  :share/hazardous 2
+                  :share/legendary 1}]
+     (variances share-map weights)))
+  ([share-map weights]
+   (merge-with * weights
+               (transform-values share-map (fn [m] (-> m
+                                                       vals
+                                                       util-score/variation))))))
 
 (comment
   (def sample-map (-> (core/build layout/eight-player)
