@@ -19,15 +19,18 @@
       :tiles
       (transform-values move-cost)))
 
-(defn adjacent-map [galaxy-map]
-  (->> galaxy-map
-       :tiles
-       keys
-       (reduce (fn [r c] (assoc r c (core/adjacent galaxy-map c)))
-               {})))
+(defn adjacent-map [galaxy-map {:keys [follow-wormholes]}]
+  (let [get-adjacent (if follow-wormholes
+                       (partial core/adjacent galaxy-map)
+                       (partial core/neighbouring galaxy-map))]
+    (->> galaxy-map
+         :tiles
+         keys
+         (reduce (fn [r c] (assoc r c (get-adjacent c)))
+                 {}))))
 
 (defnp from
-  ([galaxy-map start-coordinate] (from (adjacent-map galaxy-map)
+  ([galaxy-map start-coordinate] (from (adjacent-map galaxy-map {:follow-wormholes true})
                                        (move-cost-map galaxy-map)
                                        start-coordinate))
   ([neighbour-map move-cost-map start-coordinate]
@@ -45,9 +48,11 @@
            (recur result
                   (pop visit-queue))))))))
 
-(defnp from-all [galaxy-map coords]
-  (let [neighbours (adjacent-map galaxy-map)
-        move-costs (move-cost-map galaxy-map)]
-    (reduce (fn [r home-c] (assoc r home-c (from neighbours move-costs home-c)))
-            {}
-            coords)))
+(defnp from-all
+  ([galaxy-map coords] (from-all galaxy-map coords {:follow-wormholes true}))
+  ([galaxy-map coords opts]
+   (let [neighbours (adjacent-map galaxy-map opts)
+         move-costs (move-cost-map galaxy-map)]
+     (reduce (fn [r home-c] (assoc r home-c (from neighbours move-costs home-c)))
+             {}
+             coords))))

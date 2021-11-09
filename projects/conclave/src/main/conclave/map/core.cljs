@@ -43,11 +43,18 @@
        (map (partial tile->coordinate galaxy-map))
        (remove #(or (nil? %) (= coordinate %)))))
 
+(defn in-bounds? [galaxy-map]
+  (fn [coordinate]
+    (contains? (:tiles galaxy-map) coordinate)))
+
+(defn neighbouring [galaxy-map coordinate]
+  (filter (in-bounds? galaxy-map) (hex/neighbours coordinate)))
+
 (defn adjacent [galaxy-map coordinate]
   (let [neighbours (hex/neighbours coordinate)
         wormhole-neighbours (adjacent-wormholes galaxy-map coordinate)]
     (distinct (concat
-               (filter (partial coordinate->tile galaxy-map) neighbours) ;; remove out-of-bounds
+               (filter (in-bounds? galaxy-map) neighbours) ;; remove out-of-bounds
                wormhole-neighbours))))
 
 (defn select-by-tile [galaxy-map f]
