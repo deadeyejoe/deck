@@ -2,6 +2,7 @@
   (:require [re-frame.core :as rf]
             [conclave.tiles.core :as tile]
             [conclave.map.core :as map]
+            [conclave.map.optimization :as opt]
             [conclave.map.layout :as layout]
             [conclave.worker :as worker]
             [conclave.map.optimization :as opt]))
@@ -27,21 +28,43 @@
 (rf/reg-event-db
  :map/generate-raw
  (fn [db _ev]
-   (assoc db :map (new-map (:seed db)))))
+   (let [raw (new-map (:seed db))]
+     (assoc db
+            :map raw
+            :score/constraint (opt/calculate-constraint-score raw)
+            :score/variance (opt/calculate-variance-score raw)))))
 
 (rf/reg-event-db
  :map/generate-optimized
  (fn [db _ev]
    (worker/generate (:seed db)
-                    {:on-result #(rf/dispatch [:map/set (:map %)])})
+                    {:on-result   (fn [p]
+                                    (rf/dispatch [:map/update p])
+                                    (rf/dispatch [:map/finish p]))
+                     :on-progress (fn [p]
+                                    (rf/dispatch [:map/update p])
+                                    (rf/dispatch [:map/progress p]))})
    (assoc db :processing true)))
 
 (rf/reg-event-db
- :map/set
- (fn [db [_en map]]
-   (-> db
-       (assoc :map map)
-       (dissoc :processing))))
+ :map/update
+ (fn [db [_en {:keys [map constraint variance]}]]
+   (assoc db :map map
+          :score/constraint constraint
+          :score/variance variance)))
+
+(rf/reg-event-db
+ :map/progress
+ (fn [db [_en {:keys [total done progress]}]]
+   (assoc db
+          :progress/total total
+          :progress/done done
+          :progress/progress progress)))
+
+(rf/reg-event-db
+ :map/finish
+ (fn [db _ev]
+   (dissoc db :processing)))
 
 (rf/reg-event-db
  :set-overlay
