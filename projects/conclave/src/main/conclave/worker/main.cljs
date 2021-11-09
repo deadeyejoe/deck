@@ -19,14 +19,10 @@
            :pstats
            (tufte/format-pstats pstats {:columns [:n-calls :p50 :mean :clock :total]}))))
 
-(defn register [id handler]
-  (worker/register
-   id
-   (fn [{:keys [profile] :as request}]
-     (if profile
-       (profile-request #(handler request))
-       (handler request)))))
+(defn handler [{:keys [profile] :as request}]
+  (if profile
+    (profile-request #(generate request))
+    (generate request)))
 
 (defn main []
-  (register :generate generate)
-  (worker/bootstrap))
+  (worker/bootstrap handler))
