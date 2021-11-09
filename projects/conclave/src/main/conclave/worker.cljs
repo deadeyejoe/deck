@@ -2,20 +2,29 @@
   (:require [clojure.core.async :as async]
             [conclave.worker.client :as client]
             [conclave.worker.core :as worker])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+  (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
-(defn spawn [arguments result-handler]
+(defn spawn [arguments
+             {:keys [on-result on-progress on-error]
+              :or   {on-progress (constantly nil)
+                     on-error (constantly nil)}}]
   (let [worker (worker/create "assets/app/js/worker.js")
         result-chan (client/do-with-worker! worker arguments)]
-    (go
-      (let [result (async/<! result-chan)]
-        (tap> result)
-        (result-handler result)
-        (.terminate worker)
-        result))))
+    (go-loop [{:keys [state] :as result} (async/<! result-chan)]
+      (case state
+        :success    (do  (tap> result)
+                         (on-result result)
+                         (.terminate worker)
+                         result)
+        :processing (do
+                      (tap> result)
+                      (on-progress result)
+                      (recur (async/<! result-chan)))
+        :error      (do (on-error result)
+                        result)))))
 
-(defn generate [seed result-handler]
-  (spawn {:handler :generate :arguments {:seed seed :profile true}}
-         result-handler))
+(defn generate [seed handlers]
+  (spawn {:arguments {:seed seed :profile true}}
+         handlers))
 
 (comment (generate "FGHIJ" (constantly nil)))

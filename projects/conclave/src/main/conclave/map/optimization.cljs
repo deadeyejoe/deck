@@ -44,20 +44,24 @@
 (defnp go 
   ([galaxy-map swaps] (go galaxy-map swaps ##Inf))
   ([galaxy-map swaps limit]
-   (loop [current-map galaxy-map
-          [current-swap & rest] swaps
-          constraint-score  (calculate-constraint-score galaxy-map)
-          variance-score    (calculate-variance-score   galaxy-map)
-          iteration 1]
-     (if (or (< limit iteration) (nil? current-swap))
-       [current-map [] constraint-score variance-score]
-       (let [new-map (apply core/swap-tiles current-map current-swap)
-             new-constraint-score (calculate-constraint-score new-map)
-             new-variance-score (calculate-variance-score new-map)]
-         (if (and (<= new-constraint-score constraint-score)
-                  (<= new-variance-score variance-score))
-           (recur new-map     rest new-constraint-score new-variance-score (inc iteration))
-           (recur current-map rest constraint-score     variance-score (inc iteration))))))))
+   (go galaxy-map swaps limit
+       (calculate-constraint-score galaxy-map)
+       (calculate-variance-score galaxy-map)))
+  ([galaxy-map swaps limit constraint-score variance-score]
+    (loop [current-map galaxy-map
+           [current-swap & rest :as swaps-remaining] swaps
+           constraint-score constraint-score
+           variance-score variance-score
+           iteration 1]
+      (if (or (< limit iteration) (nil? current-swap))
+        [current-map (seq swaps-remaining) constraint-score variance-score]
+        (let [new-map (apply core/swap-tiles current-map current-swap)
+              new-constraint-score (calculate-constraint-score new-map)
+              new-variance-score (calculate-variance-score new-map)]
+          (if (and (<= new-constraint-score constraint-score)
+                   (<= new-variance-score variance-score))
+            (recur new-map     rest new-constraint-score new-variance-score (inc iteration))
+            (recur current-map rest constraint-score     variance-score (inc iteration))))))))
 
 (comment
   (def sample-map (-> (core/build layout/eight-player)

@@ -33,7 +33,7 @@
  :map/generate-optimized
  (fn [db _ev]
    (worker/generate (:seed db)
-                    #(rf/dispatch [:map/set (:map %)]))
+                    {:on-result #(rf/dispatch [:map/set (:map %)])})
    (assoc db :processing true)))
 
 (rf/reg-event-db
