@@ -19,9 +19,10 @@
   (let [distances (score/hs-distances galaxy-map)
         shares    (score/shares galaxy-map distances score/discrete-stakes)
         variances (score/variances shares)]
-    (-> variances
-        (vals)
-        ((partial apply +)))))
+    (->> variances
+         score/apply-weights
+         vals
+         (apply +))))
 
 (defnp step
   ([galaxy-map swaps]
