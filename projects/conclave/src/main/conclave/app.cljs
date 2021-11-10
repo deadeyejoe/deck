@@ -116,15 +116,15 @@
 (defn variances []
   [:div {:class ["flex" "flex-col" "justify-center" "w-full"]}
    [:div "Variances"]
-   [value "Resource" [:score/variance :share/resource]]
-   [value "Influence" [:score/variance :share/influence]]
-   [value "Tech" [:score/variance :share/tech]]
-   [value "Cultural" [:score/variance :share/cultural]]
-   [value "Industrial" [:score/variance :share/industrial]]
-   [value "Hazardous" [:score/variance :share/hazardous]]
-   [value "Legendary" [:score/variance :share/legendary]]
+   [value "Resource" [:score/variance-breakdown :share/resource]]
+   [value "Influence" [:score/variance-breakdown :share/influence]]
+   [value "Tech" [:score/variance-breakdown :share/tech]]
+   [value "Cultural" [:score/variance-breakdown :share/cultural]]
+   [value "Industrial" [:score/variance-breakdown :share/industrial]]
+   [value "Hazardous" [:score/variance-breakdown :share/hazardous]]
+   [value "Legendary" [:score/variance-breakdown :share/legendary]]
    [:div {:class ["h-2" "w-full" "border-b-1" "rounded" "border-white"]}]
-   [value "Naive Total" [:score/variance :total]]])
+   [value "Naive Total" [:score/variance-breakdown :total]]])
 
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}

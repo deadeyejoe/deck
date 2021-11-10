@@ -9,7 +9,8 @@
             [conclave.map.score :as map-score]
             [conclave.map.summary :as map-summary]
             [conclave.map.constraints :as constraints]
-            [conclave.vector :as vect]))
+            [conclave.vector :as vect]
+            [conclave.utils :as utils]))
 
 (rf/reg-sub
  :seed
@@ -17,13 +18,13 @@
    (:seed db)))
 
 (rf/reg-sub
- :processing?
- (fn [db] (:processing db)))
-
-(rf/reg-sub
  :galaxy-map
  (fn [db _qv]
    (:map db)))
+
+(rf/reg-sub
+ :processing?
+ (fn [db] (:processing db)))
 
 (rf/reg-sub
  :tile
@@ -81,7 +82,7 @@
                        key))
                  (interpose ", ")
                  (apply str))
-            ": " (.toLocaleString highest-stake "en-IN" {:maximumFractionDigits 2})))
+            ": " (utils/format-number highest-stake)))
      "")))
 
 (rf/reg-sub
@@ -174,14 +175,12 @@
    (map-score/variances shares)))
 
 (rf/reg-sub
- :score/variance
+ :score/variance-breakdown
  :<- [:score/variances]
  (fn [variances [_q field]]
-   (.toLocaleString (if (= :total field)
-                      (->> variances vals (apply +))
-                      (get variances field))
-                    "en-IN"
-                    {:maximumFractionDigits 2})))
+   (utils/format-number (if (= :total field)
+                          (->> variances vals (apply +))
+                          (get variances field)))))
 
 (rf/reg-sub
  :player/keys

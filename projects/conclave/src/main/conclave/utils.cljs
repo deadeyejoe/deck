@@ -18,3 +18,8 @@
           (recur all [] (conj final intermediate)))
         (recur rest (conj intermediate first) final))
       final)))
+
+(defn format-number [n]
+  (.toLocaleString n
+                   "en-IN"
+                   {:maximumFractionDigits 2}))
