@@ -20,6 +20,6 @@
       final)))
 
 (defn format-number [n]
-  (.toLocaleString n
+  (.toLocaleString (or n 0)
                    "en-IN"
                    {:maximumFractionDigits 2}))

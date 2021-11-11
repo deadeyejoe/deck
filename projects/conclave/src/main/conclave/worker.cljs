@@ -24,7 +24,7 @@
                         result)))))
 
 (defn generate [seed handlers]
-  (spawn {:arguments {:seed seed :profile true}}
+  (spawn {:arguments {:seed seed :profile true :limit 50}}
          handlers))
 
 (comment (generate "FGHIJ" (constantly nil)))

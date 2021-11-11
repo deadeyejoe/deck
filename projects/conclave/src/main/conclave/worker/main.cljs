@@ -29,7 +29,7 @@
                                    :constraint constraint-score
                                    :variance variance-score}
                                   (progress swaps remaining-swaps)))
-          (recur (opt/go galaxy-map remaining-swaps limit constraint-score variance-score)))
+          (recur (opt/go optimized remaining-swaps limit constraint-score variance-score)))
         {:map optimized
          :constraint constraint-score
          :variance variance-score}))))

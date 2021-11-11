@@ -3,6 +3,7 @@
             [re-frame.core :as rf]
             [conclave.hex :as hex]
             [conclave.vector :as vect]
+            [conclave.utils :as utils]
             [conclave.handlers]
             [conclave.subs]
             [conclave.worker]
@@ -69,14 +70,19 @@
              :class ["rounded" "back" "text-gray-200" "bg-gray-600"]}]))
 
 (defn map-controls []
-  (let [processing? @(rf/subscribe [:processing?])]
+  (let [processing? @(rf/subscribe [:processing?])
+        done        @(rf/subscribe [:progress/done])
+        total       @(rf/subscribe [:progress/total])
+        percent     @(rf/subscribe [:progress/percent])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Map controls"]
      [:div "Seed: "
       [text-input [:seed] #(vector :seed/set %)]]
      [button "Generate Raw" [:map/generate-raw]]
      [button "Generate Optimized" [:map/generate-optimized]]
-     (when processing? [:div "Processing"])]))
+     (when processing? [:div (str "Processing " done " of " total " (" percent "% complete)")])
+     [value "Constraint " [:score/constraint]]
+     [value "Variance " [:score/variance]]]))
 
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])

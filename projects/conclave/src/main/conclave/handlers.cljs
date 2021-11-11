@@ -4,8 +4,7 @@
             [conclave.map.core :as map]
             [conclave.map.optimization :as opt]
             [conclave.map.layout :as layout]
-            [conclave.worker :as worker]
-            [conclave.map.optimization :as opt]))
+            [conclave.worker :as worker]))
 
 (defn new-map [seed]
   (-> (map/build layout/eight-player)
@@ -39,32 +38,36 @@
  (fn [db _ev]
    (worker/generate (:seed db)
                     {:on-result   (fn [p]
-                                    (rf/dispatch [:map/update p])
                                     (rf/dispatch [:map/finish p]))
                      :on-progress (fn [p]
-                                    (rf/dispatch [:map/update p])
                                     (rf/dispatch [:map/progress p]))})
    (assoc db :processing true)))
 
-(rf/reg-event-db
- :map/update
- (fn [db [_en {:keys [map constraint variance]}]]
-   (assoc db :map map
-          :score/constraint constraint
-          :score/variance variance)))
+
+(defn map-update [db {:keys [map constraint variance]}]
+  (assoc db
+         :map map
+         :score/constraint constraint
+         :score/variance variance))
 
 (rf/reg-event-db
  :map/progress
- (fn [db [_en {:keys [total done progress]}]]
-   (assoc db
-          :progress/total total
-          :progress/done done
-          :progress/progress progress)))
+ (fn [db [_en {:keys [total done progress] :as p}]]
+   (-> db
+       (map-update p)
+       (assoc :progress/total total
+              :progress/done done
+              :progress/percent progress))))
 
 (rf/reg-event-db
  :map/finish
- (fn [db _ev]
-   (dissoc db :processing)))
+ (fn [db [_ev p]]
+   (-> db
+       (map-update p)
+       (dissoc :processing
+               :progress/total
+               :progress/done
+               :progress/percent))))
 
 (rf/reg-event-db
  :set-overlay

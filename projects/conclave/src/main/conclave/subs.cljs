@@ -27,6 +27,26 @@
  (fn [db] (:processing db)))
 
 (rf/reg-sub
+ :progress/done
+ (fn [db] (:progress/done db)))
+
+(rf/reg-sub
+ :progress/total
+ (fn [db] (:progress/total db)))
+
+(rf/reg-sub
+ :progress/percent
+ (fn [db] (:progress/percent db)))
+
+(rf/reg-sub
+ :score/variance
+ (fn [db] (utils/format-number (:score/variance db))))
+
+(rf/reg-sub
+ :score/constraint
+ (fn [db] (:score/constraint db)))
+
+(rf/reg-sub
  :tile
  :<- [:galaxy-map]
  (fn [galaxy-map [_q coordinate]]
