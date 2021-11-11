@@ -6,3 +6,4 @@
 .lsp
 .nrepl-port
 .clj-kondo
+*.code-workspace
