@@ -2,7 +2,7 @@
   (:require [conclave.map.core :as core]
             [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
-            [conclave.map.score-beta :as score]
+            [conclave.map.score :as score]
             [conclave.map.constraints :as constraints]
             [taoensso.tufte :as tufte :refer-macros (defnp profiled)]))
 

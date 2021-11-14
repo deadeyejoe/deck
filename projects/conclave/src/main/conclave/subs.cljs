@@ -6,7 +6,7 @@
             [conclave.map.core :as map]
             [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
-            [conclave.map.score-beta :as map.score]
+            [conclave.map.score :as map.score]
             [conclave.map.summary :as map-summary]
             [conclave.map.constraints :as constraints]
             [conclave.vector :as vect]
