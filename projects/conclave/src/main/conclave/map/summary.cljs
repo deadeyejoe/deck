@@ -1,10 +1,5 @@
 (ns conclave.map.summary
-  (:require [clojure.set :as set]
-            [conclave.map.core :as core]
-            [conclave.map.layout :as layout]
-            [conclave.tiles.core :as tile]
-            [conclave.map.score :as score]
-            [conclave.map.constraints :as constraints]))
+  (:require [conclave.map.core :as core]))
 
 (defn collect-vector [result vector]
   (into (or result []) vector))

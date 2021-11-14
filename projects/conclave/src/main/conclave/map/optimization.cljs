@@ -2,10 +2,9 @@
   (:require [conclave.map.core :as core]
             [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
-            [conclave.map.score :as score]
-            [conclave.map.distance :as distance]
+            [conclave.map.score-beta :as score]
             [conclave.map.constraints :as constraints]
-            [taoensso.tufte :as tufte :refer-macros (defnp p profiled profile)]))
+            [taoensso.tufte :as tufte :refer-macros (defnp profiled)]))
 
 (defnp calculate-constraint-score [galaxy-map]
   (let [anomalies (constraints/count-adjacent-anomalies galaxy-map)
@@ -16,13 +15,11 @@
        (* 4 zero-start))))
 
 (defnp calculate-variance-score [galaxy-map]
-  (let [distances (score/hs-distances galaxy-map)
-        shares    (score/shares galaxy-map distances score/discrete-stakes)
-        variances (score/variances shares)]
-    (->> variances
-         score/apply-weights
-         vals
-         (apply +))))
+  (->> (score/combined-shares galaxy-map {:stake :discrete})
+       score/variances
+       score/apply-weights
+       vals
+       (apply +)))
 
 (defnp step
   ([galaxy-map swaps]

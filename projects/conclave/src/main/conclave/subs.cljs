@@ -6,7 +6,7 @@
             [conclave.map.core :as map]
             [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
-            [conclave.map.score :as map-score]
+            [conclave.map.score-beta :as map.score]
             [conclave.map.summary :as map-summary]
             [conclave.map.constraints :as constraints]
             [conclave.vector :as vect]
@@ -81,9 +81,7 @@
  :<- [:stake/mode]
  :<- [:galaxy-map]
  (fn [[mode galaxy-map] _qv]
-   (map-score/stakes galaxy-map (case mode
-                                  :discrete map-score/discrete-stakes
-                                  :continuous map-score/continuous-stakes))))
+   (map.score/compute-stakes galaxy-map {:stake mode})))
 
 (rf/reg-sub
  :tile/highest-stake
@@ -184,15 +182,13 @@
  :<- [:galaxy-map]
  :<- [:stake/mode]
  (fn [[galaxy-map stake-mode] _qv]
-   (map-score/shares galaxy-map (case stake-mode
-                                  :discrete map-score/discrete-stakes
-                                  :continuous map-score/continuous-stakes))))
+   (map.score/combined-shares galaxy-map {:stake stake-mode})))
 
 (rf/reg-sub
  :score/variances
  :<- [:score/shares]
  (fn [shares _qv]
-   (map-score/variances shares)))
+   (map.score/variances shares)))
 
 (rf/reg-sub
  :score/variance-breakdown
