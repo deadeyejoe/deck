@@ -1,5 +1,6 @@
 (ns conclave.map.optimization
   (:require [conclave.map.core :as core]
+            [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
             [conclave.map.score :as score]
@@ -67,15 +68,16 @@
   (def swaps (core/generate-swap-list sample-map "ABCDE"))
   (def cs (calculate-constraint-score sample-map))
   (def vs (calculate-variance-score sample-map))
-(tufte/add-basic-println-handler!
- {:format-pstats-opts {:columns [:n-calls :p50 :mean :clock :total]
+  (tufte/add-basic-println-handler!
+    {:format-pstats-opts {:columns [:n-calls :p50 :mean :clock :total]
                        :format-id-fn name}})
-  (let [sample-map (-> (core/build layout/eight-player)
+  (let [new-map (-> (core/build layout/eight-player)
                        (core/populate "ABCDE" tile/default-set))
+        sample-map (assoc new-map :hs-distances (distance/hs-distances new-map {:movement-score :simple}))
         swaps (core/generate-swap-list sample-map "ABCDE")]
     #_(profile {} (go sample-map swaps 50))
-    (binding [tufte/*ns-filter* "conclave.map.score"])
-    (-> (profiled {} (go sample-map swaps 10))
+    
+    (-> (profiled {} (go sample-map swaps 100))
         second
         (tufte/format-pstats {:columns [:n-calls :p50 :mean :clock :total]})
         println)))

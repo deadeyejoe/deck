@@ -21,12 +21,9 @@
 (s/def ::context (s/keys :req-un [::galaxy-map ::distances ::stakes]))
 
 (s/def ::stake-options #{:discrete :continuous})
+(s/def ::movement-score #{:simple :dynamic})
 (s/def ::follow-wormholes boolean?)
-(s/def ::evaluation-options (s/keys :opt-un [::stake ::follow-wormholes]))
-
-(defnp hs-distances [galaxy-map opts]
-  (let [home-coordinates (-> galaxy-map :layout :home-tiles keys)]
-    (distance/from-all galaxy-map home-coordinates opts)))
+(s/def ::evaluation-options (s/keys :opt-un [::stake ::follow-wormholes ::movement-score]))
 
 (defn restrict-to [hs->coordinate->distance target]
   (transform-values hs->coordinate->distance #(get % target)))
@@ -66,7 +63,7 @@
   (core/select-by-tile galaxy-map tile-score/stake?))
 
 (defn compute-stakes [galaxy-map opts]
-  (let [distances (hs-distances galaxy-map opts)
+  (let [distances (distance/hs-distances galaxy-map opts)
         stakeable (stakeable galaxy-map)]
     (zipmap stakeable
             (map #(compute-stake distances % opts) stakeable))))
@@ -89,7 +86,7 @@
         (tile-share tile))))
 
 (defnp combined-shares [galaxy-map opts]
-  (let [distances (hs-distances galaxy-map opts)
+  (let [distances (distance/hs-distances galaxy-map opts)
         stakeable (stakeable galaxy-map)]
     (->> stakeable
          (map #(compute-share galaxy-map distances % opts))

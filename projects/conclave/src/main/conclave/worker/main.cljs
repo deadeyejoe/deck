@@ -1,6 +1,7 @@
 (ns conclave.worker.main
   (:require [conclave.worker.instance :as worker]
             [conclave.map.core :as map]
+            [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
             [conclave.map.optimization :as opt]
             [conclave.tiles.core :as tile]
@@ -16,6 +17,11 @@
                     (* 100)
                     int
                     (- 100))}))
+
+(defn initialize-map [seed]
+  (let [new-map (-> (map/build layout/eight-player)
+                    (map/populate seed tile/default-set))]
+    (assoc new-map :hs-distances (distance/hs-distances new-map {:movement-score :simple}))))
 
 (defnp generate [{:keys [seed limit] :or {limit 10}}]
   (let [galaxy-map (-> (map/build layout/eight-player)
