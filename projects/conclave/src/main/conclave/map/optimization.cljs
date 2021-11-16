@@ -73,7 +73,9 @@
                        :format-id-fn name}})
   (let [new-map (-> (core/build layout/eight-player)
                        (core/populate "ABCDE" tile/default-set))
-        sample-map (assoc new-map :hs-distances (distance/hs-distances new-map {:movement-score :simple}))
+        sample-map (assoc new-map
+                          :hs-distances
+                          (distance/hs-distances new-map {:movement-score :static}))
         swaps (core/generate-swap-list sample-map "ABCDE")]
     #_(profile {} (go sample-map swaps 50))
     

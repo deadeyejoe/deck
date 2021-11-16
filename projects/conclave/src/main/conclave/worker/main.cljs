@@ -18,14 +18,15 @@
                     int
                     (- 100))}))
 
-(defn initialize-map [seed]
+(defn initialize-map [seed {:keys [movement-score] :or {movement-score :static} :as opts}]
   (let [new-map (-> (map/build layout/eight-player)
                     (map/populate seed tile/default-set))]
-    (assoc new-map :hs-distances (distance/hs-distances new-map {:movement-score :simple}))))
+    (if (= movement-score :static)
+      (assoc new-map :hs-distances (distance/hs-distances new-map opts))
+      new-map)))
 
 (defnp generate [{:keys [seed limit] :or {limit 10}}]
-  (let [galaxy-map (-> (map/build layout/eight-player)
-                       (map/populate seed tile/default-set))
+  (let [galaxy-map (initialize-map seed {:movement-score :static})
         swaps (map/generate-swap-list galaxy-map seed)]
     (loop [[optimized remaining-swaps constraint-score variance-score] (opt/go galaxy-map swaps limit)]
       (if (seq remaining-swaps)

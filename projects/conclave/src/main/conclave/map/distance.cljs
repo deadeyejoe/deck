@@ -14,18 +14,13 @@
     (tile/red? tile) 1.2 ;; empty tile
     :else            1))
 
-(defn move-cost-simple [tile]
-  (if (= (:anomaly tile) :supernova)
-    9000.1
-    1))
-
 (defn move-cost-map
   ([galaxy-map opts]
    (-> galaxy-map
        :tiles
-       (transform-values (if (= :simple (:movement-score opts))
-                          move-cost-simple
-                          move-cost-dynamic)))))
+       (transform-values (if (= :static (:movement-score opts))
+                           (constantly 1)
+                           move-cost-dynamic)))))
 
 (defn adjacent-map [galaxy-map {:keys [follow-wormholes]}]
   (let [get-adjacent (if follow-wormholes
@@ -39,7 +34,7 @@
 
 (defnp from
   ([galaxy-map start-coordinate] (from (adjacent-map galaxy-map {:follow-wormholes true})
-                                       (move-cost-map galaxy-map {:movement-score :simple})
+                                       (move-cost-map galaxy-map {:movement-score :static})
                                        start-coordinate))
   ([neighbour-map move-cost-map start-coordinate]
    (loop [result {}
@@ -58,7 +53,7 @@
 
 (defnp from-all
   ([galaxy-map coords] (from-all galaxy-map coords {:follow-wormholes true
-                                                    :movement-score :simple}))
+                                                    :movement-score :static}))
   ([galaxy-map coords opts]
    (let [neighbours (adjacent-map galaxy-map opts)
          move-costs (move-cost-map galaxy-map opts)]

@@ -21,7 +21,7 @@
 (s/def ::context (s/keys :req-un [::galaxy-map ::distances ::stakes]))
 
 (s/def ::stake-options #{:discrete :continuous})
-(s/def ::movement-score #{:simple :dynamic})
+(s/def ::movement-score #{:static :dynamic})
 (s/def ::follow-wormholes boolean?)
 (s/def ::evaluation-options (s/keys :opt-un [::stake ::follow-wormholes ::movement-score]))
 
