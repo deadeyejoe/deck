@@ -172,12 +172,6 @@
     (constraints/count-adjacent-wormholes galaxy-map :beta))))
 
 (rf/reg-sub
- :constraint/zero-start
- :<- [:galaxy-map]
- (fn [galaxy-map _qv]
-   (constraints/count-zero-starts galaxy-map)))
-
-(rf/reg-sub
  :score/shares
  :<- [:galaxy-map]
  :<- [:stake/mode]

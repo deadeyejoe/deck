@@ -116,8 +116,7 @@
   [:div {:class ["flex" "flex-col" "justify-center"]}
    [:div "Constraints"]
    [value "Adjacent Anomalies" [:constraint/anomalies]]
-   [value "Adjacent Wormholes" [:constraint/wormholes]]
-   [value "Zero Starts" [:constraint/zero-start]]])
+   [value "Adjacent Wormholes" [:constraint/wormholes]]])
 
 (defn variances []
   [:div {:class ["flex" "flex-col" "justify-center" "w-full"]}

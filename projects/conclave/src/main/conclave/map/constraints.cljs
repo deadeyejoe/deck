@@ -32,32 +32,8 @@
 (defn adjacent-wormholes? [galaxy-map]
   (< 0 (count-adjacent-wormholes galaxy-map)))
 
-(defn zero-adjacent-planets? [galaxy-map coord]
-  (->> coord
-       (core/adjacent galaxy-map)
-       (map (partial core/coordinate->tile galaxy-map))
-       (not-any? tile/has-planets?)))
-
-(defn count-zero-starts [galaxy-map]
-  (let [home-tiles (core/select-by-tile galaxy-map tile/home?)]
-    (->> home-tiles
-         (filter (partial zero-adjacent-planets? galaxy-map))
-         count)))
-
-(defn zero-starts? [galaxy-map]
-  (->> galaxy-map
-       count-zero-starts
-       (< 0)))
-
 (comment
   (def sample-map (-> (core/build layout/eight-player)
                       (core/populate "ABCDE" tile/default-set)))
   (count-adjacent-anomalies sample-map)
-  (adjacent-wormholes? sample-map)
-  (-> sample-map
-      (core/swap-tiles [-1 3 -2] [0 2 -2])
-      (adjacent-wormholes?))
-  (zero-starts? sample-map)
-  (-> sample-map
-      (core/swap-tiles [1 3 -4] [2 2 -4])
-      (zero-starts?)))
+  (adjacent-wormholes? sample-map))

@@ -9,11 +9,9 @@
 
 (defnp calculate-constraint-score [galaxy-map]
   (let [anomalies (constraints/count-adjacent-anomalies galaxy-map)
-        wormholes (constraints/count-adjacent-wormholes galaxy-map)
-        zero-start (constraints/count-zero-starts galaxy-map)]
+        wormholes (constraints/count-adjacent-wormholes galaxy-map)]
     (+ anomalies
-       (* 2 wormholes)
-       (* 4 zero-start))))
+       (* 2 wormholes))))
 
 (defnp calculate-variance-score [galaxy-map]
   (->> (score/combined-shares galaxy-map {:stake :discrete})
