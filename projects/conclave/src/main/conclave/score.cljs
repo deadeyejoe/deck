@@ -7,9 +7,10 @@
 (defn standard-deviation
   ([xs] (standard-deviation xs (mean xs)))
   ([xs mean]
-   (Math/sqrt (/
-               (reduce + (map square (map - xs (repeat mean))))
-               (- (count xs) 1)))))
+   (if (-> xs count (= 1)) 
+     0
+     (Math/sqrt (/ (reduce + (map square (map - xs (repeat mean))))
+                   (- (count xs) 1))))))
 
 (defn variation [xs]
   (let [mean (mean xs)]
