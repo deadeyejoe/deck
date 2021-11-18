@@ -56,7 +56,7 @@
                    continuous-stakes)]
     (-> hs->coordinate->distance
         (restrict-to coordinate)
-(stake-fn)
+        (stake-fn)
         (normalize-stakes))))
 
 (defn stakeable [galaxy-map]
@@ -85,6 +85,12 @@
     (-> (compute-stake hs->coordinate->distance coordinate opts)
         (tile-share tile))))
 
+(defn share-map [galaxy-map opts]
+  (let [distances (distance/hs-distances galaxy-map opts)
+        stakeable (stakeable galaxy-map)]
+    (zipmap stakeable
+            (map #(compute-share galaxy-map distances % opts) stakeable))))
+
 (defnp combined-shares [galaxy-map opts]
   (let [distances (distance/hs-distances galaxy-map opts)
         stakeable (stakeable galaxy-map)]
@@ -109,3 +115,4 @@
 (defn apply-weights
   ([variances] (apply-weights variances default-weights))
   ([variances weights] (merge-with * weights variances)))
+

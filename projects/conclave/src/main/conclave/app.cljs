@@ -80,6 +80,7 @@
       [text-input [:seed] #(vector :seed/set %)]]
      [button "Generate Raw" [:map/generate-raw]]
      [button "Generate Optimized" [:map/generate-optimized]]
+     [button "Generate Random" [:map/generate-random]]
      (when processing? [:div (str "Processing " done " of " total " (" percent "% complete)")])
      [value "Constraint " [:score/constraint]]
      [value "Variance " [:score/variance]]]))

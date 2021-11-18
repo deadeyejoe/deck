@@ -1,6 +1,7 @@
 (ns conclave.handlers
   (:require [re-frame.core :as rf]
             [conclave.tiles.core :as tile]
+            [conclave.random :as random]
             [conclave.map.core :as map]
             [conclave.map.optimization :as opt]
             [conclave.map.layout :as layout]
@@ -43,6 +44,12 @@
                                     (rf/dispatch [:map/progress p]))})
    (assoc db :processing true)))
 
+(rf/reg-event-fx
+ :map/generate-random
+ (fn [{:keys [db]} _ev]
+   (let [random-seed  (apply str (random/sample (map char (range 65 91)) 6 (. js/Date now)))]
+     {:db (assoc db :seed random-seed)
+      :fx [[:dispatch [:map/generate-optimized]]]})))
 
 (defn map-update [db {:keys [map constraint variance]}]
   (assoc db
