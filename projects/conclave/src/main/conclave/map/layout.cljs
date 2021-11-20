@@ -36,3 +36,14 @@
 
 (comment
   (count (free-spaces eight-player)))
+
+(defn rings [{:keys [radius] :as layout}]
+  (let [free-spaces (set (free-spaces layout))]
+    (->> (range (inc radius))
+         (map (fn [r] (->> r
+                           (hex/ring-coordinates)
+                           (filter free-spaces))))
+         (filter seq))))
+
+(comment
+  (map count (rings eight-player)))

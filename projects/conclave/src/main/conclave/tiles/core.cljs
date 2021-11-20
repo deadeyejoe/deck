@@ -97,3 +97,7 @@
 (defn image [tile]
   (or (:image tile) (str "ST_" (-> tile :key name) ".png")))
 
+(defn stakeable? [tile]
+  (and (not (home? tile))
+       (not (mecatol? tile))
+       (seq (:planets tile))))

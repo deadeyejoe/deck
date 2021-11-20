@@ -1,29 +1,11 @@
 (ns conclave.map.score
   (:require [conclave.map.core :as core]
             [conclave.map.distance :as distance]
-            [conclave.tiles.score :as tile-score]
+            [conclave.tiles.core :as tile]
             [conclave.utils :refer [transform-values]]
             [conclave.score :as util-score]
             [taoensso.tufte :as tufte :refer-macros (defnp)]
-            [clojure.spec.alpha :as s])
-  (:require-macros [clojure.spec.alpha]))
-
-(s/def ::coordinate vector?)
-(s/def ::galaxy-map map?)
-(s/def ::distances (s/map-of ::coordinate
-                             (s/map-of ::coordinate number?)))
-(s/def ::stakes (s/map-of ::coordinate
-                          (s/map-of ::coordinate number?)))
-
-(s/def ::shares (s/map-of keyword?
-                          (s/map-of ::coordinate number?)))
-
-(s/def ::context (s/keys :req-un [::galaxy-map ::distances ::stakes]))
-
-(s/def ::stake-options #{:discrete :continuous})
-(s/def ::movement-score #{:static :dynamic})
-(s/def ::follow-wormholes boolean?)
-(s/def ::evaluation-options (s/keys :opt-un [::stake ::follow-wormholes ::movement-score]))
+            [clojure.spec.alpha :as s]))
 
 (defn restrict-to [hs->coordinate->distance target]
   (transform-values hs->coordinate->distance #(get % target)))
@@ -60,7 +42,7 @@
         (normalize-stakes))))
 
 (defn stakeable [galaxy-map]
-  (core/select-by-tile galaxy-map tile-score/stake?))
+  (core/select-by-tile galaxy-map tile/stakeable?))
 
 (defn compute-stakes [galaxy-map opts]
   (let [distances (distance/hs-distances galaxy-map opts)

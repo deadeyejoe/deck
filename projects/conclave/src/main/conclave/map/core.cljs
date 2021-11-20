@@ -75,5 +75,8 @@
                      (-> (free-spaces galaxy-map)
                          (comb/combinations 2))))
 
+(def sample-map (-> (build layout/eight-player)
+                    (populate "ABCDE" tile/default-set)))
+
 
 
