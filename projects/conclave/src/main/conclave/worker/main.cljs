@@ -20,7 +20,7 @@
 
 (defn initialize-map [seed {:keys [movement-score] :or {movement-score :static} :as opts}]
   (let [new-map (-> (map/build layout/eight-player)
-                    (map/populate seed tile/default-set))]
+                    (map/populate seed))]
     (if (= movement-score :static)
       (assoc new-map :hs-distances (distance/hs-distances new-map opts))
       new-map)))

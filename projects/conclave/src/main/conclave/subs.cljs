@@ -7,10 +7,13 @@
             [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
             [conclave.map.score :as map.score]
+            [conclave.map.beta.distance :as distance-beta]
+            [conclave.map.beta.stake :as stake]
+            [conclave.map.beta.score :as score]
             [conclave.map.summary :as map-summary]
             [conclave.map.constraints :as constraints]
-            [conclave.vector :as vect]
-            [conclave.utils :as utils]))
+            [conclave.utils.vector :as vect]
+            [conclave.utils.utils :as utils]))
 
 (rf/reg-sub
  :seed
@@ -64,11 +67,17 @@
    (= selected coordinate)))
 
 (rf/reg-sub
- :tile/distance-map
+ :tile/neighbour-map
  :<- [:galaxy-map]
+ (fn [galaxy-map _qv]
+   (distance-beta/neighbour-map galaxy-map)))
+
+(rf/reg-sub
+ :tile/distance-map
+ :<- [:tile/neighbour-map]
  :<- [:selected]
- (fn [[galaxy-map selected] _qv]
-   (distance/from galaxy-map selected)))
+ (fn [[neighbour-map selected] _qv]
+   (distance-beta/distances-from neighbour-map selected)))
 
 (rf/reg-sub
  :tile/distance-score
@@ -77,11 +86,17 @@
    (distance-map coordinate)))
 
 (rf/reg-sub
- :tile/stake-map
- :<- [:stake/mode]
+ :tile/distance-map
  :<- [:galaxy-map]
- (fn [[mode galaxy-map] _qv]
-   (map.score/compute-stakes galaxy-map {:stake mode})))
+ (fn [galaxy-map _qv]
+   (distance-beta/coordinate->distances galaxy-map)))
+
+(rf/reg-sub
+ :tile/stake-map
+ :<- [:galaxy-map]
+ :<- [:tile/distance-map]
+ (fn [[galaxy-map distance-map] _qv]
+   (stake/stakes-for-map galaxy-map distance-map)))
 
 (rf/reg-sub
  :tile/highest-stake
@@ -105,16 +120,17 @@
 
 (rf/reg-sub
  :overlay/mode
- (fn [db _qv] (:overlay/mode db)))
+ (fn [db _qv] (:overlay-mode db)))
 
 (rf/reg-sub
  :overlay/content
  (fn [[_q coordinate] _dv]
    [(rf/subscribe [:overlay/mode])
     (rf/subscribe [:tile coordinate])
-    (rf/subscribe [:tile/distance-score coordinate])
+    (rf/subscribe [:selected])
+(rf/subscribe [:tile/distance-map])
     (rf/subscribe [:tile/highest-stake coordinate])])
- (fn [[mode tile distance-score highest-stake] [_q coordinate]]
+ (fn [[mode tile selected distance-map highest-stake] [_q coordinate]]
    (if (= mode :coordinates)
      (vect/->display coordinate)
      (if (tile/home? tile)
@@ -124,13 +140,13 @@
          :tile-number (tiles-view/number tile)
          :res-inf     (tiles-view/res-inf tile)
          :wormhole    (tiles-view/wormhole tile)
-         :distance-score          distance-score
+         :distance-score          (get-in distance-map [selected coordinate])
          :highest-stake           highest-stake
          nil)))))
 
 (rf/reg-sub
  :highlight/mode
- (fn [db _qv] (:highlight/mode db)))
+ (fn [db _qv] (:highlight-mode db)))
 
 (rf/reg-sub
  :hovered
@@ -152,46 +168,6 @@
  (fn [highlight-set [_q coordinate]]
    (contains? highlight-set coordinate)))
 
-
-(rf/reg-sub
- :stake/mode
- (fn [db _qv] (:stake/mode db)))
-
-(rf/reg-sub
- :constraint/anomalies
- :<- [:galaxy-map]
- (fn [galaxy-map _qv]
-   (constraints/count-adjacent-anomalies galaxy-map)))
-
-(rf/reg-sub
- :constraint/wormholes
- :<- [:galaxy-map]
- (fn [galaxy-map _qv]
-   (+
-    (constraints/count-adjacent-wormholes galaxy-map :alpha)
-    (constraints/count-adjacent-wormholes galaxy-map :beta))))
-
-(rf/reg-sub
- :score/shares
- :<- [:galaxy-map]
- :<- [:stake/mode]
- (fn [[galaxy-map stake-mode] _qv]
-   (map.score/combined-shares galaxy-map {:stake stake-mode})))
-
-(rf/reg-sub
- :score/variances
- :<- [:score/shares]
- (fn [shares _qv]
-   (map.score/variances shares)))
-
-(rf/reg-sub
- :score/variance-breakdown
- :<- [:score/variances]
- (fn [variances [_q field]]
-   (utils/format-number (if (= :total field)
-                          (->> variances vals (apply +))
-                          (get variances field)))))
-
 (rf/reg-sub
  :player/keys
  :<- [:galaxy-map]
@@ -203,4 +179,3 @@
  :<- [:galaxy-map]
  (fn [galaxy-map [_q player-key]]
    (map-summary/player-summary galaxy-map player-key)))
-

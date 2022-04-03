@@ -1,4 +1,4 @@
-(ns conclave.random
+(ns conclave.utils.random
   (:require [clojure.string :as str]))
 
 (def modulus (Math/pow 2 32))

@@ -1,4 +1,4 @@
-(ns conclave.score)
+(ns conclave.utils.score)
 
 (defn square [x] (* x x))
 
@@ -7,7 +7,7 @@
 (defn standard-deviation
   ([xs] (standard-deviation xs (mean xs)))
   ([xs mean]
-   (if (-> xs count (= 1)) 
+   (if (-> xs count (= 1))
      0
      (Math/sqrt (/ (reduce + (map square (map - xs (repeat mean))))
                    (- (count xs) 1))))))

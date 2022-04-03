@@ -61,7 +61,7 @@
 
 (comment
   (def sample-map (-> (core/build layout/eight-player)
-                      (core/populate "ABCDE" tile/default-set)))
+                      (core/populate "ABCDE")))
   (count (prn-str sample-map))
   (def swaps (core/generate-swap-list sample-map "ABCDE"))
   (def cs (calculate-constraint-score sample-map))
@@ -70,7 +70,7 @@
     {:format-pstats-opts {:columns [:n-calls :p50 :mean :clock :total]
                        :format-id-fn name}})
   (let [new-map (-> (core/build layout/eight-player)
-                       (core/populate "ABCDE" tile/default-set))
+                       (core/populate "ABCDE"))
         sample-map (assoc new-map
                           :hs-distances
                           (distance/hs-distances new-map {:movement-score :static}))
@@ -81,4 +81,3 @@
         second
         (tufte/format-pstats {:columns [:n-calls :p50 :mean :clock :total]})
         println)))
-

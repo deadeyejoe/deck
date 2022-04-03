@@ -1,6 +1,34 @@
 (ns conclave.tiles.core
   (:require [conclave.data :as data]
-            [conclave.tiles.static :refer [green-tile]]))
+            [conclave.tiles.static :refer [green-tile]]
+            [clojure.spec.alpha :as s]))
+
+(s/def ::key keyword?)
+(s/def ::type #{:green :red :blue :hyperlane})
+(s/def ::wormhole #{:alpha :beta :gamma :delta})
+(s/def ::anomaly #{:asteroid-field :nebula :gravity-rift :supernova})
+(s/def ::pok boolean?)
+
+(s/def ::name (s/and string?
+                     not-empty))
+(s/def ::resources nat-int?)
+(s/def ::influence nat-int?)
+(s/def ::specialty #{:biotic :cybernetic :propulsion :warfare})
+(s/def ::trait #{:cultural :hazardous :industrial})
+(s/def ::legendary boolean?)
+(s/def ::planet (s/keys :req-un [::name
+                                 ::resources
+                                 ::influence]
+                        :opt-un [::specialty
+                                 ::trait
+                                 ::legendary]))
+(s/def ::planets (s/coll-of ::planet))
+(s/def ::instance (s/keys :req-un [::key
+                                   ::type]
+                          :opt-un [::wormhole
+                                   ::anomaly
+                                   ::planets
+                                   ::pok]))
 
 (defn enrich [key raw-tile]
   (let [planets (:planets raw-tile)
@@ -52,29 +80,47 @@
 (defn nexus? [tile] (= tile nexus))
 
 (defn home? [tile] (= (:type tile) :green))
+(def homes (filter home? tiles))
+
 (defn blue? [tile] (= (:type tile) :blue))
+(def blues (filter blue? tiles))
+
 (defn red? [tile] (= (:type tile) :red))
+(def reds (filter red? tiles))
+
+(defn hyperlane? [tile] (= (:type tile) :hyperlane))
+(def hyperlanes (filter hyperlane? tiles))
 
 (defn wormhole? [tile] (contains? tile :wormhole))
-
 (defn alpha-wormhole? [tile] (= :alpha (:wormhole tile)))
 (defn beta-wormhole? [tile] (= :beta (:wormhole tile)))
 
-(def wormholes (->> tiles
-                    (filter wormhole?)
-                    (map :key)))
-(def wormholes-alpha (->> tiles
-                          (filter alpha-wormhole?)
-                          (map :key)))
-(def wormholes-beta (->> tiles
-                         (filter beta-wormhole?)
-                         (map :key)))
+(def wormholes (filter wormhole? tiles))
+(def wormholes-alpha (filter alpha-wormhole? tiles))
+(def wormholes-beta  (filter beta-wormhole? tiles))
 
 (defn anomaly? [tile] (contains? tile :anomaly))
+(def anomalies (filter anomaly? tiles))
 
-(def anomalies (->> tiles
-                    (filter anomaly?)
-                    (map :key)))
+(def supernova? (every-pred (comp #{:supernova} :anomaly)
+                            (complement :race)))
+(def supernovae (filter supernova? tiles))
+
+(def nebula? (every-pred (comp #{:nebula} :anomaly)
+                         (complement :race)))
+(def nebulae (filter nebula? tiles))
+
+(def asteroid-field? (every-pred (comp #{:asteroid-field} :anomaly)
+                                 (complement :race)))
+(def asteroid-fields (filter asteroid-field? tiles))
+
+(def gravity-rift? (every-pred (comp #{:gravity-rift} :anomaly)
+                               (complement :race)))
+(def gravity-rifts (filter gravity-rift? tiles))
+
+(defn legendary? [tile] (and (not (nexus? tile))
+                             (:legendary tile)))
+(def legendaries (filter legendary? tiles))
 
 (defn has-planets? [tile] (-> tile :planets seq))
 (defn no-planets? [tile] (-> tile :planets empty?))
@@ -97,7 +143,7 @@
 (defn image [tile]
   (or (:image tile) (str "ST_" (-> tile :key name) ".png")))
 
-(defn stakeable? [tile]
+(defn ^:deprecated stakeable? [tile]
   (and (not (home? tile))
        (not (mecatol? tile))
        (seq (:planets tile))))

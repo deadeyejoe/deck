@@ -1,5 +1,5 @@
-(ns conclave.hex
-  (:require [conclave.vector :as vect]))
+(ns conclave.utils.hex
+  (:require [conclave.utils.vector :as vect]))
 
 (def sqr3 (Math/sqrt 3))
 

@@ -2,7 +2,7 @@
   (:require [taoensso.tufte :as tufte :refer-macros (defnp)]
             [conclave.map.core :as core]
             [conclave.tiles.core :as tile]
-            [conclave.utils :refer [transform-values]]))
+            [conclave.utils.utils :refer [transform-values]]))
 
 (defn move-cost-dynamic [tile]
   (cond 

@@ -1,4 +1,4 @@
-(ns conclave.vector)
+(ns conclave.utils.vector)
 
 (defn scale [v s]
   (mapv (partial * s) v))

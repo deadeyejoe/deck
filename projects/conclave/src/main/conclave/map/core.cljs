@@ -1,9 +1,18 @@
 (ns conclave.map.core
-  (:require [clojure.math.combinatorics :as comb]
-            [conclave.random :as rand]
+  (:require [conclave.utils.random :as rand]
             [conclave.tiles.core :as tile]
             [conclave.map.layout :as layout]
-            [conclave.hex :as hex]))
+            [conclave.utils.hex :as hex]
+            [clojure.math.combinatorics :as comb]
+            [clojure.spec.alpha :as s]))
+
+(s/def ::layout ::layout/instance)
+(s/def ::tiles (s/map-of ::layout/coordinate ::layout/tile))
+(s/def ::tiles-reverse (s/map-of ::tile/key ::layout/coordinate))
+
+(s/def ::galaxy (s/keys :req-un [::layout
+                                 ::tiles
+                                 ::tiles-reverse]))
 
 (defn set-coordinate [galaxy-map coordinate tile]
   (-> galaxy-map
@@ -25,10 +34,26 @@
 (defn free-spaces [galaxy-map]
   (layout/free-spaces (:layout galaxy-map)))
 
-(defn populate [galaxy-map seed tileset]
-  (let [free-spaces   (free-spaces galaxy-map)
-        sampled-tiles (rand/sample tileset (count free-spaces) seed)]
+(defn sample-tiles [seed amount]
+  (let [fixed-tiles (concat tile/wormholes-alpha tile/wormholes-beta)
+        sampleable-tiles (remove (set fixed-tiles) tile/default-set)]
+    (->> (rand/sample sampleable-tiles
+                      (- amount
+                         (count fixed-tiles))
+                      seed)
+         (into fixed-tiles)
+         (rand/seed-shuffle seed))))
+
+(defn populate [galaxy-map seed]
+  (let [free-spaces (free-spaces galaxy-map)
+        sampled-tiles (sample-tiles seed (count free-spaces))]
     (import-coordinate-map galaxy-map (zipmap free-spaces sampled-tiles))))
+
+(defn coordinates [galaxy-map]
+  (-> galaxy-map :tiles keys))
+
+(defn home-coordinates [galaxy-map]
+  (-> galaxy-map :layout :home-tiles keys))
 
 (defn coordinate->tile [galaxy-map coordinate]
   (get-in galaxy-map [:tiles coordinate]))
@@ -40,6 +65,7 @@
   (->> coordinate
        (coordinate->tile galaxy-map)
        (tile/matching-wormholes)
+       (map :key)
        (map (partial tile->coordinate galaxy-map))
        (remove #(or (nil? %) (= coordinate %)))))
 
@@ -76,7 +102,4 @@
                          (comb/combinations 2))))
 
 (def sample-map (-> (build layout/eight-player)
-                    (populate "ABCDE" tile/default-set)))
-
-
-
+                    (populate "ABCDE")))

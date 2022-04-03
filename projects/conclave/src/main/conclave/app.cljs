@@ -1,9 +1,9 @@
 (ns conclave.app
   (:require [reagent.dom]
             [re-frame.core :as rf]
-            [conclave.hex :as hex]
-            [conclave.vector :as vect]
-            [conclave.utils :as utils]
+            [conclave.utils.hex :as hex]
+            [conclave.utils.vector :as vect]
+            [conclave.utils.utils :as utils]
             [conclave.handlers]
             [conclave.subs]
             [conclave.worker]
@@ -106,43 +106,14 @@
      [button "Distance Score" [:set-overlay :distance-score]]
      [button "Highest Stake" [:set-overlay :highest-stake]]]))
 
-(defn stake-controls []
-  (let [mode @(rf/subscribe [:stake/mode])]
-    [:div {:class ["flex" "flex-col" "justify-center"]}
-     [:div "Stake Mode: " mode]
-     [button "Discrete" [:set-stake :discrete]]
-     [button "Continuous" [:set-stake :continuous]]]))
-
-(defn constraints []
-  [:div {:class ["flex" "flex-col" "justify-center"]}
-   [:div "Constraints"]
-   [value "Adjacent Anomalies" [:constraint/anomalies]]
-   [value "Adjacent Wormholes" [:constraint/wormholes]]])
-
-(defn variances []
-  [:div {:class ["flex" "flex-col" "justify-center" "w-full"]}
-   [:div "Variances"]
-   [value "Resource" [:score/variance-breakdown :share/resource]]
-   [value "Influence" [:score/variance-breakdown :share/influence]]
-   [value "Tech" [:score/variance-breakdown :share/tech]]
-   [value "Cultural" [:score/variance-breakdown :share/cultural]]
-   [value "Industrial" [:score/variance-breakdown :share/industrial]]
-   [value "Hazardous" [:score/variance-breakdown :share/hazardous]]
-   [value "Legendary" [:score/variance-breakdown :share/legendary]]
-   [:div {:class ["h-2" "w-full" "border-b-1" "rounded" "border-white"]}]
-   [value "Naive Total" [:score/variance-breakdown :total]]])
-
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
    [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-around"]}
     [map-controls]
     [highlight-controls]
-    [overlay-controls]
-    [stake-controls]]
+    [overlay-controls]]
    [:div {:class ["absolute" "right-0" "inset-y-0" "flex" "flex-col" "justify-around" "w-1/6" "mr-10"]}
-    [player-summary/component]
-    [constraints]
-    [variances]]
+    [player-summary/component]]
    [origin
     (into
      [:<> [hex-tile 17 [0 0 0]]]

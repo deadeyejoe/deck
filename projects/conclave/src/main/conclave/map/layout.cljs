@@ -1,6 +1,21 @@
 (ns conclave.map.layout
   (:require [conclave.tiles.core :as tiles]
-            [conclave.hex :as hex]))
+            [conclave.utils.hex :as hex]
+            [clojure.spec.alpha :as s]))
+
+(s/def ::name (s/and string?
+                     not-empty))
+(s/def ::radius pos-int?)
+
+(s/def ::coordinate (s/coll-of int? :kind vector? :count 3))
+(s/def ::tile-map (s/map-of ::coordinate ::tiles/instance))
+
+(s/def ::fixed-tiles ::tile-map)
+(s/def ::home-tiles ::tile-map)
+(s/def ::instance (s/keys :req-un [::name
+                                   ::radius
+                                   ::fixed-tiles
+                                   ::home-tiles]))
 
 (def eight-player {:name "8 Player"
                    :radius 4

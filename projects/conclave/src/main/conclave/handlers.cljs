@@ -1,24 +1,18 @@
 (ns conclave.handlers
   (:require [re-frame.core :as rf]
-            [conclave.tiles.core :as tile]
-            [conclave.random :as random]
+            [conclave.db :as db]
             [conclave.map.core :as map]
+            [conclave.map.beta.build :as map.build]
             [conclave.map.optimization :as opt]
             [conclave.map.layout :as layout]
+            [conclave.utils.random :as random]
+            [conclave.tiles.core :as tile]
             [conclave.worker :as worker]))
-
-(defn new-map [seed]
-  (-> (map/build layout/eight-player)
-      (map/populate seed tile/default-set)))
 
 (rf/reg-event-fx
  :initialize
  (fn [_con [_en seed]]
-   {:db  {:overlay/mode :none
-          :highlight/mode :single
-          :stake/mode :discrete
-          :seed seed
-          :map (new-map seed)}}))
+   {:db (db/initialize seed)}))
 
 (rf/reg-event-db
  :seed/set
@@ -28,11 +22,9 @@
 (rf/reg-event-db
  :map/generate-raw
  (fn [db _ev]
-   (let [raw (new-map (:seed db))]
-     (assoc db
-            :map raw
-            :score/constraint (opt/calculate-constraint-score raw)
-            :score/variance (opt/calculate-variance-score raw)))))
+   (->> (:seed db)
+        (map.build/create)
+        (db/set-map db))))
 
 (rf/reg-event-db
  :map/generate-optimized
@@ -44,33 +36,31 @@
                                     (rf/dispatch [:map/progress p]))})
    (assoc db :processing true)))
 
+(defn random-seed []
+  (->> (. js/Date now)
+       (random/sample (map char (range 65 91)) 6)
+       (apply str)))
+
 (rf/reg-event-fx
  :map/generate-random
  (fn [{:keys [db]} _ev]
-   (let [random-seed  (apply str (random/sample (map char (range 65 91)) 6 (. js/Date now)))]
-     {:db (assoc db :seed random-seed)
-      :fx [[:dispatch [:map/generate-optimized]]]})))
-
-(defn map-update [db {:keys [map constraint variance]}]
-  (assoc db
-         :map map
-         :score/constraint constraint
-         :score/variance variance))
+   {:db (assoc db :seed (random-seed))
+    :fx [[:dispatch [:map/generate-optimized]]]}))
 
 (rf/reg-event-db
  :map/progress
- (fn [db [_en {:keys [total done progress] :as p}]]
+ (fn [db [_en {:keys [total done progress map] :as p}]]
    (-> db
-       (map-update p)
+       (db/set-map map)
        (assoc :progress/total total
               :progress/done done
               :progress/percent progress))))
 
 (rf/reg-event-db
  :map/finish
- (fn [db [_ev p]]
+ (fn [db [_ev {:keys [map] :as p}]]
    (-> db
-       (map-update p)
+       (db/set-map map)
        (dissoc :processing
                :progress/total
                :progress/done
@@ -79,17 +69,17 @@
 (rf/reg-event-db
  :set-overlay
  (fn [db [_ mode]]
-   (assoc db :overlay/mode mode)))
+   (assoc db :overlay-mode mode)))
 
 (rf/reg-event-db
  :set-highlight
  (fn [db [_ mode]]
-   (assoc db :highlight/mode mode)))
+   (assoc db :highlight-mode mode)))
 
 (rf/reg-event-db
  :set-stake
  (fn [db [_ mode]]
-   (assoc db :stake/mode mode)))
+   (assoc db :stake-mode mode)))
 
 (rf/reg-event-db
  :hover/start
