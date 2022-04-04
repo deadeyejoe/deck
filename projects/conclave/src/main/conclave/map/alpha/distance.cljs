@@ -1,16 +1,16 @@
-(ns conclave.map.distance
+(ns conclave.map.alpha.distance
   (:require [taoensso.tufte :as tufte :refer-macros (defnp)]
             [conclave.map.core :as core]
             [conclave.tiles.core :as tile]
             [conclave.utils.utils :refer [transform-values]]))
 
 (defn move-cost-dynamic [tile]
-  (cond 
+  (cond
     (:anomaly tile)  (case (:anomaly tile)
-                      :asteroid-field 1.5
-                      :gravity-rift 1
-                      :nebula 2
-                      :supernova 9000.1)
+                       :asteroid-field 1.5
+                       :gravity-rift 1
+                       :nebula 2
+                       :supernova 9000.1)
     (tile/red? tile) 1.2 ;; empty tile
     :else            1))
 
@@ -44,10 +44,10 @@
          result
          (if (< distance (get result coordinate ##Inf))
            (let [updated-distance (+ (get move-cost-map coordinate) distance)]
-               (recur (assoc result coordinate distance)
-                      (reduce (fn [q coord] (conj q [updated-distance coord (get neighbour-map coord)]))
-                              (pop visit-queue)
-                              neighbours)))
+             (recur (assoc result coordinate distance)
+                    (reduce (fn [q coord] (conj q [updated-distance coord (get neighbour-map coord)]))
+                            (pop visit-queue)
+                            neighbours)))
            (recur result
                   (pop visit-queue))))))))
 

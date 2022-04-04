@@ -1,4 +1,4 @@
-(ns conclave.map.constraints
+(ns conclave.map.alpha.constraints
   (:require [conclave.map.core :as core]
             [conclave.utils.hex :as hex]
             [conclave.map.layout :as layout]

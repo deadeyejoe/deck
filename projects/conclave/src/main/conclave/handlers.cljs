@@ -4,7 +4,6 @@
             [conclave.map.core :as map]
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as map.opt]
-            [conclave.map.optimization :as opt]
             [conclave.map.layout :as layout]
             [conclave.utils.random :as random]
             [conclave.tiles.core :as tile]

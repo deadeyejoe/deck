@@ -1,9 +1,9 @@
-(ns conclave.map.score
+(ns conclave.map.alpha.score
   (:require [conclave.map.core :as core]
             [conclave.map.distance :as distance]
             [conclave.tiles.core :as tile]
             [conclave.utils.utils :refer [transform-values]]
-[conclave.utils.score :as util-score]
+            [conclave.utils.score :as util-score]
             [taoensso.tufte :as tufte :refer-macros (defnp)]
             [clojure.spec.alpha :as s]))
 

@@ -1,7 +1,6 @@
 (ns conclave.map.beta.score
   (:require [conclave.map.core :as core]
             [conclave.map.layout :as layout]
-            [conclave.map.distance :as distance]
             [conclave.tiles.core :as tile]
             [conclave.utils.score :as util-score]
             [taoensso.tufte :as tufte :refer-macros (defnp)]

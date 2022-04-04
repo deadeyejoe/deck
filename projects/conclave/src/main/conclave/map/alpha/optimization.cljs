@@ -1,4 +1,4 @@
-(ns conclave.map.optimization
+(ns conclave.map.alpha.optimization
   (:require [conclave.map.core :as core]
             [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
@@ -37,27 +37,27 @@
                (recur current-map rest)))
            (recur current-map rest)))))))
 
-(defnp go 
+(defnp go
   ([galaxy-map swaps] (go galaxy-map swaps ##Inf))
   ([galaxy-map swaps limit]
    (go galaxy-map swaps limit
        (calculate-constraint-score galaxy-map)
        (calculate-variance-score galaxy-map)))
   ([galaxy-map swaps limit constraint-score variance-score]
-    (loop [current-map galaxy-map
-           [current-swap & rest :as swaps-remaining] swaps
-           constraint-score constraint-score
-           variance-score variance-score
-           iteration 1]
-      (if (or (< limit iteration) (nil? current-swap))
-        [current-map (seq swaps-remaining) constraint-score variance-score]
-        (let [new-map (apply core/swap-tiles current-map current-swap)
-              new-constraint-score (calculate-constraint-score new-map)
-              new-variance-score (calculate-variance-score new-map)]
-          (if (and (<= new-constraint-score constraint-score)
-                   (<= new-variance-score variance-score))
-            (recur new-map     rest new-constraint-score new-variance-score (inc iteration))
-            (recur current-map rest constraint-score     variance-score (inc iteration))))))))
+   (loop [current-map galaxy-map
+          [current-swap & rest :as swaps-remaining] swaps
+          constraint-score constraint-score
+          variance-score variance-score
+          iteration 1]
+     (if (or (< limit iteration) (nil? current-swap))
+       [current-map (seq swaps-remaining) constraint-score variance-score]
+       (let [new-map (apply core/swap-tiles current-map current-swap)
+             new-constraint-score (calculate-constraint-score new-map)
+             new-variance-score (calculate-variance-score new-map)]
+         (if (and (<= new-constraint-score constraint-score)
+                  (<= new-variance-score variance-score))
+           (recur new-map     rest new-constraint-score new-variance-score (inc iteration))
+           (recur current-map rest constraint-score     variance-score (inc iteration))))))))
 
 (comment
   (def sample-map (-> (core/build layout/eight-player)
@@ -67,16 +67,16 @@
   (def cs (calculate-constraint-score sample-map))
   (def vs (calculate-variance-score sample-map))
   (tufte/add-basic-println-handler!
-    {:format-pstats-opts {:columns [:n-calls :p50 :mean :clock :total]
-                       :format-id-fn name}})
+   {:format-pstats-opts {:columns [:n-calls :p50 :mean :clock :total]
+                         :format-id-fn name}})
   (let [new-map (-> (core/build layout/eight-player)
-                       (core/populate "ABCDE"))
+                    (core/populate "ABCDE"))
         sample-map (assoc new-map
                           :hs-distances
                           (distance/hs-distances new-map {:movement-score :static}))
         swaps (core/generate-swap-list sample-map "ABCDE")]
     #_(profile {} (go sample-map swaps 50))
-    
+
     (-> (profiled {} (go sample-map swaps 100))
         second
         (tufte/format-pstats {:columns [:n-calls :p50 :mean :clock :total]})

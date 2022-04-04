@@ -5,7 +5,6 @@
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
             [conclave.map.layout :as layout]
-            [conclave.map.score :as map.score]
             [conclave.map.beta.constraint :as constraint]
             [conclave.map.beta.stake :as stake]
             [conclave.map.beta.score :as score]

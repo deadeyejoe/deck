@@ -6,7 +6,6 @@
             [conclave.utils.utils :as utils]
             [conclave.handlers]
             [conclave.subs :as subs]
-            [conclave.worker]
             [conclave.tiles.core :as tile]
             [conclave.view.map.controls :as map-controls]
             [conclave.view.common :as common]
