@@ -43,6 +43,11 @@
 (defn coin-toss [seed]
   (even? (first (generator (coerce-seed seed)))))
 
+(defn random-seed []
+  (->> (. js/Date now)
+       (sample (map char (range 65 91)) 6)
+       (apply str)))
+
 (comment
   (let [l (range 0 10)]
     [(sample l 2 5)

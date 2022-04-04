@@ -8,6 +8,8 @@
             [conclave.subs]
             [conclave.worker]
             [conclave.tiles.core :as tile]
+            [conclave.view.map.controls :as map-controls]
+            [conclave.view.common :as common]
             [conclave.view.player-summary :as player-summary]))
 
 ;; Assume flat top.
@@ -49,67 +51,31 @@
      [:img (merge {:src (str "images/" (tile/image tile))}
                   (when (or highlighted? selected?) {:height "95%" :width "95%"}))]]))
 
-(defn button [value dispatch]
-  [:input {:type "button"
-           :value value
-           :class ["m-1" "text-gray-900"]
-           :on-click #(rf/dispatch dispatch)}])
-
-(defn value [label query-vector]
-  (let [sub @(rf/subscribe query-vector)]
-    [:div
-     {:class ["flex" "justify-between"]}
-     [:div (str label ":")]
-     [:div sub]]))
-
-(defn text-input [sub-query build-dispatch]
-  (let [sub @(rf/subscribe sub-query)]
-    [:input {:type "text"
-             :value sub
-             :on-change #(rf/dispatch-sync (-> % .-target .-value build-dispatch))
-             :class ["rounded" "back" "text-gray-200" "bg-gray-600"]}]))
-
-(defn map-controls []
-  (let [processing? @(rf/subscribe [:processing?])
-        done        @(rf/subscribe [:progress/done])
-        total       @(rf/subscribe [:progress/total])
-        percent     @(rf/subscribe [:progress/percent])]
-    [:div {:class ["flex" "flex-col" "justify-center"]}
-     [:div "Map controls"]
-     [:div "Seed: "
-      [text-input [:seed] #(vector :seed/set %)]]
-     [button "Generate Raw" [:map/generate-raw]]
-     [button "Generate Optimized" [:map/generate-optimized]]
-     [button "Generate Random" [:map/generate-random]]
-     (when processing? [:div (str "Processing " done " of " total " (" percent "% complete)")])
-     [value "Constraint " [:score/constraint]]
-     [value "Variance " [:score/variance]]]))
-
 (defn highlight-controls []
   (let [mode @(rf/subscribe [:highlight/mode])
         target @(rf/subscribe [:hovered])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Highlight Mode: " mode]
      [:div "Target: " (vect/->display target)]
-     [button "Single" [:set-highlight :single]]
-     [button "Adjacent" [:set-highlight :adjacent]]]))
+     [common/button "Single" [:set-highlight :single]]
+     [common/button "Adjacent" [:set-highlight :adjacent]]]))
 
 (defn overlay-controls []
   (let [mode @(rf/subscribe [:overlay/mode])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Overlay Mode: " mode]
-     [button "None" [:set-overlay :none]]
-     [button "Tile Number" [:set-overlay :tile-number]]
-     [button "Coordinates" [:set-overlay :coordinates]]
-     [button "Res/Inf" [:set-overlay :res-inf]]
-     [button "Wormhole" [:set-overlay :wormhole]]
-     [button "Distance Score" [:set-overlay :distance-score]]
-     [button "Highest Stake" [:set-overlay :highest-stake]]]))
+     [common/button "None" [:set-overlay :none]]
+     [common/button "Tile Number" [:set-overlay :tile-number]]
+     [common/button "Coordinates" [:set-overlay :coordinates]]
+     [common/button "Res/Inf" [:set-overlay :res-inf]]
+     [common/button "Wormhole" [:set-overlay :wormhole]]
+     [common/button "Distance Score" [:set-overlay :distance-score]]
+     [common/button "Highest Stake" [:set-overlay :highest-stake]]]))
 
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
    [:div {:class ["absolute" "left-0" "inset-y-0" "flex" "flex-col" "justify-around"]}
-    [map-controls]
+    [map-controls/component]
     [highlight-controls]
     [overlay-controls]]
    [:div {:class ["absolute" "right-0" "inset-y-0" "flex" "flex-col" "justify-around" "w-1/6" "mr-10"]}
