@@ -58,6 +58,9 @@
 (defn coordinate->tile [galaxy-map coordinate]
   (get-in galaxy-map [:tiles coordinate]))
 
+(defn coordinate->tile-key [galaxy-map coordinate]
+  (get-in galaxy-map [:tiles coordinate :key]))
+
 (defn tile->coordinate [galaxy-map tile]
   (get-in galaxy-map [:tiles-reverse (or (:key tile) tile)]))
 

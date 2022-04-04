@@ -21,11 +21,17 @@
    (assoc db :seed seed)))
 
 (rf/reg-event-db
+ :map/raw
+ (fn [{:keys [seed] :as db} _ev]
+   (let [raw (map.build/create seed)]
+     (db/set-map db raw))))
+
+(rf/reg-event-db
  :map/generate
  (fn [{:keys [seed] :as db} _ev]
-   (let [map (map.build/create seed)
-         swaps (map/generate-swap-list map seed)
-         [generated _ _] (map.opt/optimize map swaps)]
+   (let [raw (map.build/create seed)
+         swaps (map/generate-swap-list raw seed)
+         [generated _ _] (map.opt/optimize raw swaps)]
      (db/set-map db generated))))
 
 (rf/reg-event-db

@@ -18,35 +18,61 @@
 (def constraints {:anomalies       {:tiles tile/anomalies
                                     :min-distance-allowed 2}
                   :wormhole-alpha  {:tiles tile/wormholes-alpha
-                                    :min-distance-allowed 3}
+                                    :distance-threshold 4
+                                    :min-distance-allowed 2}
                   :wormhole-beta   {:tiles tile/wormholes-beta
-                                    :min-distance-allowed 3}
+                                    :distance-threshold 4
+                                    :min-distance-allowed 2}
                   :legendaries     {:tiles tile/legendaries
                                     :min-distance-allowed 3}
                   :supernovae      {:tiles tile/supernovae
-                                    :min-distance-allowed 3}
+                                    :distance-threshold 4
+                                    :min-distance-allowed 2}
                   :nebulae         {:tiles tile/nebulae
-                                    :min-distance-allowed 3}
+                                    :min-distance-allowed 2}
                   :gravity-rifts   {:tiles tile/gravity-rifts
-                                    :min-distance-allowed 3}})
+                                    :min-distance-allowed 2}})
+
+(defn distance->score [{:keys [distance-threshold min-distance-allowed]
+                        :or {distance-threshold 0}
+                        :as constraint} distance]
+  (cond
+    (< distance min-distance-allowed) 100
+    (<= min-distance-allowed distance distance-threshold) (inc (- distance-threshold distance))
+    (< distance-threshold distance) 0))
+
+(->> (range 7)
+     (map (juxt identity
+                (partial distance->score (:wormhole-alpha constraints)))))
 
 (defn evaluate-constraint [galaxy-map
-                           [constraint-name {:keys [tiles min-distance-allowed]}]]
+                           [constraint-name
+                            {:keys [tiles factor] :as constraint}]]
   (let [{:keys [:mutual-distances]
          :as coordinate-data} (coordinate-dispersion-data galaxy-map tiles)
         distance-violations (->> mutual-distances
-                                 (filter #(< % min-distance-allowed))
-                                 (count))]
-    (when (pos? distance-violations)
+                                 (map (partial distance->score constraint))
+                                 (filter pos-int?))]
+    (when (seq distance-violations)
       (assoc coordinate-data
-             :violations distance-violations
-             :type constraint-name))))
+             :key constraint-name
+             :violations (count distance-violations)
+             :score (apply + distance-violations)))))
 
 (defn evaluate-constraints [galaxy-map]
   (keep (partial evaluate-constraint galaxy-map) constraints))
 
-(defn score [galaxy-map]
+(defn score [constraint-violations]
+  (->> constraint-violations
+       (map :score)
+       (apply +)))
+
+(defn compute-score [galaxy-map]
   (->> galaxy-map
        (evaluate-constraints)
-       (map :violations)
-       (apply +)))
+       (score)))
+
+(defn summary [violations]
+  {:key :total
+   :violations (apply + (map :volations violations))
+   :score (score violations)})

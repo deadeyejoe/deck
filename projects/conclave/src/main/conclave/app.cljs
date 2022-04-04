@@ -78,7 +78,7 @@
     [map-controls/component]
     [highlight-controls]
     [overlay-controls]]
-   [:div {:class ["absolute" "right-0" "inset-y-0" "flex" "flex-col" "justify-around" "w-1/6" "mr-10"]}
+   [:div {:class ["absolute" "right-0" "inset-y-0" "flex" "flex-col" "justify-around" "w-1/5" "mr-10"]}
     [player-summary/component]]
    [origin
     (into

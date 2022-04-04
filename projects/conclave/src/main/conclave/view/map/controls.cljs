@@ -7,4 +7,5 @@
    [:div "Map Controls"]
    [:div "Seed: "
     [common/text-input [subs/seed] #(vector :seed/set %)]]
+   [common/button "Raw" [:map/raw]]
    [common/button "Generate" [:map/generate]]])

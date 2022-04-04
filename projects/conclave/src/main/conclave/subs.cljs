@@ -4,16 +4,15 @@
             [conclave.tiles.core :as tile]
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
-            [conclave.map.distance :as distance]
             [conclave.map.layout :as layout]
             [conclave.map.score :as map.score]
-            [conclave.map.beta.distance :as distance-beta]
+            [conclave.map.beta.constraint :as constraint]
             [conclave.map.beta.stake :as stake]
             [conclave.map.beta.score :as score]
             [conclave.map.summary :as map-summary]
-            [conclave.map.constraints :as constraints]
             [conclave.utils.vector :as vect]
-            [conclave.utils.utils :as utils]))
+            [conclave.utils.utils :as utils]
+            [medley.core :as medley]))
 
 (def seed ::seed)
 (rf/reg-sub
@@ -135,14 +134,46 @@
  (fn [highlight-set [_q coordinate]]
    (contains? highlight-set coordinate)))
 
+(def player-keys ::player-keys)
 (rf/reg-sub
- :player/keys
+ player-keys
  :<- [galaxy-map]
  (fn [galaxy-map _qv]
    (-> galaxy-map :layout layout/player-keys)))
 
+(def player-scores ::player-scores)
 (rf/reg-sub
- :player/summary
+ player-scores
  :<- [galaxy-map]
- (fn [galaxy-map [_q player-key]]
-   (map-summary/player-summary galaxy-map player-key)))
+ (fn [galaxy-map _qv]
+   (->> galaxy-map
+        (score/combined-shares)
+        (score/player-scores)
+        (medley/map-keys (partial map/coordinate->tile-key galaxy-map)))))
+
+(def player-summary ::player-summary)
+(rf/reg-sub
+ player-summary
+ :<- [galaxy-map]
+ :<- [player-scores]
+ (fn [[galaxy-map player-scores] [_q player-key]]
+   (-> (map-summary/player-summary galaxy-map player-key)
+       (assoc :score (get player-scores player-key)))))
+
+(def variance-score ::variance-score)
+(rf/reg-sub
+ variance-score
+ :<- [player-scores]
+ (fn [player-scores _qv]
+   (-> player-scores
+       (score/variance-score)
+       (utils/format-number))))
+
+(def constraint-violations ::constraint-violations)
+(rf/reg-sub
+ constraint-violations
+ :<- [galaxy-map]
+ (fn [galaxy-map _qv]
+   (let [violations (vec (constraint/evaluate-constraints galaxy-map))
+         total (constraint/summary violations)]
+     (conj violations total))))

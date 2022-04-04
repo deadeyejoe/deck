@@ -1,22 +1,43 @@
 (ns conclave.view.player-summary
   (:require [re-frame.core :as rf]
+            [conclave.subs :as subs]
             [conclave.view.icons :as icons]
-            [conclave.tiles.core :as tile]))
+            [conclave.tiles.core :as tile]
+            [conclave.utils.utils :as utils]
+            [conclave.view.common :as common]))
 
 (defn summary-row [key]
-  (let [summary @(rf/subscribe [:player/summary key])]
-    [:div {:class ["flex" "justify-around" "mb-1"]}
-     [:div {:class ["w-2/12"]} key]
-     [:div {:class ["w-2/12"]} (:total/resources summary)]
-     [:div {:class ["w-2/12"]} (:total/influence summary)]
-     [:div {:class ["flex" "justify-start" "w-1/2"]}
-      (map icons/trait->img (:total/traits summary))]
-     [:div {:class ["flex" "justify-end" "w-1/3"]}
-      (map icons/specialty->img (:total/specialty summary))]]))
+  (let [{:keys [:score
+                :total/resources
+                :total/influence
+                :total/traits
+                :total/specialty] :as summary} @(rf/subscribe [subs/player-summary key])]
+    [:div {:class ["flex" "justify-around"]}
+     [:div {:class ["w-1/12"]} key]
+     [:div {:class ["w-1/4"]} (utils/format-number score)]
+     [:div {:class ["w-1/12"]} resources]
+     [:div {:class ["w-1/12"]} influence]
+     [:div {:class ["flex" "justify-start" "w-1/4"]}
+      (map icons/trait->img traits)]
+     [:div {:class ["flex" "justify-end" "w-1/4"]}
+      (map icons/specialty->img specialty)]]))
+
+(defn constraint [{:keys [key violations score] :as constraint-violation}]
+  [:div {:class ["flex" "justify-between"]}
+   [:div {:class ["flex" "justify-start" "w-1/2"]} key]
+   [:div {:class ["flex" "justify-end" "w-1/4"]} violations]
+   [:div {:class ["flex" "justify-end" "w-1/4"]} score]])
 
 (defn component []
-  (let [player-keys @(rf/subscribe [:player/keys])]
-    [:div {:class ["flex" "flex-col" "justify-center"]}
+  (let [player-keys @(rf/subscribe [subs/player-keys])
+        constraint-violations @(rf/subscribe [subs/constraint-violations])]
+    [:div {:class ["flex" "flex-col" "justify-center"  "mb-1"]}
      [:div "Player Summary"]
      (doall
-      (map summary-row player-keys))]))
+      (map summary-row player-keys))
+     [common/labeled-value "Variance" [subs/variance-score]]
+     [constraint {:key "Constraints: "
+                  :violations "Violations"
+                  :score "Score"}]
+     (doall
+      (map constraint constraint-violations))]))

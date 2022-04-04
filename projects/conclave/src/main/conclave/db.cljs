@@ -49,4 +49,4 @@
   (assoc db
          :map new-map
          :variance-score (score/compute-variance new-map)
-         :constraint-score (constraint/score new-map)))
+         :constraint-score (constraint/compute-score new-map)))
