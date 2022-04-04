@@ -4,6 +4,7 @@
 .calva
 .cpcache
 .lsp
+.portal/
 .nrepl-port
 .clj-kondo
 *.code-workspace
