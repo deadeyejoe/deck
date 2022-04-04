@@ -15,31 +15,22 @@
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]))
 
+(def seed ::seed)
 (rf/reg-sub
- :seed
+ seed
  (fn [db]
    (:seed db)))
 
+(def galaxy-map ::galaxy-map)
 (rf/reg-sub
- :galaxy-map
+ galaxy-map
  (fn [db _qv]
    (:map db)))
 
+(def processing? ::processing?)
 (rf/reg-sub
- :processing?
+ processing?
  (fn [db] (:processing db)))
-
-(rf/reg-sub
- :progress/done
- (fn [db] (:progress/done db)))
-
-(rf/reg-sub
- :progress/total
- (fn [db] (:progress/total db)))
-
-(rf/reg-sub
- :progress/percent
- (fn [db] (:progress/percent db)))
 
 (rf/reg-sub
  :score/variance
@@ -49,133 +40,109 @@
  :score/constraint
  (fn [db] (:score/constraint db)))
 
+(def tile ::tile)
 (rf/reg-sub
- :tile
- :<- [:galaxy-map]
+ tile
+ :<- [galaxy-map]
  (fn [galaxy-map [_q coordinate]]
    (map/coordinate->tile galaxy-map coordinate)))
 
+(def selected-tile ::selected-tile)
 (rf/reg-sub
- :selected
+ selected-tile
  (fn [db _qv]
    (:selected db)))
 
+(def tile-selected? ::tile-selected)
 (rf/reg-sub
- :selected?
- :<- [:selected]
+ tile-selected?
+ :<- [selected-tile]
  (fn [selected [_q coordinate]]
    (= selected coordinate)))
 
+(def distance-map ::distance-map)
 (rf/reg-sub
- :tile/neighbour-map
- :<- [:galaxy-map]
+ distance-map
+ :<- [galaxy-map]
  (fn [galaxy-map _qv]
-   (distance-beta/neighbour-map galaxy-map)))
+   (:distances galaxy-map)))
 
+(def stake-map ::stake-map)
 (rf/reg-sub
- :tile/distance-map
- :<- [:tile/neighbour-map]
- :<- [:selected]
- (fn [[neighbour-map selected] _qv]
-   (distance-beta/distances-from neighbour-map selected)))
-
-(rf/reg-sub
- :tile/distance-score
- :<- [:tile/distance-map]
- (fn [distance-map [_q coordinate]]
-   (distance-map coordinate)))
-
-(rf/reg-sub
- :tile/distance-map
- :<- [:galaxy-map]
+ stake-map
+ :<- [galaxy-map]
  (fn [galaxy-map _qv]
-   (distance-beta/coordinate->distances galaxy-map)))
+   (:stakes galaxy-map)))
 
-(rf/reg-sub
- :tile/stake-map
- :<- [:galaxy-map]
- :<- [:tile/distance-map]
- (fn [[galaxy-map distance-map] _qv]
-   (stake/stakes-for-map galaxy-map distance-map)))
+(defn highest-stake [galaxy-map coordinate]
+  (when-let [[highest-stake highest-tile-keys] (stake/highest-stake galaxy-map coordinate)]
+    (str (->> highest-tile-keys
+              (interpose ", ")
+              (apply str))
+         ": " (utils/format-number highest-stake))))
 
+(def overlay-mode ::overlay-mode)
 (rf/reg-sub
- :tile/highest-stake
- :<- [:galaxy-map]
- :<- [:tile/stake-map]
- (fn [[galaxy-map stake-map]  [_q coordinate]]
-   (if (stake-map coordinate)
-     (let [hs->stake (stake-map coordinate)
-           [highest-stake highest-entries] (->> hs->stake
-                                                (group-by val)
-                                                (apply max-key key))]
-       (str (->> highest-entries
-                 (map (comp
-                       :key
-                       (partial map/coordinate->tile galaxy-map)
-                       key))
-                 (interpose ", ")
-                 (apply str))
-            ": " (utils/format-number highest-stake)))
-     "")))
-
-(rf/reg-sub
- :overlay/mode
+ overlay-mode
  (fn [db _qv] (:overlay-mode db)))
 
+(def overlay-content ::overlay-content)
 (rf/reg-sub
- :overlay/content
+ overlay-content
  (fn [[_q coordinate] _dv]
-   [(rf/subscribe [:overlay/mode])
-    (rf/subscribe [:tile coordinate])
-    (rf/subscribe [:selected])
-(rf/subscribe [:tile/distance-map])
-    (rf/subscribe [:tile/highest-stake coordinate])])
- (fn [[mode tile selected distance-map highest-stake] [_q coordinate]]
-   (if (= mode :coordinates)
-     (vect/->display coordinate)
-     (if (tile/home? tile)
-       (-> tile :key str str/upper-case)
-       (case mode
-         :coordinates (vect/->display coordinate)
-         :tile-number (tiles-view/number tile)
-         :res-inf     (tiles-view/res-inf tile)
-         :wormhole    (tiles-view/wormhole tile)
-         :distance-score          (get-in distance-map [selected coordinate])
-         :highest-stake           highest-stake
-         nil)))))
+   [(rf/subscribe [galaxy-map])
+    (rf/subscribe [overlay-mode])
+    (rf/subscribe [selected-tile])])
+ (fn [[{:keys [distances] :as galaxy-map} mode selected] [_q coordinate]]
+   (let [tile (map/coordinate->tile galaxy-map coordinate)]
+     (case mode
+       :coordinates (vect/->display coordinate)
+       :distance-score (get-in distances [selected coordinate])
+       (if (tile/home? tile)
+         (-> tile :key str str/upper-case)
+         (case mode
+           :tile-number   (tiles-view/number tile)
+           :res-inf       (tiles-view/res-inf tile)
+           :wormhole      (tiles-view/wormhole tile)
+           :highest-stake (highest-stake galaxy-map coordinate)
+           nil))))))
 
+(def highlight-mode ::highlight-mode)
 (rf/reg-sub
- :highlight/mode
+ highlight-mode
  (fn [db _qv] (:highlight-mode db)))
 
+(def hovered ::hovered)
 (rf/reg-sub
- :hovered
+ hovered
  (fn [db _qv] (:hovered db)))
 
+(def highlight-set ::highlight-set)
 (rf/reg-sub
- :highlight-set
- :<- [:galaxy-map]
- :<- [:highlight/mode]
- :<- [:hovered]
+ highlight-set
+ :<- [galaxy-map]
+ :<- [highlight-mode]
+ :<- [hovered]
  (fn [[galaxy-map mode hovered] _qv]
    (case mode
      :adjacent (into #{} (map/adjacent galaxy-map hovered))
      #{hovered})))
 
+(def tile-highlighted? ::tile-highlighted?)
 (rf/reg-sub
- :highlighted?
- :<- [:highlight-set]
+ tile-highlighted?
+ :<- [highlight-set]
  (fn [highlight-set [_q coordinate]]
    (contains? highlight-set coordinate)))
 
 (rf/reg-sub
  :player/keys
- :<- [:galaxy-map]
+ :<- [galaxy-map]
  (fn [galaxy-map _qv]
    (-> galaxy-map :layout layout/player-keys)))
 
 (rf/reg-sub
  :player/summary
- :<- [:galaxy-map]
+ :<- [galaxy-map]
  (fn [galaxy-map [_q player-key]]
    (map-summary/player-summary galaxy-map player-key)))

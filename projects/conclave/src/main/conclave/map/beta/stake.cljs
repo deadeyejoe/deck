@@ -48,3 +48,12 @@
                 (core/populate "ABCDE"))
         distances (distance/coordinate->distances map)]
     (stakes-for-map map distances)))
+
+(defn highest-stake [{:keys [stakes] :as galaxy-map} coordinate]
+  (when-let [system->stake (get stakes coordinate)]
+    (let [[highest-stake highest-entries] (some->> system->stake
+                                                   (group-by val)
+                                                   (apply max-key key))
+          highest-entry-keys (mapv (comp :key (partial core/coordinate->tile galaxy-map) key)
+                                   highest-entries)]
+      [highest-stake highest-entry-keys])))

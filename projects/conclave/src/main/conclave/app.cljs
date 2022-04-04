@@ -5,7 +5,7 @@
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]
             [conclave.handlers]
-            [conclave.subs]
+            [conclave.subs :as subs]
             [conclave.worker]
             [conclave.tiles.core :as tile]
             [conclave.view.map.controls :as map-controls]
@@ -27,16 +27,16 @@
 (defn epsilon [v] (* v 0.99))
 
 (defn hex-overlay [coordinate]
-  (let [content @(rf/subscribe [:overlay/content coordinate])]
+  (let [content @(rf/subscribe [subs/overlay-content coordinate])]
     [:div {:class ["absolute" "bg-black" "text-white"
                    "top-1/2" "left-1/2" "transform" "-translate-x-1/2" "-translate-y-1/2"]}
      content]))
 
 (defn hex-tile [size coordinate]
   (let [[x-offset y-offset] (hex/coordinate->offset (epsilon size) coordinate)
-        tile @(rf/subscribe [:tile coordinate])
-        highlighted? @(rf/subscribe [:highlighted? coordinate])
-        selected? @(rf/subscribe [:selected? coordinate])]
+        tile @(rf/subscribe [subs/tile coordinate])
+        highlighted? @(rf/subscribe [subs/tile-highlighted? coordinate])
+        selected? @(rf/subscribe [subs/tile-selected? coordinate])]
     [:div {:class (concat ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2"
                            "flex" "justify-center" "items-center"]
                           (when highlighted?  ["bg-blue-600" "z-highlight"])
@@ -52,8 +52,8 @@
                   (when (or highlighted? selected?) {:height "95%" :width "95%"}))]]))
 
 (defn highlight-controls []
-  (let [mode @(rf/subscribe [:highlight/mode])
-        target @(rf/subscribe [:hovered])]
+  (let [mode @(rf/subscribe [subs/highlight-mode])
+        target @(rf/subscribe [subs/hovered])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Highlight Mode: " mode]
      [:div "Target: " (vect/->display target)]
@@ -61,7 +61,7 @@
      [common/button "Adjacent" [:set-highlight :adjacent]]]))
 
 (defn overlay-controls []
-  (let [mode @(rf/subscribe [:overlay/mode])]
+  (let [mode @(rf/subscribe [subs/overlay-mode])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Overlay Mode: " mode]
      [common/button "None" [:set-overlay :none]]

@@ -3,6 +3,7 @@
             [conclave.db :as db]
             [conclave.map.core :as map]
             [conclave.map.beta.build :as map.build]
+            [conclave.map.beta.optimization :as map.opt]
             [conclave.map.optimization :as opt]
             [conclave.map.layout :as layout]
             [conclave.utils.random :as random]
@@ -20,51 +21,12 @@
    (assoc db :seed seed)))
 
 (rf/reg-event-db
- :map/generate-raw
- (fn [db _ev]
-   (->> (:seed db)
-        (map.build/create)
-        (db/set-map db))))
-
-(rf/reg-event-db
- :map/generate-optimized
- (fn [db _ev]
-   (worker/generate (:seed db)
-                    {:on-result   (fn [p]
-                                    (rf/dispatch [:map/finish p]))
-                     :on-progress (fn [p]
-                                    (rf/dispatch [:map/progress p]))})
-   (assoc db :processing true)))
-
-(defn random-seed []
-  (->> (. js/Date now)
-       (random/sample (map char (range 65 91)) 6)
-       (apply str)))
-
-(rf/reg-event-fx
- :map/generate-random
- (fn [{:keys [db]} _ev]
-   {:db (assoc db :seed (random-seed))
-    :fx [[:dispatch [:map/generate-optimized]]]}))
-
-(rf/reg-event-db
- :map/progress
- (fn [db [_en {:keys [total done progress map] :as p}]]
-   (-> db
-       (db/set-map map)
-       (assoc :progress/total total
-              :progress/done done
-              :progress/percent progress))))
-
-(rf/reg-event-db
- :map/finish
- (fn [db [_ev {:keys [map] :as p}]]
-   (-> db
-       (db/set-map map)
-       (dissoc :processing
-               :progress/total
-               :progress/done
-               :progress/percent))))
+ :map/generate
+ (fn [{:keys [seed] :as db} _ev]
+   (let [map (map.build/create seed)
+         swaps (map/generate-swap-list map seed)
+         [generated _ _] (map.opt/optimize map swaps)]
+     (db/set-map db generated))))
 
 (rf/reg-event-db
  :set-overlay
