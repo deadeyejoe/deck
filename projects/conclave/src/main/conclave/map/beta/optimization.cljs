@@ -12,8 +12,7 @@
 
 
 (defn variance-tolerated? [new-variance current-variance]
-  (or (< new-variance current-variance)
-      #_(< (- new-variance current-variance) 0.001)))
+  (< new-variance current-variance))
 
 (defn constraint-tolerated? [new-constraint current-constraint]
   (or (< new-constraint current-constraint)

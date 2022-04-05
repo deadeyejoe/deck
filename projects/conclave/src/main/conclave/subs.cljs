@@ -84,14 +84,29 @@
  overlay-mode
  (fn [db _qv] (:overlay-mode db)))
 
+(rf/reg-sub
+ ::tile-scores
+ :<- [galaxy-map]
+ (fn [galaxy-map _qv]
+   (score/tile-scores galaxy-map)))
+
+(rf/reg-sub
+ ::tile-shares
+ :<- [galaxy-map]
+ :<- [::tile-scores]
+ (fn [[galaxy-map tile-scores] _qv]
+   (score/tile-shares galaxy-map tile-scores)))
+
 (def overlay-content ::overlay-content)
 (rf/reg-sub
  overlay-content
  (fn [[_q coordinate] _dv]
    [(rf/subscribe [galaxy-map])
     (rf/subscribe [overlay-mode])
-    (rf/subscribe [selected-tile])])
- (fn [[{:keys [distances] :as galaxy-map} mode selected] [_q coordinate]]
+    (rf/subscribe [selected-tile])
+    (rf/subscribe [::tile-scores])
+    (rf/subscribe [::tile-shares])])
+ (fn [[{:keys [distances] :as galaxy-map} mode selected tile-scores tile-shares] [_q coordinate]]
    (let [tile (map/coordinate->tile galaxy-map coordinate)]
      (case mode
        :coordinates (vect/->display coordinate)
@@ -102,6 +117,9 @@
            :tile-number   (tiles-view/number tile)
            :res-inf       (tiles-view/res-inf tile)
            :wormhole      (tiles-view/wormhole tile)
+           :tile-score    (tile-scores coordinate)
+           :tile-share    (when-let [share (get-in tile-shares [coordinate selected])]
+                            (utils/format-number share))
            :highest-stake (highest-stake galaxy-map coordinate)
            nil))))))
 
@@ -146,8 +164,8 @@
  :<- [galaxy-map]
  (fn [galaxy-map _qv]
    (->> galaxy-map
-        (score/combined-shares)
-        (score/player-scores)
+        (score/tile-scores)
+        (score/player-scores galaxy-map)
         (medley/map-keys (partial map/coordinate->tile-key galaxy-map)))))
 
 (def player-summary ::player-summary)

@@ -7,11 +7,11 @@
             [conclave.view.common :as common]))
 
 (defn summary-row [key]
-  (let [{:keys [:score
-                :total/resources
-                :total/influence
-                :total/traits
-                :total/specialty] :as summary} @(rf/subscribe [subs/player-summary key])]
+  (let [{:keys [score
+                resources
+                influence
+                traits
+                specialties] :as summary} @(rf/subscribe [subs/player-summary key])]
     [:div {:class ["flex" "justify-around"]}
      [:div {:class ["w-1/12"]} key]
      [:div {:class ["w-1/4"]} (utils/format-number score)]
@@ -20,7 +20,7 @@
      [:div {:class ["flex" "justify-start" "w-1/4"]}
       (map icons/trait->img traits)]
      [:div {:class ["flex" "justify-end" "w-1/4"]}
-      (map icons/specialty->img specialty)]]))
+      (map icons/specialty->img specialties)]]))
 
 (defn constraint [{:keys [key violations score] :as constraint-violation}]
   [:div {:class ["flex" "justify-between"]}

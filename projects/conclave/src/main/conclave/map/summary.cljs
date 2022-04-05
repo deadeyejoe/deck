@@ -4,12 +4,12 @@
 (defn collect-vector [result vector]
   (into (or result []) vector))
 
-(defn collect [result tile]
+(defn collect [result {:keys [total] :as tile}]
   (-> result
-      (update :total/resources + (:total/resources tile))
-      (update :total/influence + (:total/influence tile))
-      (update :total/traits    collect-vector (:total/traits tile))
-      (update :total/specialty collect-vector (:total/specialty tile))))
+      (update :resources + (:resources total))
+      (update :influence + (:influence total))
+      (update :traits    collect-vector (:traits total))
+      (update :specialties collect-vector (:specialties total))))
 
 (defn player-summary [galaxy-map player-key]
   (let [home-c (core/tile->coordinate galaxy-map player-key)
@@ -17,5 +17,5 @@
     (-> (->> neighbours
              (map (partial core/coordinate->tile galaxy-map))
              (reduce collect {}))
-        (update :total/traits sort)
-        (update :total/specialty sort))))
+        (update :traits (comp vec sort))
+        (update :specialties (comp vec sort)))))

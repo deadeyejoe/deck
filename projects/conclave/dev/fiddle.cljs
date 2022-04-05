@@ -5,11 +5,11 @@
             [conclave.map.beta.optimization :as optimization]
             [conclave.map.beta.score :as score]
             [conclave.map.beta.stake :as stake]
-            [conclave.map.beta.summary :as summary]
-            [conclave.hex :as hex]
+            [conclave.map.summary :as summary]
+            [conclave.utils.hex :as hex]
             [conclave.map.core :as core]
             [conclave.map.layout :as layout]
-            [conclave.score :as util-score]
+            [conclave.utils.score :as util-score]
             [conclave.tiles.core :as tile]
             [clojure.math.combinatorics :as combo]
             [clojure.spec.alpha :as s]
@@ -20,18 +20,6 @@
 (def swaps (core/generate-swap-list sample-map "ABCDE"))
 (first swaps)
 
-(s/valid? (s/map-of ::layout/coordinate
-                    (s/map-of keyword?
-                              (s/map-of ::layout/coordinate
-                                        number?)))
-          (score/shares-for-map sample-map))
-
-(->> (score/combined-shares sample-map)
-     (score/invert-share-map)
-     (medley/map-vals #(->> %
-                            score/apply-weights
-                            vals
-                            (apply +))))
 (comment
   "Demonstrating that you don't need to consider variation for constrained tiles
    (assuming that the min-distance is 3)"
@@ -45,11 +33,23 @@
 (constraint/evaluate-constraints sample-map)
 (constraint/score sample-map)
 
-(score/combined-shares sample-map)
+(let [tile (-> (core/coordinate->tile sample-map [0 1 -1])
+               (:total)
+               (select-keys (keys score/default-weights)))]
+  (merge-with *
+              (select-keys score/default-weights (keys tile))
+              tile))
+(score/weighted-tile (core/coordinate->tile sample-map [0 1 -1]))
+(score/tile-score (core/coordinate->tile sample-map [0 1 -1]))
+
+(->> (score/tile-scores sample-map)
+     (score/player-scores sample-map))
 
 (core/coordinate->tile sample-map [-1 1 0])
 (-> (apply core/swap-tiles sample-map (first swaps))
     (core/coordinate->tile [0 -1 1]))
+
+(summary/player-summary sample-map :p1)
 
 (drop 1 (optimization/to-triple sample-map))
 (drop 1 (optimization/to-triple (apply core/swap-tiles sample-map (second swaps))))

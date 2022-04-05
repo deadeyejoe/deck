@@ -30,39 +30,31 @@
                                    ::planets
                                    ::pok]))
 
-(defn enrich [key raw-tile]
-  (let [planets (:planets raw-tile)
-        all-traits (->> planets
-                        (map :trait)
+(defn totals [{:keys [planets anomaly] :as raw-tile}]
+  (let [all-traits (->> planets
+                        (keep :trait)
                         (remove nil?)
                         (sort)
                         (vec))]
-    (merge raw-tile
-           {:key key
-            :total/planets    (count planets)
-            :total/resources  (->> planets
-                                   (map :resources)
-                                   (apply +))
-            :total/influence  (->> planets
-                                   (map :influence)
-                                   (apply +))
-            :total/traits     all-traits
-            :total/cultural   (->> all-traits
-                                   (filter #{:cultural})
-                                   count)
-            :total/industrial (->> all-traits
-                                   (filter #{:industrial})
-                                   count)
-            :total/hazardous  (->> all-traits
-                                   (filter #{:hazardous})
-                                   count)
-            :total/specialty  (->> planets
-                                   (map :specialty)
-                                   (remove nil?)
-                                   sort
-                                   vec)}
-           (when (some :legendary planets)
-             {:legendary true}))))
+    (merge
+     {:planets (count planets)
+      :resources (apply + (map :resources planets))
+      :influence (apply + (map :influence planets))
+      :traits all-traits
+      :cultural (count (keep #{:cultural} all-traits))
+      :industrial (count (keep #{:industrial} all-traits))
+      :hazardous (count (keep #{:hazardous} all-traits))
+      :specialties (keep :specialty planets)
+      :tech (count (keep :specialty planets))
+      :legendary (count (keep :legendary planets))}
+     (when anomaly {anomaly 1}))))
+
+(defn enrich [key {:keys [planets] :as raw-tile}]
+  (merge raw-tile
+         {:key key
+          :total (totals raw-tile)}
+         (when (some :legendary planets)
+           {:legendary true})))
 
 (def key->tiles (reduce-kv #(assoc %1 %2 (enrich %2 %3))
                            {}

@@ -68,6 +68,8 @@
      [common/button "Coordinates" [:set-overlay :coordinates]]
      [common/button "Res/Inf" [:set-overlay :res-inf]]
      [common/button "Wormhole" [:set-overlay :wormhole]]
+     [common/button "Tile Score" [:set-overlay :tile-score]]
+     [common/button "Tile Share" [:set-overlay :tile-share]]
      [common/button "Distance Score" [:set-overlay :distance-score]]
      [common/button "Highest Stake" [:set-overlay :highest-stake]]]))
 

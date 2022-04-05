@@ -16,6 +16,8 @@
                     :res-inf
                     :wormhole
                     :distance-score
+                    :tile-score
+                    :tile-share
                     :highest-stake])
 (s/def ::overlay-mode (set overlay-modes))
 

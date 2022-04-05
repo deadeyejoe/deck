@@ -6,42 +6,8 @@
             [taoensso.tufte :as tufte :refer-macros (defnp)]
             [medley.core :as medley]))
 
-(defn scale-stakes [hs->stake factor]
-  (medley/map-vals (partial * factor) hs->stake))
-
-(defn tech-factor [tile]
-  (if (seq (:total/specialty tile)) 1 0))
-
-(defn legendary-factor [tile]
-  (if (:legendary tile) 1 0))
-
-(defn tile-share [hs->stake tile]
-  (merge {:resource   (scale-stakes hs->stake (:total/resources tile))
-          :influence  (scale-stakes hs->stake (:total/influence tile))
-          :cultural   (scale-stakes hs->stake (:total/cultural tile))
-          :industrial (scale-stakes hs->stake (:total/industrial tile))
-          :hazardous  (scale-stakes hs->stake (:total/hazardous tile))}
-         (when (seq (:total/specialty tile))
-           {:tech hs->stake})
-         (when (:legendary tile)
-           {:legendary hs->stake})
-         (when-let [anomaly-type (:anomaly tile)]
-           {anomaly-type hs->stake})))
-
-(defn shares-for-map [{:keys [stakes] :as galaxy-map}]
-  (medley/map-kv-vals (fn [coordinate hs->stake]
-                        (->> coordinate
-                             (core/coordinate->tile galaxy-map)
-                             (tile-share hs->stake)))
-                      stakes))
-
-(defnp combined-shares [galaxy-map]
-  (->> (shares-for-map galaxy-map)
-       (vals)
-       (apply merge-with (partial merge-with +))))
-
 (def default-weights
-  {:resource 8
+  {:resources 8
    :influence 6
    :tech 8
    :cultural 4
@@ -49,13 +15,43 @@
    :hazardous 4
    :legendary 8
    :gravity-rift 1
-   :nebula -8
-   :asteroid-field -16
-   :supernova -40})
+   :nebula -5
+   :asteroid-field -10
+   :supernova -30})
 
-(defn apply-weights
-  ([map] (apply-weights map default-weights))
-  ([weights map] (merge-with * weights map)))
+(defn weighted-tile
+  ([tile] (weighted-tile default-weights tile))
+  ([weights {:keys [total] :as tile}]
+   (merge-with *
+               (select-keys total (keys weights))
+               (select-keys weights (keys total)))))
+
+(defn tile-score
+  ([tile] (tile-score default-weights tile))
+  ([weights tile]
+   (->> (weighted-tile weights tile)
+        (vals)
+        (apply +))))
+
+(defn tile-scores [{:keys [tiles] :as galaxy}]
+  (medley/map-vals (partial tile-score) tiles))
+
+(defn tile-shares [{:keys [stakes] :as galaxy-map} tile-scores]
+  (merge-with (fn [hs->stake score]
+                (medley/map-vals (partial * score) hs->stake))
+              stakes
+              (select-keys tile-scores (keys stakes))))
+
+(defn tile-shares-2 [{:keys [stakes] :as galaxy-map} tile-scores]
+  (medley/map-kv-vals (fn [coordinate hs->stake]
+                        (let [score (tile-scores coordinate)]
+                          (medley/map-vals (partial * score) hs->stake)))
+                      stakes))
+
+(defn player-scores [{:keys [stakes] :as galaxy-map} tile-scores]
+  (->> (tile-shares galaxy-map tile-scores)
+       (vals)
+       (apply merge-with +)))
 
 (defn invert-share-map [share-map]
   (->> share-map
@@ -64,21 +60,11 @@
                                hs->share)))
        (apply merge-with merge)))
 
-(defn player-scores
-  ([combined-shares] (player-scores combined-shares default-weights))
-  ([combined-shares weights]
-   (->> combined-shares
-        (invert-share-map)
-        (medley/map-vals #(->> %
-                               (apply-weights weights)
-                               (vals)
-                               (apply +))))))
-
 (defn variance-score [player-scores]
   (-> player-scores vals util-score/variation))
 
 (defnp compute-variance [galaxy-map]
-  (-> galaxy-map
-      (combined-shares)
-      (player-scores)
-      (variance-score)))
+  (->> galaxy-map
+       (tile-scores)
+       (player-scores galaxy-map)
+       (variance-score)))

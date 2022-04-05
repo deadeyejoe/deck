@@ -18,19 +18,15 @@
 (def constraints {:anomalies       {:tiles tile/anomalies
                                     :min-distance-allowed 2}
                   :wormhole-alpha  {:tiles tile/wormholes-alpha
-                                    :distance-threshold 4
+                                    :distance-threshold 3
                                     :min-distance-allowed 2}
                   :wormhole-beta   {:tiles tile/wormholes-beta
-                                    :distance-threshold 4
+                                    :distance-threshold 3
                                     :min-distance-allowed 2}
                   :legendaries     {:tiles tile/legendaries
                                     :min-distance-allowed 3}
                   :supernovae      {:tiles tile/supernovae
-                                    :distance-threshold 4
-                                    :min-distance-allowed 2}
-                  :nebulae         {:tiles tile/nebulae
-                                    :min-distance-allowed 2}
-                  :gravity-rifts   {:tiles tile/gravity-rifts
+                                    :distance-threshold 3
                                     :min-distance-allowed 2}})
 
 (defn distance->score [{:keys [distance-threshold min-distance-allowed]
@@ -40,10 +36,6 @@
     (< distance min-distance-allowed) 100
     (<= min-distance-allowed distance distance-threshold) (inc (- distance-threshold distance))
     (< distance-threshold distance) 0))
-
-(->> (range 7)
-     (map (juxt identity
-                (partial distance->score (:wormhole-alpha constraints)))))
 
 (defn evaluate-constraint [galaxy-map
                            [constraint-name
