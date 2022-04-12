@@ -64,13 +64,11 @@
 (defn tile->coordinate [galaxy-map tile]
   (get-in galaxy-map [:tiles-reverse (or (:key tile) tile)]))
 
-(defn adjacent-wormholes [galaxy-map coordinate]
-  (->> coordinate
-       (coordinate->tile galaxy-map)
-       (tile/matching-wormholes)
-       (map :key)
-       (map (partial tile->coordinate galaxy-map))
-       (remove #(or (nil? %) (= coordinate %)))))
+(defn origin-distance-map [galaxy-map]
+  (-> galaxy-map :distances (get hex/origin)))
+
+(defn distance-to-origin [galaxy-map coordinate]
+  (get-in galaxy-map [:distances hex/origin coordinate]))
 
 (defn in-bounds? [galaxy-map]
   (fn [coordinate]
@@ -78,6 +76,16 @@
 
 (defn neighbouring [galaxy-map coordinate]
   (filter (in-bounds? galaxy-map) (hex/neighbours coordinate)))
+
+;; TODO retire these notions of 'adjacent'
+
+(defn adjacent-wormholes [galaxy-map coordinate]
+  (->> coordinate
+       (coordinate->tile galaxy-map)
+       (tile/matching-wormholes)
+       (map :key)
+       (map (partial tile->coordinate galaxy-map))
+       (remove #(or (nil? %) (= coordinate %)))))
 
 (defn adjacent [galaxy-map coordinate]
   (let [neighbours (hex/neighbours coordinate)

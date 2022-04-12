@@ -10,9 +10,9 @@
   {:resources 8
    :influence 6
    :tech 8
-   :cultural 4
-   :industrial 2
-   :hazardous 4
+   :cultural 2
+   :industrial 1
+   :hazardous 2
    :legendary 8
    :gravity-rift 1
    :nebula -5

@@ -186,11 +186,11 @@
        (score/variance-score)
        (utils/format-number))))
 
-(def constraint-violations ::constraint-violations)
+(def constraint-contributions ::constraint-contributions)
 (rf/reg-sub
- constraint-violations
+ constraint-contributions
  :<- [galaxy-map]
  (fn [galaxy-map _qv]
-   (let [violations (vec (constraint/evaluate-constraints galaxy-map))
-         total (constraint/summary violations)]
-     (conj violations total))))
+   (let [contributions (vec (constraint/evaluate-constraints galaxy-map))
+         total (constraint/summary contributions)]
+     (conj contributions total))))

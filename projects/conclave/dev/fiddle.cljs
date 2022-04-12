@@ -6,6 +6,8 @@
             [conclave.map.beta.score :as score]
             [conclave.map.beta.stake :as stake]
             [conclave.map.summary :as summary]
+            [conclave.map.weight :as weight]
+
             [conclave.utils.hex :as hex]
             [conclave.map.core :as core]
             [conclave.map.layout :as layout]
@@ -51,14 +53,9 @@
 
 (summary/player-summary sample-map :p1)
 
-(drop 1 (optimization/to-triple sample-map))
-(drop 1 (optimization/to-triple (apply core/swap-tiles sample-map (second swaps))))
-(let [[m v c] (optimization/to-triple sample-map)]
-  (drop 1 (optimization/step m v c (second swaps))))
+(def weights {:supernova (weight/to-origin 4 4 dec)
+              :asteroid-field (weight/from-origin 4 4 dec)})
 
-(-> (profiled {} (optimization/optimize sample-map swaps))
-    second
-    (tufte/format-pstats {:columns [:n-calls :p50 :mean :clock :total]})
-    println)
-
-(summary/player-summary sample-map :p1)
+(core/origin-distance-map sample)
+(weight/weight-for-distance 3 weights)
+(weight/weight-map sample-map weights)

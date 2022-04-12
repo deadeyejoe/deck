@@ -16,7 +16,7 @@
 
 (defn constraint-tolerated? [new-constraint current-constraint]
   (or (< new-constraint current-constraint)
-      (= (- new-constraint current-constraint) 1)))
+      (<= (Math/abs (- new-constraint current-constraint)) 1)))
 
 (defnp step [galaxy-map current-variance current-constraint swap]
   (let [new-galaxy (apply core/swap-tiles galaxy-map swap)

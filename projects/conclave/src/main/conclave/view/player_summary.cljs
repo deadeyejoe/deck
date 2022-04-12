@@ -22,22 +22,22 @@
      [:div {:class ["flex" "justify-end" "w-1/4"]}
       (map icons/specialty->img specialties)]]))
 
-(defn constraint [{:keys [key violations score] :as constraint-violation}]
+(defn constraint [{:keys [key contributions score] :as constraint-violation}]
   [:div {:class ["flex" "justify-between"]}
    [:div {:class ["flex" "justify-start" "w-1/2"]} key]
-   [:div {:class ["flex" "justify-end" "w-1/4"]} violations]
+   [:div {:class ["flex" "justify-end" "w-1/4"]} contributions]
    [:div {:class ["flex" "justify-end" "w-1/4"]} score]])
 
 (defn component []
   (let [player-keys @(rf/subscribe [subs/player-keys])
-        constraint-violations @(rf/subscribe [subs/constraint-violations])]
+        constraint-contributions @(rf/subscribe [subs/constraint-contributions])]
     [:div {:class ["flex" "flex-col" "justify-center"  "mb-1"]}
      [:div "Player Summary"]
      (doall
       (map summary-row player-keys))
      [common/labeled-value "Variance" [subs/variance-score]]
      [constraint {:key "Constraints: "
-                  :violations "Violations"
+                  :contributions "Contributions"
                   :score "Score"}]
      (doall
-      (map constraint constraint-violations))]))
+      (map constraint constraint-contributions))]))
