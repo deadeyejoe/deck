@@ -9,56 +9,74 @@
             [conclave.tiles.core :as tile]
             [conclave.worker :as worker]))
 
+(def initialize ::initialize)
 (rf/reg-event-fx
- :initialize
+ initialize
  (fn [_con [_en seed]]
    {:db (db/initialize seed)}))
 
+(def set-seed ::set-seed)
 (rf/reg-event-db
- :seed/set
+ set-seed
  (fn [db [_en seed]]
    (assoc db :seed seed)))
 
+(def raw-map ::raw-map)
 (rf/reg-event-db
- :map/raw
+ raw-map
  (fn [{:keys [seed] :as db} _ev]
    (let [raw (map.build/create seed)]
      (db/set-map db raw))))
 
+(def generate-map ::generate-map)
 (rf/reg-event-db
- :map/generate
+ generate-map
  (fn [{:keys [seed] :as db} _ev]
    (let [raw (map.build/create seed)
          swaps (map/generate-swap-list raw seed)
          [generated _ _] (map.opt/optimize raw swaps)]
      (db/set-map db generated))))
 
+(def optimize-map ::optimize-map)
 (rf/reg-event-db
- :set-overlay
+ optimize-map
+ (fn [{:keys [map seed] :as db} _ev]
+   (let [swaps (map/generate-swap-list map seed)
+         [generated _ _] (map.opt/optimize map swaps)]
+     (db/set-map db generated))))
+
+(def set-overlay ::set-overlay)
+(rf/reg-event-db
+ set-overlay
  (fn [db [_ mode]]
    (assoc db :overlay-mode mode)))
 
+(def set-highlight ::set-highlight)
 (rf/reg-event-db
- :set-highlight
+ set-highlight
  (fn [db [_ mode]]
    (assoc db :highlight-mode mode)))
 
+(def set-stake ::set-stake)
 (rf/reg-event-db
- :set-stake
+ set-stake
  (fn [db [_ mode]]
    (assoc db :stake-mode mode)))
 
+(def set-hover ::set-hover)
 (rf/reg-event-db
- :hover/start
+ set-hover
  (fn [db [_name coordinate]]
    (assoc db :hovered coordinate)))
 
+(def clear-hover ::clear-hover)
 (rf/reg-event-db
- :hover/clear
+ clear-hover
  (fn [db _event]
    (dissoc db :hovered)))
 
+(def select-tile ::select-tile)
 (rf/reg-event-db
- :tile/select
+ select-tile
  (fn [db [_en coordinate]]
    (assoc db :selected coordinate)))

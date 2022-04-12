@@ -4,7 +4,7 @@
             [conclave.utils.hex :as hex]
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]
-            [conclave.handlers]
+            [conclave.handlers :as handlers]
             [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
             [conclave.view.map.controls :as map-controls]
@@ -40,8 +40,8 @@
                            "flex" "justify-center" "items-center"]
                           (when highlighted?  ["bg-blue-600" "z-highlight"])
                           (when selected? ["bg-white" "z-highlight"]))
-           :on-mouse-enter #(rf/dispatch [:hover/start coordinate])
-           :on-click #(rf/dispatch [:tile/select coordinate])
+           :on-mouse-enter #(rf/dispatch [handlers/set-hover coordinate])
+           :on-click #(rf/dispatch [handlers/select-tile coordinate])
            :style (merge (hex-style (if selected? (* size 1.1) size))
                          {:margin-left (str x-offset "mm")
                           :margin-top (str y-offset "mm")
@@ -56,22 +56,22 @@
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Highlight Mode: " mode]
      [:div "Target: " (vect/->display target)]
-     [common/button "Single" [:set-highlight :single]]
-     [common/button "Adjacent" [:set-highlight :adjacent]]]))
+     [common/button "Single" [handlers/set-highlight :single]]
+     [common/button "Adjacent" [handlers/set-highlight :adjacent]]]))
 
 (defn overlay-controls []
   (let [mode @(rf/subscribe [subs/overlay-mode])]
     [:div {:class ["flex" "flex-col" "justify-center"]}
      [:div "Overlay Mode: " mode]
-     [common/button "None" [:set-overlay :none]]
-     [common/button "Tile Number" [:set-overlay :tile-number]]
-     [common/button "Coordinates" [:set-overlay :coordinates]]
-     [common/button "Res/Inf" [:set-overlay :res-inf]]
-     [common/button "Wormhole" [:set-overlay :wormhole]]
-     [common/button "Tile Score" [:set-overlay :tile-score]]
-     [common/button "Tile Share" [:set-overlay :tile-share]]
-     [common/button "Distance Score" [:set-overlay :distance-score]]
-     [common/button "Highest Stake" [:set-overlay :highest-stake]]]))
+     [common/button "None" [handlers/set-overlay :none]]
+     [common/button "Tile Number" [handlers/set-overlay :tile-number]]
+     [common/button "Coordinates" [handlers/set-overlay :coordinates]]
+     [common/button "Res/Inf" [handlers/set-overlay :res-inf]]
+     [common/button "Wormhole" [handlers/set-overlay :wormhole]]
+     [common/button "Tile Score" [handlers/set-overlay :tile-score]]
+     [common/button "Tile Share" [handlers/set-overlay :tile-share]]
+     [common/button "Distance Score" [handlers/set-overlay :distance-score]]
+     [common/button "Highest Stake" [handlers/set-overlay :highest-stake]]]))
 
 (defn ui []
   [:div {:class ["text-gray-200" "h-screen" "w-screen" "bg-gray-900" "flex" "justify-center" "items-center"]}
@@ -99,5 +99,5 @@
   (render))
 
 (defn init []
-  (rf/dispatch-sync [:initialize "ABCDE"])
+  (rf/dispatch-sync [handlers/initialize "ABCDE"])
   (render))
