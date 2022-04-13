@@ -1,30 +1,35 @@
 (ns conclave.worker
-  (:require [clojure.core.async :as async]
-            [conclave.worker.client :as client]
-            [conclave.worker.core :as worker])
-  (:require-macros [cljs.core.async.macros :refer [go-loop]]))
+  (:require [conclave.worker.instance :as worker]
+            [conclave.map.beta.build :as map.build]
+            [conclave.map.beta.distance :as distance]
+            [conclave.map.beta.optimization :as opt]
+            [conclave.map.core :as map]
+            [conclave.map.layout :as layout]
+            [conclave.tiles.core :as tile]
+            [taoensso.tufte :as tufte :refer-macros [defnp profiled]]))
 
-(defn spawn [arguments
-             {:keys [on-result on-progress on-error]
-              :or   {on-progress (constantly nil)
-                     on-error (constantly nil)}}]
-  (let [worker (worker/create "assets/app/js/worker.js")
-        result-chan (client/do-with-worker! worker arguments)]
-    (go-loop [{:keys [state] :as result} (async/<! result-chan)]
-      (case state
-        :success    (do  (tap> result)
-                         (on-result result)
-                         (.terminate worker)
-                         result)
-        :processing (do
-                      (tap> result)
-                      (on-progress result)
-                      (recur (async/<! result-chan)))
-        :error      (do (on-error result)
-                        result)))))
+(defnp optimize [{:keys [map seed] :as request}]
+  (let [swaps (map/generate-swap-list map seed)]
+    {:map (first (opt/optimize map swaps))}))
 
-(defn generate [seed handlers]
-  (spawn {:arguments {:seed seed :profile true :limit 50}}
-         handlers))
+(defnp generate [{:keys [seed] :as request}]
+  (let [galaxy-map (map.build/create seed)
+        swaps (map/generate-swap-list galaxy-map seed)]
+    {:map (first (opt/optimize galaxy-map swaps))}))
 
-(comment (generate "FGHIJ" (constantly nil)))
+(defn profile-request [f]
+  (let [[result pstats] (profiled {} (f))]
+    (assoc result
+           :pstats
+           (tufte/format-pstats pstats {:columns [:n-calls :p50 :mean :clock :total]}))))
+
+(defn handler [{:keys [profile action] :as request}]
+  (let [action-handler #(case action
+                          :optimize (optimize request)
+                          :generate (generate request))]
+    (if profile
+      (profile-request action-handler)
+      (action-handler))))
+
+(defn main []
+  (worker/bootstrap handler))

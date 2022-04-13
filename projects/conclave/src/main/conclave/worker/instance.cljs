@@ -23,8 +23,8 @@
 
 (defn- handle-request [handler event]
   (try
-    (let [{:keys [arguments]} (core/unwrap event)
-          result (handler arguments)]
+    (let [payload (core/unwrap event)
+          result (handler payload)]
       (if (chan? result)
         (go (respond! (assoc (<! result) :state :success)))
         (respond! (assoc result :state :success))))

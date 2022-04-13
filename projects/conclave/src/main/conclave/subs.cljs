@@ -30,6 +30,11 @@
  processing?
  (fn [db] (:processing db)))
 
+(def worker-mode ::worker-mode)
+(rf/reg-sub
+ worker-mode
+ (fn [db] (:worker-mode db)))
+
 (rf/reg-sub
  :score/variance
  (fn [db] (utils/format-number (:score/variance db))))

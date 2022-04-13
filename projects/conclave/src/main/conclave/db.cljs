@@ -28,6 +28,7 @@
 (s/def ::selected ::layout/coordinate)
 
 (s/def ::processing boolean?)
+(s/def ::worker-mode #{:async :sync})
 (s/def ::constraint-score number?)
 (s/def ::variance-score number?)
 
@@ -35,6 +36,7 @@
                       ::map
                       ::overlay-mode
                       ::highlight-mode
+                      ::worker-mode
                       ::hovered
                       ::selected
                       ::constraint-score
@@ -44,6 +46,7 @@
 (defn initialize [seed]
   {:seed seed
    :map (map.build/create seed)
+   :worker-mode :sync
    :overlay-mode :none
    :highlight-mode :single})
 
@@ -52,3 +55,12 @@
          :map new-map
          :variance-score (score/compute-variance new-map)
          :constraint-score (constraint/compute-score new-map)))
+
+(defn processing! [db]
+  (assoc db :processing true))
+
+(defn processing? [db]
+  (:processing db))
+
+(defn finished! [db]
+  (assoc db :processing false))

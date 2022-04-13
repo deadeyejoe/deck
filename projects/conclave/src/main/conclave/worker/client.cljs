@@ -1,7 +1,7 @@
 (ns conclave.worker.client
   (:require [cljs.core.async :refer [chan sliding-buffer <! >! put!]]
             [conclave.worker.core :as core])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (defn- response-handler [result-chan]
   (fn [event]
@@ -19,3 +19,23 @@
         (put! result-chan {:state :error, :error e})))
 
     result-chan))
+
+(defn spawn [arguments
+             {:keys [on-result on-progress on-error]
+              :or   {on-progress (constantly nil)
+                     on-error (constantly nil)}}]
+  (let [worker (core/create "assets/app/js/worker.js")
+        result-chan (do-with-worker! worker arguments)]
+    (go-loop [{:keys [state] :as result} (<! result-chan)]
+      (case state
+        :success    (do  (tap> result)
+                         (on-result result)
+                         (.terminate worker)
+                         result)
+        :processing (do
+                      (tap> result)
+                      (on-progress result)
+                      (recur (<! result-chan)))
+        :error      (do (tap> result)
+                        (on-error result)
+                        result)))))

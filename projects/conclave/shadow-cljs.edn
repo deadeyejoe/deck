@@ -7,7 +7,10 @@
    :asset-path "assets/app/js"
    :modules {:shared {:entries []}
              :main {:init-fn conclave.app/init
-                    :depends-on #{:shared}}}
+                    :depends-on #{:shared}}
+             :worker {:init-fn conclave.worker/main
+                      :depends-on #{:shared}
+                      :web-worker true}}
 ;;    :devtools {:preloads [day8.re-frame-10x.preload]}
 ;;    :dev {:compiler-options
 ;;          {:closure-defines
