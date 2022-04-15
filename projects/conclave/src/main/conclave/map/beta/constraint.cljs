@@ -18,10 +18,12 @@
 
 (def constraints {:anomalies       {:tiles tile/anomalies
                                     :type :min-distance
-                                    :min-distance-allowed 2}
+                                    :min-distance-allowed 2
+                                    :factor -100}
                   :wormhole-distance {:tiles tile/wormholes
                                       :type :min-distance
-                                      :min-distance-allowed 2}
+                                      :min-distance-allowed 2
+                                      :factor -100}
                   :wormhole-ring   {:tiles tile/wormholes
                                     :type :ring
                                     :ring->score {1 4
@@ -32,13 +34,11 @@
                   :wormhole-alpha  {:tiles tile/wormholes-alpha
                                     :type :proportional
                                     :lower-threshold 2
-                                    :upper-threshold 5
-                                    :factor -1}
+                                    :upper-threshold 5}
                   :wormhole-beta   {:tiles tile/wormholes-beta
                                     :type :proportional
                                     :lower-threshold 2
-                                    :upper-threshold 5
-                                    :factor -1}
+                                    :upper-threshold 5}
                   :legendaries     {:tiles tile/legendaries
                                     :type :proportional}
                   :supernovae      {:tiles tile/supernovae
@@ -69,7 +69,7 @@
    {:keys [min-distance-allowed] :as constraint}]
   (let [contributions (filter #(< % min-distance-allowed) mutual-distances)]
     {:contributions (count contributions)
-     :score (* 100 (count contributions))}))
+     :score (count contributions)}))
 
 (defmethod constraint-score :proportional
   [galaxy-map
