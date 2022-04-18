@@ -9,14 +9,19 @@
 (defn summary-row [key]
   (let [{:keys [score
                 resources
+                optimal-resources
                 influence
+                optimal-influence
                 traits
-                specialties] :as summary} @(rf/subscribe [subs/player-summary key])]
-    [:div {:class ["flex" "justify-around"]}
+                specialties
+                problems
+                valid] :as summary} @(rf/subscribe [subs/player-summary key])]
+    [:div (merge {:class ["flex" "justify-around" (when-not valid "bg-red-600")]}
+                 (when-not valid {:title (->> problems (interpose ",") (apply str))}))
      [:div {:class ["w-1/12"]} key]
-     [:div {:class ["w-1/4"]} (utils/format-number score)]
-     [:div {:class ["w-1/12"]} resources]
-     [:div {:class ["w-1/12"]} influence]
+     [:div {:class ["w-1/12"]} (int score)]
+     [:div {:class ["w-1/6"]} (str optimal-resources "/" optimal-influence)]
+     [:div {:class ["w-1/12"]} (str "(" resources "/" influence ")")]
      [:div {:class ["flex" "justify-start" "w-1/4"]}
       (map icons/trait->img traits)]
      [:div {:class ["flex" "justify-end" "w-1/4"]}

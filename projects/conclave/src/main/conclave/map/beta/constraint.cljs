@@ -19,11 +19,7 @@
 (def constraints {:anomalies       {:tiles tile/anomalies
                                     :type :min-distance
                                     :min-distance-allowed 2
-                                    :factor -100}
-                  :wormhole-distance {:tiles tile/wormholes
-                                      :type :min-distance
-                                      :min-distance-allowed 2
-                                      :factor -100}
+                                    :factor -10}
                   :wormhole-ring   {:tiles tile/wormholes
                                     :type :ring
                                     :ring->score {1 4
@@ -34,11 +30,19 @@
                   :wormhole-alpha  {:tiles tile/wormholes-alpha
                                     :type :proportional
                                     :lower-threshold 2
-                                    :upper-threshold 5}
+                                    :upper-threshold 5
+                                    :factor 2}
                   :wormhole-beta   {:tiles tile/wormholes-beta
                                     :type :proportional
                                     :lower-threshold 2
-                                    :upper-threshold 5}
+                                    :upper-threshold 5
+                                    :factor 2}
+                  :specialties {:tiles tile/with-specialties
+                                :type :min-distance
+                                :min-distance-allowed 2
+                                ;; :lower-threshold 2
+                                ;; :upper-threshold 3
+                                :factor -1}
                   :legendaries     {:tiles tile/legendaries
                                     :type :proportional}
                   :supernovae      {:tiles tile/supernovae
@@ -78,7 +82,7 @@
   (let [contributions (->> mutual-distances
                            (keep (fn [distance]
                                    (when (<= lower-threshold distance upper-threshold)
-                                     (- distance lower-threshold))))
+                                     (- distance (dec lower-threshold)))))
                            (filter pos-int?))]
     {:contributions (count contributions)
      :score (apply + contributions)}))

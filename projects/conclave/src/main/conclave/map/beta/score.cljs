@@ -7,17 +7,25 @@
             [medley.core :as medley]))
 
 (def default-weights
-  {:resources 8
-   :influence 6
-   :tech 8
-   :cultural 2
-   :industrial 1
-   :hazardous 2
-   :legendary 8
-   :gravity-rift 1
+  {:optimal-resources 8
+   :optimal-influence 8
+   :tech 4
+   :supernova -20
    :nebula -5
-   :asteroid-field -10
-   :supernova -30})
+   :asteroid-field -10}
+  #_{:resources 0
+     :optimal-resources 8
+     :influence 0
+     :optimal-influence 8
+     :tech 8
+     :cultural 2
+     :industrial 1
+     :hazardous 2
+     :legendary 8
+     :gravity-rift 1
+     :nebula -5
+     :asteroid-field -10
+     :supernova -20})
 
 (defn weighted-tile
   ([tile] (weighted-tile default-weights tile))
@@ -38,7 +46,7 @@
 
 (defn tile-shares [{:keys [stakes] :as galaxy-map} tile-scores]
   (merge-with (fn [hs->stake score]
-                (medley/map-vals (partial * score) hs->stake))
+                (medley/map-vals (fn [stake] (if (= 1 stake) score 0)) hs->stake))
               stakes
               (select-keys tile-scores (keys stakes))))
 

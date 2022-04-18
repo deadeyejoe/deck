@@ -15,6 +15,7 @@
                     :coordinates
                     :res-inf
                     :wormhole
+                    :tech
                     :distance-score
                     :tile-score
                     :tile-share
@@ -22,7 +23,8 @@
 (s/def ::overlay-mode (set overlay-modes))
 
 (def highlight-modes [:single
-                      :adjacent])
+                      :adjacent
+                      :slice])
 (s/def ::highlight-mode (set highlight-modes))
 (s/def ::hovered ::layout/coordinate)
 (s/def ::selected ::layout/coordinate)

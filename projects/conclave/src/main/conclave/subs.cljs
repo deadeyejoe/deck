@@ -122,6 +122,7 @@
            :tile-number   (tiles-view/number tile)
            :res-inf       (tiles-view/res-inf tile)
            :wormhole      (tiles-view/wormhole tile)
+           :tech          (tiles-view/tech tile)
            :tile-score    (tile-scores coordinate)
            :tile-share    (when-let [share (get-in tile-shares [coordinate selected])]
                             (utils/format-number share))
@@ -147,6 +148,7 @@
  (fn [[galaxy-map mode hovered] _qv]
    (case mode
      :adjacent (into #{} (map/adjacent galaxy-map hovered))
+     :slice (into #{} (get-in galaxy-map [:slices hovered]))
      #{hovered})))
 
 (def tile-highlighted? ::tile-highlighted?)

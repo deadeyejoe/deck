@@ -57,7 +57,8 @@
      [:div "Highlight Mode: " mode]
      [:div "Target: " (vect/->display target)]
      [common/button "Single" [handlers/set-highlight :single]]
-     [common/button "Adjacent" [handlers/set-highlight :adjacent]]]))
+     [common/button "Adjacent" [handlers/set-highlight :adjacent]]
+     [common/button "Slice" [handlers/set-highlight :slice]]]))
 
 (defn overlay-controls []
   (let [mode @(rf/subscribe [subs/overlay-mode])]
@@ -68,6 +69,7 @@
      [common/button "Coordinates" [handlers/set-overlay :coordinates]]
      [common/button "Res/Inf" [handlers/set-overlay :res-inf]]
      [common/button "Wormhole" [handlers/set-overlay :wormhole]]
+     [common/button "Tech" [handlers/set-overlay :tech]]
      [common/button "Tile Score" [handlers/set-overlay :tile-score]]
      [common/button "Tile Share" [handlers/set-overlay :tile-share]]
      [common/button "Distance Score" [handlers/set-overlay :distance-score]]

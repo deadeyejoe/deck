@@ -11,3 +11,8 @@
 
 (defn wormhole [tile]
   (case (:wormhole tile) :alpha "Alpha" :beta "Beta" nil))
+
+(defn tech [tile]
+  (->> (get-in tile [:total :specialties])
+       (interpose ",")
+       (apply str)))

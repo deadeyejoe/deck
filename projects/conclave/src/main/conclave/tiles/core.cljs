@@ -40,6 +40,8 @@
      {:planets (count planets)
       :resources (apply + (map :resources planets))
       :influence (apply + (map :influence planets))
+      :optimal-resources (apply + (map :optimal-resources planets))
+      :optimal-influence (apply + (map :optimal-influence planets))
       :traits all-traits
       :cultural (count (keep #{:cultural} all-traits))
       :industrial (count (keep #{:industrial} all-traits))
@@ -49,12 +51,21 @@
       :legendary (count (keep :legendary planets))}
      (when anomaly {anomaly 1}))))
 
+(defn enrich-planet [{:keys [resources influence specialty] :as planet}]
+  (merge planet
+         (cond
+           (< influence resources) {:optimal-resources resources :optimal-influence 0}
+           (< resources influence) {:optimal-resources 0 :optimal-influence influence}
+           (= resources influence) {:optimal-resources (/ resources 2)
+                                    :optimal-influence (/ influence 2)})))
+
 (defn enrich [key {:keys [planets] :as raw-tile}]
-  (merge raw-tile
-         {:key key
-          :total (totals raw-tile)}
-         (when (some :legendary planets)
-           {:legendary true})))
+  (let [with-enriched-planets (update raw-tile :planets (partial map enrich-planet))]
+    (merge with-enriched-planets
+           {:key key
+            :total (totals with-enriched-planets)}
+           (when (some :legendary planets)
+             {:legendary true}))))
 
 (def key->tiles (reduce-kv #(assoc %1 %2 (enrich %2 %3))
                            {}
@@ -115,7 +126,13 @@
 (def legendaries (filter legendary? tiles))
 
 (defn has-planets? [tile] (-> tile :planets seq))
+(def with-planets (filter has-planets? tiles))
+
 (defn no-planets? [tile] (-> tile :planets empty?))
+(def without-planets (filter no-planets? tiles))
+
+(defn has-specialties? [tile] (-> tile :total :specialties seq))
+(def with-specialties (filter has-specialties? tiles))
 
 (defn matching-wormholes [tile]
   (let [wormhole (:wormhole tile)]

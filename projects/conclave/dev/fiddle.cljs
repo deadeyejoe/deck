@@ -5,9 +5,8 @@
             [conclave.map.beta.optimization :as optimization]
             [conclave.map.beta.score :as score]
             [conclave.map.beta.stake :as stake]
+            [conclave.map.beta.starter :as starter]
             [conclave.map.summary :as summary]
-            [conclave.map.weight :as weight]
-
             [conclave.utils.hex :as hex]
             [conclave.map.core :as core]
             [conclave.map.layout :as layout]
@@ -15,8 +14,11 @@
             [conclave.tiles.core :as tile]
             [clojure.math.combinatorics :as combo]
             [clojure.spec.alpha :as s]
+            [re-frame.db :as rfdb]
             [medley.core :as medley]
             [taoensso.tufte :as tufte :refer-macros (profiled)]))
+
+(def current-map (:map @rfdb/app-db))
 
 (def sample-map (map.build/create "ABCDE"))
 (def swaps (core/generate-swap-list sample-map "ABCDE"))
@@ -53,9 +55,10 @@
 
 (summary/player-summary sample-map :p1)
 
-(def weights {:supernova (weight/to-origin 4 4 dec)
-              :asteroid-field (weight/from-origin 4 4 dec)})
+(core/origin-distance-map sample-map)
 
-(core/origin-distance-map sample)
-(weight/weight-for-distance 3 weights)
-(weight/weight-map sample-map weights)
+(map.build/slice-for (:stakes sample-map) [0 4 -4])
+
+(->> (starter/starter-data-for-player current-map [0 4 -4])
+     (starter/problems-with-start))
+(starter/satisfactory? current-map [0 4 -4])
