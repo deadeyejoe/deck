@@ -1,15 +1,16 @@
 (ns conclave.app
-  (:require [reagent.dom]
-            [re-frame.core :as rf]
-            [conclave.utils.hex :as hex]
-            [conclave.utils.vector :as vect]
-            [conclave.utils.utils :as utils]
-            [conclave.handlers :as handlers]
+  (:require [conclave.handlers :as handlers]
             [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
-            [conclave.view.map.controls :as map-controls]
+            [conclave.utils.hex :as hex]
+            [conclave.utils.utils :as utils]
+            [conclave.utils.vector :as vect]
             [conclave.view.common :as common]
-            [conclave.view.player-summary :as player-summary]))
+            [conclave.view.map.controls :as map-controls]
+            [conclave.view.player-summary :as player-summary]
+            [conclave.worker.client :as worker-client]
+            [reagent.dom]
+            [re-frame.core :as rf]))
 
 ;; Assume flat top.
 ;; Size is length of side, or center to corner
@@ -94,6 +95,8 @@
 
 ;; Init ====================================================
 
+(def noise "foo")
+
 (defn ^:dev/before-load stop [])
 
 (defn ^:dev/after-load start []
@@ -101,5 +104,10 @@
   (render))
 
 (defn init []
+  (rf/dispatch-sync [handlers/initialize "ABCDE"])
+  (render))
+
+(defn init-dev []
+  (worker-client/set-script-location "assets/app/js/worker.js")
   (rf/dispatch-sync [handlers/initialize "ABCDE"])
   (render))

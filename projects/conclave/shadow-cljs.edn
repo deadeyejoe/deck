@@ -6,7 +6,7 @@
    :output-dir "public/assets/app/js"
    :asset-path "assets/app/js"
    :modules {:shared {:entries []}
-             :main {:init-fn conclave.app/init
+             :main {:init-fn conclave.app/init-dev
                     :depends-on #{:shared}}
              :worker {:init-fn conclave.worker/main
                       :depends-on #{:shared}
@@ -17,7 +17,8 @@
 ;;           {"re_frame.trace.trace_enabled_QMARK_" true
 ;;            "goog.DEBUG" false}}}
    :release {:output-dir "release"
-             :asset-path "/"}}
+             :asset-path "/"
+             :modules {:main {:init-fn conclave.app/init}}}}
   :test
   {:target :node-test
    :output-to "target/node-test"

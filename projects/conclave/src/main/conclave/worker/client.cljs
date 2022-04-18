@@ -3,6 +3,11 @@
             [conclave.worker.core :as core])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
+(def script-location (atom "worker.js"))
+
+(defn set-script-location [l]
+  (reset! script-location l))
+
 (defn- response-handler [result-chan]
   (fn [event]
     (go
@@ -24,7 +29,7 @@
              {:keys [on-result on-progress on-error]
               :or   {on-progress (constantly nil)
                      on-error (constantly nil)}}]
-  (let [worker (core/create "assets/app/js/worker.js")
+  (let [worker (core/create @script-location)
         result-chan (do-with-worker! worker arguments)]
     (go-loop [{:keys [state] :as result} (<! result-chan)]
       (case state
