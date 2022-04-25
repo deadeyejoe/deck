@@ -65,11 +65,19 @@
 (def generate-map ::generate-map)
 (rf/reg-event-db
  generate-map
- (fn [{:keys [worker-mode seed] :as db} _ev]
-   (cond
-     (= :sync worker-mode) (sync-generate db)
-     (db/processing? db)   db
-     :when-async-ready     (async-generate db))))
+ (fn [{:keys [worker-mode seed] :as db} [_en mode-override]]
+   (let [mode (or mode-override worker-mode)]
+     (cond
+       (= :sync mode)      (sync-generate db)
+       (db/processing? db) db
+       :when-async-ready   (async-generate db)))))
+
+(def random-map ::random-map)
+(rf/reg-event-fx
+ random-map
+ (fn [{:keys [db] :as ctx} _ev]
+   {:db (assoc db :seed (random/random-seed))
+    :fx [[:dispatch [generate-map :async]]]}))
 
 (defn sync-optimize [{:keys [map seed] :as db}]
   (let [swaps (map/generate-swap-list map seed)
@@ -95,8 +103,11 @@
 (def set-overlay ::set-overlay)
 (rf/reg-event-db
  set-overlay
- (fn [db [_ mode]]
-   (assoc db :overlay-mode mode)))
+ (fn [{:keys [overlay-mode] :as db} [_ new-mode]]
+   (assoc db :overlay-mode
+          (if (= overlay-mode new-mode)
+            :none
+            new-mode))))
 
 (def set-highlight ::set-highlight)
 (rf/reg-event-db
@@ -114,13 +125,24 @@
 (rf/reg-event-db
  set-hover
  (fn [db [_name coordinate]]
-   (assoc db :hovered coordinate)))
+   (-> db
+       (assoc :hovered coordinate)
+       (assoc :highlight-set
+              (db/highlight-set db coordinate)))))
+
+(def highlight-player ::highlight-player)
+(rf/reg-event-db
+ highlight-player
+ (fn [{:keys [map] :as db} [_en player-key]]
+   (let [home-coordinate (map/tile->coordinate map player-key)
+         slice (get-in map [:slices home-coordinate])]
+     (assoc db :highlight-set (set slice)))))
 
 (def clear-hover ::clear-hover)
 (rf/reg-event-db
  clear-hover
  (fn [db _event]
-   (dissoc db :hovered)))
+   (dissoc db :hovered :highlight-set)))
 
 (def select-tile ::select-tile)
 (rf/reg-event-db

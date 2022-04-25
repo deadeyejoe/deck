@@ -20,6 +20,12 @@
 
 (def current-map (:map @rfdb/app-db))
 
+(let [home-c (core/tile->coordinate current-map :p6)
+      slice (get-in current-map [:slices home-c])
+      tiles (map (partial core/coordinate->tile current-map) slice)]
+  (map :wormhole tiles))
+(summary/player-summary current-map :p6)
+
 (def sample-map (map.build/create "ABCDE"))
 (def swaps (core/generate-swap-list sample-map "ABCDE"))
 (first swaps)

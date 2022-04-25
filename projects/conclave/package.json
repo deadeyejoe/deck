@@ -1,5 +1,5 @@
 {
-  "name": "authority",
+  "name": "conclave",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,18 +8,17 @@
     "postcss:build": "cross-env TAILWIND_MODE=build postcss src/css/tailwind.css -o ./public/css/main.css --verbose",
     "postcss:watch": "cross-env TAILWIND_MODE=watch postcss src/css/tailwind.css -o ./public/css/main.css --verbose -w",
     "postcss:release": "cross-env NODE_ENV=production postcss src/css/tailwind.css -o ./release/main.css --verbose",
+    "tailwind:watch": "npx tailwindcss -i ./src/css/tailwind.css -o ./public/css/main.css --watch",
     "dev": "run-p -l *:watch",
     "release": "run-s *:release",
     "deploy": "aws s3 sync --profile personal release/ s3://galactic-conclave"
   },
   "devDependencies": {
-    "@tailwindcss/jit": "^0.1.18",
-    "autoprefixer": "^10.3.1",
+    "autoprefixer": "^10.4.4",
     "cssnano": "^5.0.7",
     "npm-run-all": "^4.1.5",
-    "postcss-cli": "^8.3.1",
     "shadow-cljs": "2.15.1",
-    "tailwindcss": "^2.2.7"
+    "tailwindcss": "^3.0.24"
   },
   "dependencies": {
     "cross-env": "^7.0.3",

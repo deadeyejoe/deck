@@ -142,14 +142,7 @@
 (def highlight-set ::highlight-set)
 (rf/reg-sub
  highlight-set
- :<- [galaxy-map]
- :<- [highlight-mode]
- :<- [hovered]
- (fn [[galaxy-map mode hovered] _qv]
-   (case mode
-     :adjacent (into #{} (map/adjacent galaxy-map hovered))
-     :slice (into #{} (get-in galaxy-map [:slices hovered]))
-     #{hovered})))
+ (fn [db _qv] (:highlight-set db)))
 
 (def tile-highlighted? ::tile-highlighted?)
 (rf/reg-sub

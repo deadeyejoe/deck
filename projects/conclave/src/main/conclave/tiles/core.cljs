@@ -13,8 +13,13 @@
                      not-empty))
 (s/def ::resources nat-int?)
 (s/def ::influence nat-int?)
-(s/def ::specialty #{:biotic :cybernetic :propulsion :warfare})
-(s/def ::trait #{:cultural :hazardous :industrial})
+
+(def specialties [:biotic :cybernetic :propulsion :warfare])
+(s/def ::specialty (set specialties))
+
+(def traits [:cultural :hazardous :industrial])
+(s/def ::trait (set traits))
+
 (s/def ::legendary boolean?)
 (s/def ::planet (s/keys :req-un [::name
                                  ::resources

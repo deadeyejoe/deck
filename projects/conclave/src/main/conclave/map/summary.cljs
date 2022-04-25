@@ -2,8 +2,10 @@
   (:require [conclave.map.core :as core]
             [conclave.map.beta.starter :as starter]))
 
-(defn collect-vector [result vector]
-  (into (or result []) vector))
+(defn collect-nilable [result value]
+  (if value
+    (conj result value)
+    result))
 
 (defn collect [result {:keys [total] :as tile}]
   (-> result
@@ -11,8 +13,10 @@
       (update :optimal-resources + (:optimal-resources total))
       (update :influence + (:influence total))
       (update :optimal-influence + (:optimal-influence total))
-      (update :traits    collect-vector (:traits total))
-      (update :specialties collect-vector (:specialties total))))
+      (update :traits    into (:traits total))
+      (update :specialties into (:specialties total))
+      (update :wormholes collect-nilable (:wormhole tile))
+      (update :legendaries + (:legendary total))))
 
 (defn player-summary [galaxy-map player-key]
   (let [home-c (core/tile->coordinate galaxy-map player-key)
@@ -24,5 +28,6 @@
              (reduce collect {}))
         (update :traits (comp vec sort))
         (update :specialties (comp vec sort))
+        (update :wormholes (comp vec sort))
         (assoc :problems problems
                :valid valid?))))

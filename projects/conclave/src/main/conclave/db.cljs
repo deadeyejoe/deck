@@ -4,7 +4,7 @@
             [conclave.map.beta.constraint :as constraint]
             [conclave.map.beta.score :as score]
             [conclave.map.beta.specs :as map.specs]
-            [conclave.map.core :as core]
+            [conclave.map.core :as map.core]
             [conclave.map.layout :as layout]))
 
 (s/def ::map ::map.specs/instance)
@@ -16,6 +16,7 @@
                     :res-inf
                     :wormhole
                     :tech
+                    :legendary
                     :distance-score
                     :tile-score
                     :tile-share
@@ -26,6 +27,7 @@
                       :adjacent
                       :slice])
 (s/def ::highlight-mode (set highlight-modes))
+(s/def ::highlight-set (s/coll-of ::layout/coordinate))
 (s/def ::hovered ::layout/coordinate)
 (s/def ::selected ::layout/coordinate)
 
@@ -66,3 +68,9 @@
 
 (defn finished! [db]
   (assoc db :processing false))
+
+(defn highlight-set [{:keys [map highlight-mode] :as db} focus-coordinate]
+  (case highlight-mode
+    :adjacent (into #{focus-coordinate} (map.core/adjacent map focus-coordinate))
+    :slice (into #{focus-coordinate} (get-in map [:slices focus-coordinate]))
+    #{focus-coordinate}))

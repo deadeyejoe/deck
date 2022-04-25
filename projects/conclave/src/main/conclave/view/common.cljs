@@ -19,4 +19,4 @@
     [:input {:type "text"
              :value sub
              :on-change #(rf/dispatch-sync (-> % .-target .-value build-dispatch))
-             :class ["rounded" "back" "text-gray-200" "bg-gray-600"]}]))
+             :class ["rounded" "back" "text-gray-200" "bg-gray-600" "w-full"]}]))
