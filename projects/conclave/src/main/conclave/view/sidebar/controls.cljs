@@ -11,9 +11,7 @@
     "Seed: "]
    [:div {:class ["w-1/2" "flex" "justify-end" "items-center"]}
     [common/text-input [subs/seed] #(vector handlers/set-seed %)]]
-   [:div {:class ["bg-gray-400" "border-gray-600" "rounded-sm" "m-1"]
-          :title "Generate a map from the given seed"}
+   [:div {:title "Generate a map from the given seed"}
     [common/button "Generate" [handlers/generate-map :async]]]
-   [:div {:class ["bg-gray-400" "border-gray-600" "rounded-sm" "m-1"]
-          :title "Pick a random seed and generate a map"}
+   [:div {:title "Pick a random seed and generate a map"}
     [common/button "Random" [handlers/random-map]]]])

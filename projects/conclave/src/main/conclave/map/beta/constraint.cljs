@@ -2,8 +2,7 @@
   (:require [conclave.map.core :as core]
             [conclave.tiles.core :as tile]
             [conclave.utils.score :as score-util]
-            [conclave.map.beta.distance :as distance]
-            [clojure.math.combinatorics :as combi]))
+            [conclave.map.beta.distance :as distance]))
 
 (defn coordinate-dispersion-data [{:keys [distances] :as galaxy-map} tiles]
   (let [coordinates (map (comp (partial core/tile->coordinate galaxy-map)
@@ -48,18 +47,18 @@
                   :supernovae      {:tiles tile/supernovae
                                     :type :proportional}})
 
-(defmulti constraint-score (fn [galaxy-map coordinate-data {:keys [type] :as constraint}] type))
+(defmulti constraint-score (fn [_galaxy-map _coordinate-data {:keys [type] :as _constraint}] type))
 
 (defmethod constraint-score :default
-  [galaxy-map
-   {:keys [mutual-distances] :as coordinate-data}
-   constraint]
+  [_galaxy-map
+   _coordinate-data
+   _constraint]
   0)
 
 (defmethod constraint-score :ring
   [galaxy-map
-   {:keys [coordinates] :as coordinate-data}
-   {:keys [ring->score] :as constraint}]
+   {:keys [coordinates] :as _coordinate-data}
+   {:keys [ring->score] :as _constraint}]
   (let [contributions (->> coordinates
                            (keep (partial core/distance-to-origin galaxy-map))
                            (map ring->score)
@@ -68,17 +67,17 @@
      :score (apply + contributions)}))
 
 (defmethod constraint-score :min-distance
-  [galaxy-map
-   {:keys [mutual-distances] :as coordinate-data}
-   {:keys [min-distance-allowed] :as constraint}]
+  [_galaxy-map
+   {:keys [mutual-distances] :as _coordinate-data}
+   {:keys [min-distance-allowed] :as _constraint}]
   (let [contributions (filter #(< % min-distance-allowed) mutual-distances)]
     {:contributions (count contributions)
      :score (count contributions)}))
 
 (defmethod constraint-score :proportional
-  [galaxy-map
-   {:keys [mutual-distances] :as coordinate-data}
-   {:keys [lower-threshold upper-threshold] :or {lower-threshold 0 upper-threshold 10} :as constraint}]
+  [_galaxy-map
+   {:keys [mutual-distances] :as _coordinate-data}
+   {:keys [lower-threshold upper-threshold] :or {lower-threshold 0 upper-threshold 10} :as _constraint}]
   (let [contributions (->> mutual-distances
                            (keep (fn [distance]
                                    (when (<= lower-threshold distance upper-threshold)

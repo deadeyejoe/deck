@@ -18,8 +18,8 @@
                  "w-12" "h-12"
                  "flex" "flex-col" "justify-around" "items-center"]
          :on-click #(rf/dispatch [handlers/set-overlay :res-inf])}
-   [:div {:class ["w-4" "h-4" "bg-amber-400" "border-gray-100" "rounded-xl"]}]
-   [:div {:class ["w-4" "h-4" "bg-cyan-400" "border-gray-100" "rounded-xl"]}]])
+   [:div {:class ["w-1/2"]} icons/resource]
+   [:div {:class ["w-1/2" "mt-1"]} icons/influence]])
 
 (defn tech []
   (->> tile/specialties

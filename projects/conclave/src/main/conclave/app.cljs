@@ -4,6 +4,7 @@
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]
             [conclave.worker.client :as worker-client]
+            [reagent.dom :as rd]
             [re-frame.core :as rf]))
 
 (defn overlay []
@@ -23,8 +24,8 @@
     [sidebar/component]]])
 
 (defn render []
-  (reagent.dom/render [ui]
-                      (js/document.getElementById "app")))
+  (rd/render [ui]
+             (js/document.getElementById "app")))
 
 (defn ^:dev/before-load stop [])
 

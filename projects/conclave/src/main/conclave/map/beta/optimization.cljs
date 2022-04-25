@@ -1,15 +1,9 @@
 (ns conclave.map.beta.optimization
-  (:require [conclave.map.beta.build :as build]
-            [conclave.map.beta.distance :as distance]
-            [conclave.map.beta.constraint :as constraint]
+  (:require [conclave.map.beta.constraint :as constraint]
             [conclave.map.beta.score :as score]
             [conclave.map.beta.starter :as starter]
             [conclave.map.core :as core]
-            [conclave.map.layout :as layout]
-            [conclave.utils.score :as score-util]
-            [conclave.tiles.core :as tile]
-            [clojure.math.combinatorics :as combi]
-            [taoensso.tufte :as tufte :refer-macros (defnp profiled)]))
+            [taoensso.tufte :as tufte :refer-macros [defnp]]))
 
 
 (defn difference [x y]

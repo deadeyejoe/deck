@@ -1,11 +1,8 @@
 (ns conclave.worker
   (:require [conclave.worker.instance :as worker]
             [conclave.map.beta.build :as map.build]
-            [conclave.map.beta.distance :as distance]
             [conclave.map.beta.optimization :as opt]
             [conclave.map.core :as map]
-            [conclave.map.layout :as layout]
-            [conclave.tiles.core :as tile]
             [taoensso.tufte :as tufte :refer-macros [defnp profiled]]))
 
 (defnp optimize [{:keys [map seed] :as request}]

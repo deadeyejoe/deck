@@ -1,13 +1,10 @@
 (ns conclave.ring.core
   (:require [clojure.math.combinatorics :as combo]
             [conclave.map.core :as core]
-            [conclave.map.score :as score]
             [conclave.map.layout :as layout]
             [conclave.tiles.score :as tile.score]
             [conclave.utils :refer [transform-values]]
-[conclave.utils.score :as util.score]
-[conclave.utils.random :as random]
-[conclave.utils.hex :as hex]
+            [conclave.utils.score :as util.score]
             [taoensso.tufte :as tufte :refer-macros (defnp)]))
 
 (defn tiles->share [tiles]

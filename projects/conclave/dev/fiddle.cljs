@@ -19,6 +19,7 @@
             [taoensso.tufte :as tufte :refer-macros (profiled)]))
 
 (def current-map (:map @rfdb/app-db))
+(get-in @rfdb/app-db [:players])
 
 (let [home-c (core/tile->coordinate current-map :p6)
       slice (get-in current-map [:slices home-c])

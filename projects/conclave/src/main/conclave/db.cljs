@@ -6,7 +6,8 @@
             [conclave.map.beta.specs :as map.specs]
             [conclave.map.core :as map.core]
             [conclave.map.layout :as layout]
-            [conclave.player :as player]))
+            [conclave.player :as player]
+            [medley.core :as medley]))
 
 (s/def ::map ::map.specs/instance)
 (s/def ::seed (s/and string?
@@ -88,6 +89,9 @@
 
 (defn update-player-race [db player-key player-race]
   (assoc-in db [:players player-key :race] player-race))
+
+(defn selected-races [{:keys [players] :as _db}]
+  (keep (comp :race val) players))
 
 (defn delete-player [db player-key]
   (update db :players dissoc player-key))

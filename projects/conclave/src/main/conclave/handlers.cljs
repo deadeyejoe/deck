@@ -150,7 +150,7 @@
 (rf/reg-event-db
  toggle-player-edit
  (fn [db [_en]]
-   (update db ::player-edit not)))
+   (update db :player-edit not)))
 
 (def set-player-name ::set-player-name)
 (rf/reg-event-db

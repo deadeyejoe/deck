@@ -60,11 +60,16 @@
       :wormhole (wormhole-content tile)
       nil)))
 
+(defn home-content [{player-key :key :as _tile}]
+  (let [player-name @(rf/subscribe [subs/player-name player-key])]
+    [:div (or player-name
+              (-> player-key name str/upper-case))]))
+
 (defn component [coordinate]
   (let [tile @(rf/subscribe [subs/tile coordinate])
         content (content coordinate tile)]
     (when (or content (tile/home? tile))
       [:div {:class ["flex" "flex-col" "items-center"]}
        (when (tile/home? tile)
-         [:div (-> tile :key str str/upper-case)])
+         [home-content tile])
        content])))

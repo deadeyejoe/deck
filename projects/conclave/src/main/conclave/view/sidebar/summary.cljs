@@ -53,14 +53,15 @@
 
 (defn summary-row [player-key]
   (let [summary @(rf/subscribe [subs/player-summary player-key])
+        player-name @(rf/subscribe [subs/player-name player-key])
         valid true
         problems []]
     [:div (merge {:key player-key
-                  :class ["flex" "justify-around" "w-full" (when-not valid "bg-red-600") "my-1"]
+                  :class ["flex" "justify-around" "w-full" (when-not valid "bg-red-600") "my-1" "h-8" "py-1"]
                   :on-mouse-enter #(rf/dispatch [handlers/highlight-player player-key])
                   :on-mouse-leave #(rf/dispatch [handlers/clear-hover])}
                  (when-not valid {:title (->> problems (interpose ",") (apply str))}))
-     [:div {:class ["w-1/12"]} player-key]
+     [:div {:class ["w-1/12"]} (or player-name player-key)]
      [:div {:class ["w-1/12"]} (resource summary)]
      [:div {:class ["w-1/12"]} (influence summary)]
      [:div {:class ["flex" "w-1/4"]}
@@ -72,6 +73,6 @@
 
 (defn component []
   (let [player-keys @(rf/subscribe [subs/player-keys])]
-    [:div {:class ["flex" "flex-col" "justify-center"  "mb-1" "w-full" "h-full"]}
-     [:div "Player Summary"]
-     (doall (map summary-row player-keys))]))
+    (->> player-keys
+         (map summary-row)
+         (into [:div {:class ["flex" "flex-col" "justify-center"  "mb-1" "w-full"]}]))))

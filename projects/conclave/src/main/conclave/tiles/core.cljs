@@ -155,7 +155,7 @@
 (def default-set (filter default? tiles))
 
 (defn image [tile]
-  (or (:image tile) (str "ST_" (-> tile :key name) ".png")))
+  (or (:image tile) (str "tile/ST_" (-> tile :key name) ".png")))
 
 (defn ^:deprecated stakeable? [tile]
   (and (not (home? tile))

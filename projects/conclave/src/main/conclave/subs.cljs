@@ -1,6 +1,5 @@
 (ns conclave.subs
-  (:require [clojure.string :as str]
-            [re-frame.core :as rf]
+  (:require [conclave.db :as db]
             [conclave.tiles.core :as tile]
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
@@ -11,7 +10,9 @@
             [conclave.map.summary :as map-summary]
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]
-            [medley.core :as medley]))
+            [clojure.string :as str]
+            [medley.core :as medley]
+            [re-frame.core :as rf]))
 
 (def seed ::seed)
 (rf/reg-sub
@@ -151,12 +152,36 @@
  (fn [highlight-set [_q coordinate]]
    (contains? highlight-set coordinate)))
 
+(def player-edit ::player-edit)
+(rf/reg-sub
+ player-edit
+ (fn [db _qv]
+   (:player-edit db)))
+
 (def player-keys ::player-keys)
 (rf/reg-sub
  player-keys
  :<- [galaxy-map]
  (fn [galaxy-map _qv]
    (-> galaxy-map :layout layout/player-keys)))
+
+(def player-name ::player-name)
+(rf/reg-sub
+ player-name
+ (fn [db [_q player-key]]
+   (not-empty (get-in db [:players player-key :name]))))
+
+(def player-race ::player-race)
+(rf/reg-sub
+ player-race
+ (fn [db [_q player-key]]
+   (get-in db [:players player-key :race])))
+
+(def selected-races ::selected-races)
+(rf/reg-sub
+ selected-races
+ (fn [db [_q]]
+   (db/selected-races db)))
 
 (def player-scores ::player-scores)
 (rf/reg-sub

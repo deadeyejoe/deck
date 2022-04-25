@@ -4,7 +4,9 @@
 (defn button [value dispatch]
   [:input {:type "button"
            :value value
-           :class ["m-1" "text-gray-900"]
+           :class ["text-gray-900" "bg-gray-400" "border-gray-600"
+                   "active:bg-gray-200" "active:border-gray-100"
+                   "cursor-pointer" "border" "rounded-sm" "m-1" "p-1"]
            :on-click #(rf/dispatch dispatch)}])
 
 (defn labeled-value [label query-vector]
