@@ -1,6 +1,5 @@
 (ns conclave.view.map.overlay
-  (:require [conclave.handlers :as handlers]
-            [conclave.subs :as subs]
+  (:require [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
             [conclave.view.icons :as icons]
             [clojure.string :as str]
@@ -15,14 +14,14 @@
              (interpose ", ")
              (apply str))])
 
-(defn legendary-content [{:keys [legendary] :as tile}]
+(defn legendary-content [{:keys [legendary] :as _tile}]
   (when legendary
     [:div icons/legendary]))
 
 (defn res-inf-content [{{:keys [resources
                                 influence
                                 optimal-resources
-                                optimal-influence]} :total :as tile}]
+                                optimal-influence]} :total :as _tile}]
   (when (or (pos-int? resources) (pos-int? influence))
     [:div {:class ["flex" "text-sm" "flex-wrap"]}
      [:div {:class ["text-center" "w-1/2" "text-amber-400"]} optimal-resources]
@@ -30,20 +29,20 @@
      [:div {:class ["text-center" "w-1/2" "text-cyan-400"]} optimal-influence]
      [:div {:class ["text-center" "w-1/2" "text-cyan-800"]} influence]]))
 
-(defn tech-content [{{:keys [specialties]} :total :as tile}]
+(defn tech-content [{{:keys [specialties]} :total :as _tile}]
   (when (seq specialties)
     (->> specialties
          (map (fn [s] [:div {:key s} (icons/specialty->img s)]))
          (doall)
          (into [:div]))))
 
-(defn wormhole-content [{:keys [wormhole legendary] :as tile}]
+(defn wormhole-content [{:keys [wormhole legendary] :as _tile}]
   (or (when wormhole
         [:div (icons/wormhole->img wormhole)])
       (when legendary
         [:div icons/legendary])))
 
-(defn trait-content [{{:keys [traits]} :total :as tile}]
+(defn trait-content [{{:keys [traits]} :total :as _tile}]
   (when (seq traits)
     (->> traits
          (map-indexed (fn [i t] [:div {:key i :class ["w-1/2"]} (icons/trait->img t)]))

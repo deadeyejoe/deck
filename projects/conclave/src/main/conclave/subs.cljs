@@ -105,7 +105,7 @@
 (def overlay-content ::overlay-content)
 (rf/reg-sub
  overlay-content
- (fn [[_q coordinate] _dv]
+ (fn [[_q _coordinate] _dv]
    [(rf/subscribe [galaxy-map])
     (rf/subscribe [overlay-mode])
     (rf/subscribe [selected-tile])

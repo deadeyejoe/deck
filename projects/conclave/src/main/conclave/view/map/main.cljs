@@ -24,13 +24,13 @@
            :width "97%"
            :style {:clip-path clipped-hex-path}}]))
 
-(defn hex-overlay [{:keys [side] :as size-options} coordinate]
+(defn hex-overlay [{:keys [side] :as _size-options} coordinate]
   (let [content (overlay/component coordinate)]
     [:div {:class (conj ["absolute" "z-overlay" "top-1/2" "left-1/2"
                          "transform" "-translate-x-1/2" "-translate-y-1/2"
                          "bg-black" "flex" "justify-center" "items-center"
                          "transition-opacity"]
-                        (if content "opacity-100" "opacity-0"))
+                        (if content "opacity-80" "opacity-0"))
            :style (merge (side->hex-dimension (* 0.6 side))
                          {:clip-path hex-path})}
      content]))
@@ -43,7 +43,8 @@
          selected? @(rf/subscribe [subs/tile-selected? coordinate])]
      [:div {:key (str/join coordinate)
             :class (concat ["absolute" "transform" "-translate-x-1/2" "-translate-y-1/2"
-                            "flex" "justify-center" "items-center" "hover:z-highlight"]
+                            "flex" "justify-center" "items-center" "hover:z-highlight"
+                            "transition-colors"]
                            (if (or highlighted? selected?) ["bg-white"] ["bg-blue-900"]))
             :on-mouse-enter #(do (rf/dispatch [handlers/set-hover coordinate])
                                  (.stopPropagation %))

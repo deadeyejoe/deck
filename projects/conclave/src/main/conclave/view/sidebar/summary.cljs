@@ -6,25 +6,25 @@
             [medley.core :as medley]
             [re-frame.core :as rf]))
 
-(defn score [{:keys [score] :as summary}]
+(defn score [{:keys [score] :as _summary}]
   (int score))
 
-(defn resource [{:keys [optimal-resources resources] :as summary}]
+(defn resource [{:keys [optimal-resources resources] :as _summary}]
   [:div {:class ["flex" "justify-between"]}
    [:div {:class ["text-amber-400"]} (str optimal-resources)]
   ;;  [:div "/"]
    [:div {:class ["text-amber-800"]} #_(str "(" ")") resources]])
 
-(defn influence [{:keys [optimal-influence influence] :as summary}]
+(defn influence [{:keys [optimal-influence influence] :as _summary}]
   [:div {:class ["flex" "justify-between"]}
    [:div {:class ["text-cyan-400"]} (str optimal-influence)]
   ;;  [:div "/"]
    [:div {:class ["text-cyan-800"]} #_(str "(" ")")  influence]])
 
-(defn optimal [{:keys [optimal-resources optimal-influence] :as summary}]
+(defn optimal [{:keys [optimal-resources optimal-influence] :as _summary}]
   (str optimal-resources "/" optimal-influence))
 
-(defn maximum [{:keys [resources influence] :as summary}]
+(defn maximum [{:keys [resources influence] :as _summary}]
   (str "(" resources "/" influence ")"))
 
 (defn trait [trait count]
@@ -34,7 +34,7 @@
    [:div {:class ["mx-1"]} [icons/trait->img trait]]
    [:div count]])
 
-(defn traits [{:keys [traits] :as summary}]
+(defn traits [{:keys [traits] :as _summary}]
   (let [trait->count (->> traits
                           (group-by identity)
                           (medley/map-vals count))]
@@ -42,7 +42,7 @@
      (doall
       (map (fn [t] (trait t (get trait->count t 0))) tile/traits))]))
 
-(defn specialties [{:keys [specialties] :as summary}]
+(defn specialties [{:keys [specialties] :as _summary}]
   (into [:div {:class ["w-full" "flex" "justify-end"]}]
         (map (fn [s] [:div {:class ["mx-1"]} (icons/specialty->img s)]) specialties)))
 

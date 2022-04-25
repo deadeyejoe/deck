@@ -4,9 +4,7 @@
             [conclave.map.core :as map]
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as map.opt]
-            [conclave.map.layout :as layout]
             [conclave.utils.random :as random]
-            [conclave.tiles.core :as tile]
             [conclave.worker.client :as worker]))
 
 (def initialize ::initialize)
@@ -32,7 +30,7 @@
 (def map-generated ::map-generated)
 (rf/reg-event-db
  map-generated
- (fn [db [_en {:keys [map] :as worker-result}]]
+ (fn [db [_en {:keys [map] :as _worker-result}]]
    (-> db
        (db/finished!)
        (db/set-map map))))
@@ -40,7 +38,7 @@
 (def stop-processing ::stop-processing)
 (rf/reg-event-db
  stop-processing
- (fn [db [_en map]]
+ (fn [db [_en _map]]
    (db/finished! db)))
 
 (def set-worker-mode ::set-worker-mode)
@@ -56,26 +54,25 @@
     (db/set-map db new-map)))
 
 (defn async-generate [{:keys [seed] :as db}]
-  (do
-    (worker/spawn {:action :generate :seed seed}
-                  {:on-result #(rf/dispatch [map-generated %])
-                   :on-error #(rf/dispatch [stop-processing])})
-    (db/processing! db)))
+  (worker/spawn {:action :generate :seed seed}
+                {:on-result #(rf/dispatch [map-generated %])
+                 :on-error #(rf/dispatch [stop-processing])})
+  (db/processing! db))
 
 (def generate-map ::generate-map)
 (rf/reg-event-db
  generate-map
- (fn [{:keys [worker-mode seed] :as db} [_en mode-override]]
+ (fn [{:keys [worker-mode _seed] :as db} [_en mode-override]]
    (let [mode (or mode-override worker-mode)]
      (cond
        (= :sync mode)      (sync-generate db)
        (db/processing? db) db
-       :when-async-ready   (async-generate db)))))
+       :else               (async-generate db)))))
 
 (def random-map ::random-map)
 (rf/reg-event-fx
  random-map
- (fn [{:keys [db] :as ctx} _ev]
+ (fn [{:keys [db] :as _ctx} _ev]
    {:db (assoc db :seed (random/random-seed))
     :fx [[:dispatch [generate-map :async]]]}))
 
@@ -85,20 +82,19 @@
     (db/set-map db new-map)))
 
 (defn async-optimize [{:keys [map seed] :as db}]
-  (do
-    (worker/spawn {:action :optimize :map map :seed seed}
-                  {:on-result #(rf/dispatch [map-generated %])
-                   :on-error #(rf/dispatch [stop-processing])})
-    (db/processing! db)))
+  (worker/spawn {:action :optimize :map map :seed seed}
+                {:on-result #(rf/dispatch [map-generated %])
+                 :on-error #(rf/dispatch [stop-processing])})
+  (db/processing! db))
 
 (def optimize-map ::optimize-map)
 (rf/reg-event-db
  optimize-map
- (fn [{:keys [worker-mode seed] :as db} _ev]
+ (fn [{:keys [worker-mode _seed] :as db} _ev]
    (cond
      (= :sync worker-mode) (sync-optimize db)
      (db/processing? db)   db
-     :when-async-ready     (async-optimize db))))
+     :else     (async-optimize db))))
 
 (def set-overlay ::set-overlay)
 (rf/reg-event-db
@@ -149,3 +145,27 @@
  select-tile
  (fn [db [_en coordinate]]
    (assoc db :selected coordinate)))
+
+(def toggle-player-edit ::toggle-player-edit)
+(rf/reg-event-db
+ toggle-player-edit
+ (fn [db [_en]]
+   (update db ::player-edit not)))
+
+(def set-player-name ::set-player-name)
+(rf/reg-event-db
+ set-player-name
+ (fn [db [_en player-key name]]
+   (db/update-player-name db player-key name)))
+
+(def set-player-race ::set-player-race)
+(rf/reg-event-db
+ set-player-race
+ (fn [db [_en player-key race]]
+   (db/update-player-race db player-key race)))
+
+(def swap-players ::swap-players)
+(rf/reg-event-db
+ swap-players
+ (fn [db [_en pk1 pk2]]
+   (db/swap-players db pk1 pk2)))

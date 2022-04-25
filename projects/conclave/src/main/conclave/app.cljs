@@ -1,6 +1,5 @@
 (ns conclave.app
   (:require [conclave.handlers :as handlers]
-            [conclave.maker-ui :as maker-ui]
             [conclave.subs :as subs]
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]

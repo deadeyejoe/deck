@@ -3,12 +3,10 @@
             [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
-            [conclave.utils.utils :as utils]
             [conclave.utils.vector :as vect]
             [conclave.view.common :as common]
             [conclave.view.map.controls :as map-controls]
             [conclave.view.player-summary :as player-summary]
-            [conclave.worker.client :as worker-client]
             [reagent.dom]
             [re-frame.core :as rf]))
 

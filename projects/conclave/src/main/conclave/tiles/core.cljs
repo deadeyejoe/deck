@@ -35,7 +35,7 @@
                                    ::planets
                                    ::pok]))
 
-(defn totals [{:keys [planets anomaly] :as raw-tile}]
+(defn totals [{:keys [planets anomaly] :as _raw-tile}]
   (let [all-traits (->> planets
                         (keep :trait)
                         (remove nil?)
@@ -56,7 +56,7 @@
       :legendary (count (keep :legendary planets))}
      (when anomaly {anomaly 1}))))
 
-(defn enrich-planet [{:keys [resources influence specialty] :as planet}]
+(defn enrich-planet [{:keys [resources influence _specialty] :as planet}]
   (merge planet
          (cond
            (< influence resources) {:optimal-resources resources :optimal-influence 0}
