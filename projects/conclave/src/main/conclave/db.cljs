@@ -55,13 +55,23 @@
                              ::player-edit]
                     :opt-un [::players]))
 
-(defn initialize [seed]
-  {:seed seed
-   :map (map.build/create seed)
-   :player-edit false
+(def default-flags
+  {:player-edit false
    :worker-mode :sync
    :overlay-mode :none
    :highlight-mode :single})
+
+(defn initialize [seed]
+  (merge
+   {:seed seed
+    :map (map.build/create seed)}
+   default-flags))
+
+(defn initialize-with-map [map]
+  (merge
+   {:seed ""
+    :map map}
+   default-flags))
 
 (defn set-map [db new-map]
   (assoc db

@@ -140,6 +140,13 @@
  hovered
  (fn [db _qv] (:hovered db)))
 
+(def hovered-tile ::hovered-tile)
+(rf/reg-sub
+ hovered-tile
+ :<- [galaxy-map]
+ :<- [hovered]
+ (fn [[galaxy-map hovered] _qv] (map/coordinate->tile galaxy-map hovered)))
+
 (def highlight-set ::highlight-set)
 (rf/reg-sub
  highlight-set

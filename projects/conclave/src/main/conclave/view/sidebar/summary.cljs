@@ -1,6 +1,7 @@
 (ns conclave.view.sidebar.summary
   (:require [conclave.handlers :as handlers]
             [conclave.view.icons :as icons]
+            [conclave.view.common :as common]
             [conclave.tiles.core :as tile]
             [conclave.subs :as subs]
             [medley.core :as medley]
@@ -8,18 +9,6 @@
 
 (defn score [{:keys [score] :as _summary}]
   (int score))
-
-(defn resource [{:keys [optimal-resources resources] :as _summary}]
-  [:div {:class ["flex" "justify-between"]}
-   [:div {:class ["text-amber-400"]} (str optimal-resources)]
-  ;;  [:div "/"]
-   [:div {:class ["text-amber-800"]} #_(str "(" ")") resources]])
-
-(defn influence [{:keys [optimal-influence influence] :as _summary}]
-  [:div {:class ["flex" "justify-between"]}
-   [:div {:class ["text-cyan-400"]} (str optimal-influence)]
-  ;;  [:div "/"]
-   [:div {:class ["text-cyan-800"]} #_(str "(" ")")  influence]])
 
 (defn optimal [{:keys [optimal-resources optimal-influence] :as _summary}]
   (str optimal-resources "/" optimal-influence))
@@ -62,8 +51,8 @@
                   :on-mouse-leave #(rf/dispatch [handlers/clear-hover])}
                  (when-not valid {:title (->> problems (interpose ",") (apply str))}))
      [:div {:class ["w-1/12"]} (or player-name player-key)]
-     [:div {:class ["w-1/12"]} (resource summary)]
-     [:div {:class ["w-1/12"]} (influence summary)]
+     [:div {:class ["w-1/12"]} (common/resource summary)]
+     [:div {:class ["w-1/12"]} (common/influence summary)]
      [:div {:class ["flex" "w-1/4"]}
       [traits summary]]
      [:div {:class ["flex" "w-1/6"]}

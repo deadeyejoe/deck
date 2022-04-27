@@ -9,6 +9,7 @@
     "postcss:watch": "cross-env TAILWIND_MODE=watch postcss src/css/tailwind.css -o ./public/css/main.css --verbose -w",
     "postcss:release": "cross-env NODE_ENV=production postcss src/css/tailwind.css -o ./release/main.css --verbose",
     "tailwind:watch": "npx tailwindcss -i ./src/css/tailwind.css -o ./public/css/main.css --watch",
+    "tailwind:release": "npx tailwindcss -i ./src/css/tailwind.css -o ./release/main.css",
     "dev": "run-p -l *:watch",
     "release": "run-s *:release",
     "deploy": "aws s3 sync --profile personal release/ s3://galactic-conclave"

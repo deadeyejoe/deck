@@ -35,9 +35,10 @@
 
 (defn init-dev []
   (worker-client/set-script-location "assets/app/js/worker.js")
-  (rf/dispatch-sync [handlers/initialize "ABCDE"])
+  (rf/dispatch-sync [handlers/initialize])
   (render))
 
 (defn init []
-  (rf/dispatch-sync [handlers/initialize "ABCDE"])
+  (rf/dispatch-sync [handlers/initialize])
+  (rf/dispatch-sync [handlers/optimize-map])
   (render))

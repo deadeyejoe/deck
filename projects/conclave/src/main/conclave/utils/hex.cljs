@@ -1,5 +1,6 @@
 (ns conclave.utils.hex
-  (:require [conclave.utils.vector :as vect]))
+  (:require [conclave.utils.vector :as vect]
+            [medley.core :as medley]))
 
 (def sqr3 (Math/sqrt 3))
 
@@ -34,16 +35,31 @@
    :south-east [1 -1 0]
    :north-east [1 0 -1]))
 
+(def compass->num
+  {:north      0
+   :north-west 1
+   :south-west 2
+   :south      3
+   :south-east 4
+   :north-east 5})
+
+(def directions-num (medley/map-keys compass->num directions))
+
 (comment
   (keys directions))
 
 (def walk-radius
   "Direction to walk away from origin such that walk-perimeter will center on origin"
-  (:south-east directions))
+  (:north directions))
 
 (def walk-perimeter
-  "Directions to walk clockwise around the perimeter of a ring of radius 1"
-  (vals directions))
+  "Directions to walk clockwise around the perimeter of a ring of radius 1, starting from north"
+  (map directions [:south-east
+                   :south
+                   :south-west
+                   :north-west
+                   :north
+                   :north-east]))
 
 (defn ring-steps [radius]
   (mapcat (fn [direction] (repeat radius direction)) walk-perimeter))
@@ -72,8 +88,8 @@
 (comment
   (ring-coordinates 2))
 
-(defn map-coordinates [radius]
-  (mapcat ring-coordinates (range (inc radius))))
+(defn map-coordinates
+  ([radius] (mapcat ring-coordinates (range (inc radius)))))
 
 (comment
   (map-coordinates 3))

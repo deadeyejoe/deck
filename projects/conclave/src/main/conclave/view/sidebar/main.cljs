@@ -4,8 +4,9 @@
             [conclave.view.common :as common]
             [conclave.view.sidebar.controls :as controls]
             [conclave.view.sidebar.edit :as edit]
-            [conclave.view.sidebar.summary :as summary]
             [conclave.view.sidebar.overlay :as overlay]
+            [conclave.view.sidebar.summary :as summary]
+            [conclave.view.sidebar.tile :as tile]
             [re-frame.core :as rf]))
 
 (defn content []
@@ -21,8 +22,10 @@
       (if player-edit
         [edit/component]
         [summary/component])]
-     [:div {:class ["h-3/12" "w-full" "flex"]}
-      [overlay/component]]]))
+     [:div {:class ["h-1/12" "w-full" "flex"]}
+      [overlay/component]]
+     [:div {:class ["h-1/3" "w-full" "flex"]}
+      [tile/component]]]))
 
 (defn component []
   [:div {:class ["w-full " "h-full" "flex"]}

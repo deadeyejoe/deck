@@ -1,6 +1,7 @@
 (ns conclave.map.layout
   (:require [conclave.tiles.core :as tiles]
             [conclave.utils.hex :as hex]
+            [medley.core :as medley]
             [clojure.spec.alpha :as s]))
 
 (s/def ::name (s/and string?
@@ -18,6 +19,7 @@
                                    ::home-tiles]))
 
 (def eight-player {:name "8 Player"
+                   :code "8p"
                    :radius 4
                    :fixed-tiles {[0 0 0] tiles/mecatol}
                    :home-tiles {[0   4 -4] (tiles/blank-home-tile :p1)
@@ -28,6 +30,9 @@
                                 [-3 -1  4] (tiles/blank-home-tile :p6)
                                 [-4  2  2] (tiles/blank-home-tile :p7)
                                 [-3  4 -1] (tiles/blank-home-tile :p8)}})
+
+(def layouts [eight-player])
+(def code->layout (medley/index-by :code layouts))
 
 (defn fixed-set [layout]
   (->> layout

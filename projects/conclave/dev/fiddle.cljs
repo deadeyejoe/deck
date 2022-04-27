@@ -7,6 +7,7 @@
             [conclave.map.beta.stake :as stake]
             [conclave.map.beta.starter :as starter]
             [conclave.map.summary :as summary]
+            [conclave.map.serialization :as serialize]
             [conclave.utils.hex :as hex]
             [conclave.map.core :as core]
             [conclave.map.layout :as layout]
@@ -14,11 +15,17 @@
             [conclave.tiles.core :as tile]
             [clojure.math.combinatorics :as combo]
             [clojure.spec.alpha :as s]
+            [re-frame.core :as rf]
             [re-frame.db :as rfdb]
             [medley.core :as medley]
             [taoensso.tufte :as tufte :refer-macros (profiled)]))
 
 (def current-map (:map @rfdb/app-db))
+(->> (serialize/serialize-tiles current-map)
+     (serialize/deserialize-tiles))
+(= current-map
+   (->> (serialize/serialize current-map)
+        (serialize/deserialize)))
 (get-in @rfdb/app-db [:players])
 
 (let [home-c (core/tile->coordinate current-map :p6)

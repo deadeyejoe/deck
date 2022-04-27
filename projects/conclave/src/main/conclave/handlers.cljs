@@ -1,6 +1,8 @@
 (ns conclave.handlers
   (:require [re-frame.core :as rf]
+            [conclave.coeffects :as cofx]
             [conclave.db :as db]
+            [conclave.interceptors :as ix]
             [conclave.map.core :as map]
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as map.opt]
@@ -10,8 +12,12 @@
 (def initialize ::initialize)
 (rf/reg-event-fx
  initialize
- (fn [_con [_en seed]]
-   {:db (db/initialize seed)}))
+ [(rf/inject-cofx cofx/read-map-from-location)]
+ (fn [{:keys [map-from-location] :as coeffects} [_en seed]]
+   {:db (if map-from-location
+          (db/initialize-with-map map-from-location)
+          (db/initialize (or seed
+                             (random/random-seed))))}))
 
 (def set-seed ::set-seed)
 (rf/reg-event-db
@@ -30,6 +36,7 @@
 (def map-generated ::map-generated)
 (rf/reg-event-db
  map-generated
+ [ix/write-map-to-location]
  (fn [db [_en {:keys [map] :as _worker-result}]]
    (-> db
        (db/finished!)

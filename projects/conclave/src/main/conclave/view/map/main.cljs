@@ -3,26 +3,18 @@
             [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
+            [conclave.view.common :as common]
             [conclave.view.map.overlay :as overlay]
             [clojure.string :as str]
             [re-frame.core :as rf]))
 
 ;; Assume flat top.
 ;; Size is length of side, or center to corner
-
-(def clipped-hex-path "polygon(26% 2%, 74% 2%, 98% 50%, 74% 98%, 26% 98%, 2% 50%)")
 (def hex-path "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)")
 
 (defn side->hex-dimension [size]
   {:height (str (hex/height size) "mm")
    :width (str (hex/width size) "mm")})
-
-(defn hex-image [coordinate]
-  (let [tile @(rf/subscribe [subs/tile coordinate])]
-    [:img {:src (str "images/" (tile/image tile))
-           :height "97%"
-           :width "97%"
-           :style {:clip-path clipped-hex-path}}]))
 
 (defn hex-overlay [{:keys [side] :as _size-options} coordinate]
   (let [content (overlay/component coordinate)]
@@ -53,7 +45,7 @@
                           {:margin-left (str x-offset "mm")
                            :margin-top (str y-offset "mm")
                            :clip-path hex-path})}
-      [hex-image coordinate]
+      [common/hex-image coordinate]
       [hex-overlay size-options coordinate]])))
 
 (defn origin [content]

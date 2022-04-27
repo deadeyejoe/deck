@@ -54,7 +54,7 @@
    [:div {:class ["w-1/2"]} icons/wormhole-beta]])
 
 (defn component []
-  [:div {:class ["flex" "justify-around" "w-full"]}
+  [:div {:class ["flex" "justify-around" "w-full" "my-5"]}
    [number]
    [res-inf]
    [tech]
