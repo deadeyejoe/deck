@@ -14,6 +14,10 @@
              (interpose ", ")
              (apply str))])
 
+(defn distance-content [coordinate]
+  (when-let [selected @(rf/subscribe [subs/selected-tile])]
+    [:div (get-in @(rf/subscribe [subs/distance-map]) [selected coordinate])]))
+
 (defn legendary-content [{:keys [legendary] :as _tile}]
   (when legendary
     [:div icons/legendary]))
@@ -53,6 +57,7 @@
     (case overlay-mode
       :tile-number (tile-number-content tile)
       :coordinate (coordinate-content coordinate)
+      :distance-score (distance-content coordinate)
       :legendary (legendary-content tile)
       :res-inf (res-inf-content tile)
       :tech (tech-content tile)

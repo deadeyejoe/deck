@@ -2,16 +2,16 @@
   (:require [conclave.worker.instance :as worker]
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as opt]
-            [conclave.map.core :as map]
+            [conclave.map.layout :as layout]
             [taoensso.tufte :as tufte :refer-macros [defnp profiled]]))
 
 (defnp optimize [{:keys [map seed] :as request}]
-  (let [swaps (map/generate-swap-list map seed)]
+  (let [swaps (layout/generate-swap-list seed)]
     {:map (first (opt/optimize map swaps))}))
 
 (defnp generate [{:keys [seed] :as request}]
-  (let [galaxy-map (map.build/create seed)
-        swaps (map/generate-swap-list galaxy-map seed)]
+  (let [galaxy-map (map.build/from-layout seed)
+        swaps (layout/generate-swap-list seed)]
     {:map (first (opt/optimize galaxy-map swaps))}))
 
 (defn profile-request [f]

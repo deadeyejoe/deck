@@ -1,6 +1,8 @@
 (ns conclave.tiles.core
   (:require [conclave.data :as data]
             [conclave.tiles.static :refer [green-tile]]
+            [conclave.utils.hex :as hex]
+            [conclave.utils.vector :as vect]
             [clojure.spec.alpha :as s]))
 
 (s/def ::key keyword?)
@@ -72,19 +74,19 @@
            (when (some :legendary planets)
              {:legendary true}))))
 
-(def key->tiles (reduce-kv #(assoc %1 %2 (enrich %2 %3))
-                           {}
-                           data/tiles-raw))
+(def key->tile (reduce-kv #(assoc %1 %2 (enrich %2 %3))
+                          {}
+                          data/tiles-raw))
 
-(def tiles (vals key->tiles))
+(def tiles (vals key->tile))
 
 (defn blank-home-tile [player-id]
   (merge green-tile {:key player-id}))
 
-(def mecatol (:18 key->tiles))
+(def mecatol (:18 key->tile))
 (defn mecatol? [tile] (= tile mecatol))
 
-(def nexus   (:82 key->tiles))
+(def nexus   (:82 key->tile))
 (defn nexus? [tile] (= tile nexus))
 
 (defn home? [tile] (= (:type tile) :green))
@@ -152,12 +154,43 @@
        (not (mecatol? tile))
        (not (nexus? tile))))
 
+(def pok? :pok)
+(def non-pok? (complement pok?))
+
 (def default-set (filter default? tiles))
+
+(def default-base-game (filter (every-pred default?
+                                           non-pok?)
+                               tiles))
 
 (defn image [tile]
   (or (:image tile) (str "tile/ST_" (-> tile :key name) ".png")))
 
-(defn ^:deprecated stakeable? [tile]
+(defn stakeable? [tile]
   (and (not (home? tile))
        (not (mecatol? tile))
-       (seq (:planets tile))))
+       (not (hyperlane? tile))))
+
+(defn lane->edge [coordinate rotation [source target :as lane]]
+  (let [num->rotated-vector (fn [n] (hex/num->directions (mod (+ n rotation) 6)))
+        source-coordinate (vect/add coordinate (num->rotated-vector source))
+        target-coordinate (vect/add coordinate (num->rotated-vector target))]
+    {source-coordinate target-coordinate
+     target-coordinate source-coordinate}))
+
+(comment
+  (lane->edge [0 0 0] 0 [1 4])
+  (lane->edge [0 0 0] 3 [1 4])
+  (lane->edge [0 0 0] 5 [1 4])
+  (lane->edge [0 0 0] 6 [1 4]))
+
+(defn hyperlane-tile [key coordinate rotation]
+  (let [{:keys [hyperlanes] :as tile} (key->tile key)]
+    (assoc tile
+           :coordinate coordinate
+           :rotation rotation
+           :edges (map (partial lane->edge coordinate rotation) hyperlanes))))
+
+(comment
+  (:edges (hyperlane-tile :87A [0 0 0] 0))
+  (:edges (hyperlane-tile :87A [0 0 0] 2)))

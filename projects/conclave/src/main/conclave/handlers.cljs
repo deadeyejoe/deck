@@ -4,6 +4,7 @@
             [conclave.db :as db]
             [conclave.interceptors :as ix]
             [conclave.map.core :as map]
+            [conclave.map.layout :as layout]
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as map.opt]
             [conclave.utils.random :as random]
@@ -30,7 +31,7 @@
  raw-map
  (fn [{:keys [seed] :as db} _ev]
    (->> seed
-        (map.build/create)
+        (map.build/from-layout)
         (db/set-map db))))
 
 (def map-generated ::map-generated)
@@ -55,8 +56,8 @@
    (assoc db :worker-mode mode)))
 
 (defn sync-generate [{:keys [seed] :as db}]
-  (let [galaxy-map (map.build/create seed)
-        swaps (map/generate-swap-list galaxy-map seed)
+  (let [galaxy-map (map.build/from-layout seed)
+        swaps (layout/generate-swap-list seed)
         [new-map _ _] (map.opt/optimize galaxy-map swaps)]
     (db/set-map db new-map)))
 
@@ -84,7 +85,7 @@
     :fx [[:dispatch [generate-map :async]]]}))
 
 (defn sync-optimize [{:keys [map seed] :as db}]
-  (let [swaps (map/generate-swap-list map seed)
+  (let [swaps (layout/generate-swap-list seed)
         [new-map _ _] (map.opt/optimize map swaps)]
     (db/set-map db new-map)))
 

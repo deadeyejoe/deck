@@ -1,17 +1,15 @@
 (ns conclave.map.core
-  (:require [conclave.utils.random :as rand]
-            [conclave.tiles.core :as tile]
+  (:require [conclave.tiles.core :as tile]
             [conclave.map.layout :as layout]
             [conclave.utils.hex :as hex]
-            [clojure.math.combinatorics :as comb]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [medley.core :as medley]))
 
-(s/def ::layout ::layout/instance)
+
 (s/def ::tiles (s/map-of ::layout/coordinate ::layout/tile))
 (s/def ::tiles-reverse (s/map-of ::tile/key ::layout/coordinate))
 
-(s/def ::galaxy (s/keys :req-un [::layout
-                                 ::tiles
+(s/def ::galaxy (s/keys :req-un [::tiles
                                  ::tiles-reverse]))
 
 (defn set-coordinate [galaxy-map coordinate tile]
@@ -24,36 +22,14 @@
              galaxy-map
              coordinates))
 
-(defn build [layout]
-  (-> {:layout layout}
-      (import-coordinate-map (:fixed-tiles layout))
-      (import-coordinate-map (:home-tiles layout))))
-
-(comment (build layout/eight-player))
-
-(defn free-spaces [galaxy-map]
-  (layout/free-spaces (:layout galaxy-map)))
-
-(defn sample-tiles [seed amount]
-  (let [fixed-tiles (concat tile/wormholes-alpha tile/wormholes-beta)
-        sampleable-tiles (remove (set fixed-tiles) tile/default-set)]
-    (->> (rand/sample sampleable-tiles
-                      (- amount
-                         (count fixed-tiles))
-                      seed)
-         (into fixed-tiles)
-         (rand/seed-shuffle seed))))
-
-(defn populate [galaxy-map seed]
-  (let [free-spaces (free-spaces galaxy-map)
-        sampled-tiles (sample-tiles seed (count free-spaces))]
-    (import-coordinate-map galaxy-map (zipmap free-spaces sampled-tiles))))
-
 (defn coordinates [galaxy-map]
   (-> galaxy-map :tiles keys))
 
-(defn home-coordinates [galaxy-map]
-  (-> galaxy-map :layout :home-tiles keys))
+(defn coordinates-by-tile [tile-pred {:keys [tiles] :as galaxy-map}]
+  (keys (medley/filter-vals tile-pred tiles)))
+
+(def home-coordinates (partial coordinates-by-tile tile/home?))
+(def stakeable-coordinates (partial coordinates-by-tile tile/stakeable?))
 
 (defn coordinate->tile [galaxy-map coordinate]
   (get-in galaxy-map [:tiles coordinate]))
@@ -76,6 +52,14 @@
 
 (defn neighbouring [galaxy-map coordinate]
   (filter (in-bounds? galaxy-map) (hex/neighbours coordinate)))
+
+(defn neighbour-set [galaxy-map coordinate]
+  (set (neighbouring galaxy-map coordinate)))
+
+(defn neighbour-map [galaxy-map coordinate]
+  (let [neighbour-coordinates (neighbouring galaxy-map coordinate)]
+    (zipmap neighbour-coordinates
+            (map (partial coordinate->tile galaxy-map) neighbour-coordinates))))
 
 ;; TODO retire these notions of 'adjacent'
 
@@ -106,11 +90,3 @@
     (-> galaxy-map
         (set-coordinate c1 t2)
         (set-coordinate c2 t1))))
-
-(defn generate-swap-list [galaxy-map seed]
-  (rand/seed-shuffle seed
-                     (-> (free-spaces galaxy-map)
-                         (comb/combinations 2))))
-
-(def sample-map (-> (build layout/eight-player)
-                    (populate "ABCDE")))

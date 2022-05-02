@@ -24,3 +24,12 @@
   (distance [-1 1 0] [0 1 -1])
   (distance [0 -3 3] [-2 3 -1])
   (distance [-1 1 0] [1 -1 0]))
+
+(defn shift-left [[first & rest]]
+  (conj (vec rest) first))
+
+(defn shift-right [v]
+  (->> v
+       (butlast)
+       (cons (last v))
+       (vec)))

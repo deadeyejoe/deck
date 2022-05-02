@@ -22,6 +22,9 @@ module.exports = {
       },
       rotate: {
         "60": "60deg",
+        "120": "120deg",
+        "240": "240deg",
+        "300": "300deg",
         "-60": "-60deg"
       },
       zIndex: {

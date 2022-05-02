@@ -6,8 +6,7 @@
             [conclave.map.beta.specs :as map.specs]
             [conclave.map.core :as map.core]
             [conclave.map.layout :as layout]
-            [conclave.player :as player]
-            [medley.core :as medley]))
+            [conclave.player :as player]))
 
 (s/def ::map ::map.specs/instance)
 (s/def ::seed (s/and string?
@@ -64,7 +63,7 @@
 (defn initialize [seed]
   (merge
    {:seed seed
-    :map (map.build/create seed)}
+    :map (map.build/from-layout seed)}
    default-flags))
 
 (defn initialize-with-map [map]

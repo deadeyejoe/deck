@@ -28,15 +28,16 @@
     seed))
 
 (defn sample [collection amount seed]
-  (loop [gen (generator (coerce-seed seed) (count collection))
-         indices []]
-    (if (= (count indices) amount)
-      (map #(nth collection %) indices)
-      (let [[current-rn & rest-rn] gen
-            already-generated? (some #(= current-rn %) indices)]
-        (if already-generated?
-          (recur rest-rn indices)
-          (recur rest-rn (conj indices current-rn)))))))
+  (let [target-amount (min (count collection) amount)]
+    (loop [gen (generator (coerce-seed seed) (count collection))
+           indices []]
+      (if (= (count indices) target-amount)
+        (map #(nth collection %) indices)
+        (let [[current-rn & rest-rn] gen
+              already-generated? (some #(= current-rn %) indices)]
+          (if already-generated?
+            (recur rest-rn indices)
+            (recur rest-rn (conj indices current-rn))))))))
 
 (defn seed-shuffle [seed collection] (sample collection (count collection) seed))
 

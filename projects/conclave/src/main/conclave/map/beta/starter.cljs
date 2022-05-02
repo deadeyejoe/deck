@@ -24,8 +24,8 @@
   (cond-> []
     (< optimal-resources 2.5) (conj "Not enough resources")
     (< optimal-influence 4.0) (conj "Not enough influence")
-    (< optimal-total 9)    (conj "Total too high")
-    (< 13 optimal-total)    (conj "Total too high")
+    (< optimal-total 9)    (conj "Total res/inf too low")
+    (< 13 optimal-total)    (conj "Total res/inf too high")
     (< 2 (count specialties)) (conj "Too many techs")
     (and (seq specialties)
          (not (apply distinct? specialties))) (conj "Degenerate Techs")))

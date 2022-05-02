@@ -1,11 +1,7 @@
 (ns conclave.map.beta.stake
-  (:require [conclave.map.core :as core] [conclave.map.layout :as layout]
-            [conclave.map.beta.distance :as distance]
-            [conclave.tiles.core :as tile]
-            [conclave.utils.score :as util-score]
+  (:require [conclave.map.core :as core]
             [taoensso.tufte :as tufte :refer-macros (defnp)]
-            [medley.core :as medley]
-            [clojure.spec.alpha :as s]))
+            [medley.core :as medley]))
 
 (defn closest-homesystems [hs->distance]
   (let [[min-distance closest-entries] (->> hs->distance
@@ -39,15 +35,9 @@
 
 (defn stakes-for-map [galaxy-map coordinate->coordinate->distance]
   (let [home-system-coordinates (core/home-coordinates galaxy-map)
-        free-spaces (core/free-spaces galaxy-map)]
+        free-spaces (core/stakeable-coordinates galaxy-map)]
     (zipmap free-spaces
             (map (partial stake-for-system coordinate->coordinate->distance home-system-coordinates) free-spaces))))
-
-(comment
-  (let [map (-> (core/build layout/eight-player)
-                (core/populate "ABCDE"))
-        distances (distance/coordinate->distances map)]
-    (stakes-for-map map distances)))
 
 (defn highest-stake [{:keys [stakes] :as galaxy-map} coordinate]
   (when-let [system->stake (get stakes coordinate)]

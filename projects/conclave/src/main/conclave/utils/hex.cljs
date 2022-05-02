@@ -1,5 +1,6 @@
 (ns conclave.utils.hex
   (:require [conclave.utils.vector :as vect]
+            [clojure.set :as set]
             [medley.core :as medley]))
 
 (def sqr3 (Math/sqrt 3))
@@ -26,7 +27,17 @@
 
 (def origin [0 0 0])
 
-(def directions
+(defn ring
+  "Returns the ring of the given coordinate"
+  [x]
+  (vect/distance origin x))
+
+(defn direction
+  "Warning doesn't play nice with non-adjacent hexes"
+  [from to]
+  (mapv -  from to))
+
+(def direction->vector
   (array-map
    :north [0 1 -1]
    :north-west [-1 1 0]
@@ -37,29 +48,32 @@
 
 (def compass->num
   {:north      0
-   :north-west 1
-   :south-west 2
+   :north-east 1
+   :south-east 2
    :south      3
-   :south-east 4
-   :north-east 5})
+   :south-west 4
+   :north-west 5})
 
-(def directions-num (medley/map-keys compass->num directions))
+(def num->compass
+  (set/map-invert compass->num))
+
+(def num->directions (medley/map-keys compass->num direction->vector))
 
 (comment
-  (keys directions))
+  (keys direction->vector))
 
 (def walk-radius
   "Direction to walk away from origin such that walk-perimeter will center on origin"
-  (:north directions))
+  (:north direction->vector))
 
 (def walk-perimeter
   "Directions to walk clockwise around the perimeter of a ring of radius 1, starting from north"
-  (map directions [:south-east
-                   :south
-                   :south-west
-                   :north-west
-                   :north
-                   :north-east]))
+  (map direction->vector [:south-east
+                          :south
+                          :south-west
+                          :north-west
+                          :north
+                          :north-east]))
 
 (defn ring-steps [radius]
   (mapcat (fn [direction] (repeat radius direction)) walk-perimeter))
@@ -98,3 +112,20 @@
   (let [[q r] (cube->axial cube)]
     (vect/add (vect/scale (q-basis size) q)
               (vect/scale (r-basis size) r))))
+
+(defn rotate-clockwise
+  ([coordinate] (-> coordinate
+                    (vect/scale -1)
+                    (vect/shift-left)))
+  ([coordinate times]
+   (nth (iterate rotate-clockwise coordinate) (mod times 6))))
+
+(comment
+  (range 1)
+  (:north direction->vector)
+  (rotate-clockwise (:north direction->vector))
+  (rotate-clockwise (:north direction->vector) 2)
+  (rotate-clockwise (:north direction->vector) 3)
+  (rotate-clockwise (:north direction->vector) 4)
+  (rotate-clockwise (:north direction->vector) 5)
+  (rotate-clockwise (:north direction->vector) 6))

@@ -1,7 +1,6 @@
 (ns conclave.map.alpha.constraints
   (:require [conclave.map.core :as core]
             [conclave.utils.hex :as hex]
-            [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
             [clojure.math.combinatorics :as comb]))
 
@@ -32,9 +31,3 @@
 
 (defn adjacent-wormholes? [galaxy-map]
   (< 0 (count-adjacent-wormholes galaxy-map)))
-
-(comment
-  (def sample-map (-> (core/build layout/eight-player)
-                      (core/populate "ABCDE")))
-  (count-adjacent-anomalies sample-map)
-  (adjacent-wormholes? sample-map))

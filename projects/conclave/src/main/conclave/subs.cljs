@@ -26,6 +26,12 @@
  (fn [db _qv]
    (:map db)))
 
+(def layout ::layout)
+(rf/reg-sub
+ layout
+ (fn [db _qv]
+   layout/default-layout))
+
 (def processing? ::processing?)
 (rf/reg-sub
  processing?
@@ -168,9 +174,9 @@
 (def player-keys ::player-keys)
 (rf/reg-sub
  player-keys
- :<- [galaxy-map]
- (fn [galaxy-map _qv]
-   (-> galaxy-map :layout layout/player-keys)))
+ :<- [layout]
+ (fn [layout _qv]
+   (layout/player-keys layout)))
 
 (def player-name ::player-name)
 (rf/reg-sub

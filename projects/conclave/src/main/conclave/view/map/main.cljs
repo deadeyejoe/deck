@@ -1,7 +1,7 @@
 (ns conclave.view.map.main
   (:require [conclave.handlers :as handlers]
             [conclave.subs :as subs]
-            [conclave.tiles.core :as tile]
+            [conclave.map.core :as map]
             [conclave.utils.hex :as hex]
             [conclave.view.common :as common]
             [conclave.view.map.overlay :as overlay]
@@ -28,7 +28,7 @@
      content]))
 
 (defn hex-tile
-  ([coordinate] (hex-tile {:side 17 :epsilon 0.995} coordinate))
+  ([coordinate] (hex-tile {:side 15 :epsilon 0.995} coordinate))
   ([{:keys [side epsilon] :as size-options} coordinate]
    (let [[x-offset y-offset] (hex/coordinate->offset (* epsilon side) coordinate)
          highlighted? @(rf/subscribe [subs/tile-highlighted? coordinate])
@@ -52,7 +52,8 @@
   [:div {:class ["relative"]} content])
 
 (defn component []
-  [origin
-   (into
-    [:<> [hex-tile [0 0 0]]]
-    (map (fn [coordinate] [hex-tile coordinate]) (mapcat hex/ring-coordinates (range 1 5))))])
+  (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
+    [origin
+     (into
+      [:<> [hex-tile [0 0 0]]]
+      (map (fn [coordinate] [hex-tile coordinate]) (map/coordinates galaxy-map)))]))

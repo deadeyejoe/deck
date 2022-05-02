@@ -9,7 +9,7 @@
                  "border-blue-700" "active:border-blue-400"
                  "w-12" "h-12"
                  "flex" "flex-col" "justify-around" "items-center"]
-         :on-click #(rf/dispatch [handlers/set-overlay :tile-number])}
+         :on-click #(rf/dispatch [handlers/set-overlay :coordinate])}
    "#"])
 
 (defn res-inf []

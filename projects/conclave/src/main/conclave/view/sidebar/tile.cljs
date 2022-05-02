@@ -4,13 +4,6 @@
             [conclave.view.common :as common]
             [re-frame.core :as rf]))
 
-(defn tile-number [{:keys [key] :as _tile}]
-  [:div {:class ["h-20" "w-20" "flex" "justify-center" "items-center" "text-2xl" "bg-gray-400"]
-         :style {:clip-path common/clipped-hex-path}}
-   [:div {:class ["h-16" "w-16" "flex" "justify-center" "items-center" "text-2xl" "bg-gray-800"]
-          :style {:clip-path common/clipped-hex-path}}
-    (name key)]])
-
 (defn res-inf [planet-or-total]
   [:div {:class ["flex"]}
    [common/resource planet-or-total]
@@ -28,21 +21,35 @@
    [:div {:class ["w-1/4" "mx-1" "flex" "justify-center" "items-center"]}
     [common/influence planet]]])
 
-(defn planets-summary [{:keys [planets total] :as tile}]
+(defn planets-summary [{:keys [planets] :as _tile}]
   (when (seq planets)
-    (-> [:div {:class ["h-full" "w-full" "flex" "flex-col"]}]
+    (-> [:div {:class ["h-full" "w-full" "flex" "flex-col" "justify-center"]}]
         (into (map planet-summary planets)))))
+
+(defn tile-legend [[x y z :as coordinate] {:keys [key rotation] :as _tile}]
+  (let [standard-classes ["h-6" "mx-0.5" "text-xs" "bg-gray-600" "text-black"
+                          "flex" "justify-around" "items-center"]
+        selected @(rf/subscribe [subs/selected-tile])]
+    [:div {:class ["absolute" "bottom-0" "right-0" "flex" "p-1" "m-1"
+                   "bg-black" "border" "border-gray-600"]}
+     [:div {:class (into standard-classes ["w-6"])
+            :style {:clip-path common/clipped-hex-path}}
+      (name key)]
+     [:div {:class (into standard-classes ["rounded-xl" "w-6"])}
+      (or rotation 0)]
+     [:div {:class (into standard-classes ["w-16"])}
+      [:div x] [:div y] [:div z]]
+     [:div {:class (into standard-classes ["w-6"])}
+      (get-in @(rf/subscribe [subs/distance-map]) [selected coordinate])]]))
 
 (defn component []
   (let [coordinate (or @(rf/subscribe [subs/hovered])
                        @(rf/subscribe [subs/selected-tile]))
         tile @(rf/subscribe [subs/tile coordinate])]
     (when coordinate
-      [:div {:class ["flex" "h-full" "w-full"]}
+      [:div {:class ["flex" "h-full" "w-full" "relative"]}
        [:div {:class ["w-1/2" "h-full" "flex" "items-center"]}
-        [common/hex-image coordinate]]
-       [:div {:class ["w-1/2" "h-full" "flex" "flex-col" "items-center"]}
-        [:div {:class ["h-1/4" "w-full" "flex" "justify-center" "items-center"]}
-         [tile-number tile]] ;;don't know why but this needs to be wrapped in a div...
-        [:div {:class ["h-3/4" "w-full" "flex" "items-center" "py-6"]}
-         [planets-summary tile]]]])))
+        [common/tile->hex-image tile]]
+       [:div {:class ["w-1/2" "h-full" "flex"]}
+        [planets-summary tile]]
+       (tile-legend coordinate tile)])))

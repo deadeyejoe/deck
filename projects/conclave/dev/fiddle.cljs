@@ -6,6 +6,7 @@
             [conclave.map.beta.score :as score]
             [conclave.map.beta.stake :as stake]
             [conclave.map.beta.starter :as starter]
+            [conclave.map.adjacent :as adjacent]
             [conclave.map.summary :as summary]
             [conclave.map.serialization :as serialize]
             [conclave.utils.hex :as hex]
@@ -21,12 +22,18 @@
             [taoensso.tufte :as tufte :refer-macros (profiled)]))
 
 (def current-map (:map @rfdb/app-db))
+
+(let [map (:map @rfdb/app-db)
+      stakes (stake/stakes-for-map map (:distances map))
+      slices (map.build/slices map stakes)]
+  (map.build/slice-for stakes [0 -4 4]))
+
 (->> (serialize/serialize-tiles current-map)
      (serialize/deserialize-tiles))
 (= current-map
    (->> (serialize/serialize current-map)
         (serialize/deserialize)))
-(get-in @rfdb/app-db [:players])
+(get-in @rfdb/app-db [:hovered])
 
 (let [home-c (core/tile->coordinate current-map :p6)
       slice (get-in current-map [:slices home-c])
@@ -34,9 +41,9 @@
   (map :wormhole tiles))
 (summary/player-summary current-map :p6)
 
-(def sample-map (map.build/create "ABCDE"))
-(def swaps (core/generate-swap-list sample-map "ABCDE"))
-(first swaps)
+
+
+
 
 (comment
   "Demonstrating that you don't need to consider variation for constrained tiles
