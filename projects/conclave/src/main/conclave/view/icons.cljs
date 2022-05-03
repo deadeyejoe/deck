@@ -7,35 +7,46 @@
     :height size
     :width size}))
 
-(def trait-cultural [:img (image-props "general/trait-cultural")])
-(def trait-hazardous [:img (image-props "general/trait-hazardous")])
-(def trait-industrial [:img (image-props "general/trait-industrial")])
+(defn cultural [size] [:img (image-props "general/trait-cultural" size)])
+(defn hazardous [size] [:img (image-props "general/trait-hazardous" size)])
+(defn industrial [size] [:img (image-props "general/trait-industrial" size)])
+(def trait->img {:cultural   [cultural   "20px"]
+                 :hazardous  [hazardous  "20px"]
+                 :industrial [industrial "20px"]})
 
-(def trait->img {:cultural trait-cultural
-                 :hazardous trait-hazardous
-                 :industrial trait-industrial})
+(defn biotic     [size] [:img (image-props "general/specialty-biotic-dark" size)])
+(defn cybernetic [size] [:img (image-props "general/specialty-cybernetic-dark" size)])
+(defn propulsion [size] [:img (image-props "general/specialty-propulsion-dark" size)])
+(defn warfare    [size] [:img (image-props "general/specialty-warfare-dark" size)])
+(def specialty->img {:biotic [biotic "20px"]
+                     :cybernetic [cybernetic "20px"]
+                     :propulsion [propulsion "20px"]
+                     :warfare [warfare "20px"]})
 
-(def specialty-biotic [:img (image-props "general/specialty-biotic-dark")])
-(def specialty-cybernetic [:img (image-props "general/specialty-cybernetic-dark")])
-(def specialty-propulsion [:img (image-props "general/specialty-propulsion-dark")])
-(def specialty-warfare [:img (image-props "general/specialty-warfare-dark")])
+(defn alpha [size] [:img (image-props "wormhole-alpha" size)])
+(def wormhole-alpha [alpha "30px"])
 
-(def specialty->img {:biotic specialty-biotic
-                     :cybernetic specialty-cybernetic
-                     :propulsion specialty-propulsion
-                     :warfare specialty-warfare})
-
-(def wormhole-alpha [:img (image-props "wormhole-alpha" "30px")])
-(def wormhole-beta [:img (image-props "wormhole-beta" "30px")])
+(defn beta [size] [:img (image-props "wormhole-beta" size)])
+(def wormhole-beta [beta "30px"])
 
 (def wormhole->img {:alpha wormhole-alpha
                     :beta wormhole-beta})
 
-(def legendary [:img (image-props "general/legendary-complete" "25px")])
+(defn legendary* [size]
+  [:img (image-props "general/legendary-complete" size)])
+(def legendary [legendary* "25px"])
 
-(def resource [:img (image-props "general/resource-bg")])
-(def influence [:img (image-props "general/influence-bg")])
-(def frontier [:img (image-props "general/frontier")])
+(defn resource* [size]
+  [:img (image-props "general/resource-bg" size)])
+(def resource  [resource* "20px"])
+
+(defn influence* [size]
+  [:img (image-props "general/influence-bg" size)])
+(def influence [influence* "20px"])
+
+(defn frontier* [size]
+  [:img (image-props "general/frontier" size)])
+(def frontier  [frontier* "20px"])
 
 (defn race [code]
   [:img (image-props (str "race/" (name code)))])

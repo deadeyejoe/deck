@@ -28,26 +28,34 @@
 
 (defn tile-legend [[x y z :as coordinate] {:keys [key rotation] :as _tile}]
   (let [standard-classes ["h-6" "mx-0.5" "text-xs" "bg-gray-600" "text-black"
-                          "flex" "justify-around" "items-center"]
+                          "flex" "justify-around" "items-center" "cursor-pointer"]
         distance-from-selected @(rf/subscribe [subs/distance-from-selected coordinate])]
-    [:div {:class ["absolute" "bottom-0" "right-0" "flex" "p-1" "m-1"
-                   "bg-black" "border" "border-gray-600"]}
+    [:<>
      [:div {:class (into standard-classes ["w-6"])
-            :style {:clip-path common/clipped-hex-path}}
+            :style {:clip-path common/clipped-hex-path}
+            :title "Tile Number"}
       (name key)]
-     [:div {:class (into standard-classes ["rounded-xl" "w-6"])}
+     [:div {:class (into standard-classes ["rounded-xl" "w-6"])
+            :title "Rotation"}
       (or rotation 0)]
-     [:div {:class (into standard-classes ["w-16"])}
+     [:div {:class (into standard-classes ["w-16"])
+            :title "Coordinate"}
       [:div x] [:div y] [:div z]]
-     [:div {:class (into standard-classes ["w-6"])}
+     [:div {:class (into standard-classes ["w-6"])
+            :title "Distance from selected"}
       distance-from-selected]]))
 
 (defn component [coordinate]
   (let [tile @(rf/subscribe [subs/tile coordinate])]
-    (when coordinate
-      [:div {:class ["flex" "h-full" "w-full" "relative"]}
-       [:div {:class ["w-1/2" "h-full" "flex" "items-center"]}
-        [common/tile->hex-image tile]]
-       [:div {:class ["w-1/2" "h-full" "flex"]}
-        [planets-summary tile]]
-       (tile-legend coordinate tile)])))
+    [:div {:class ["flex" "h-full" "w-full" "justify-center" "items-center" "p-3"]}
+     (into [:div {:class ["flex" "h-full" "w-full" "relative" "shadow-inner" "bg-gray-800" "rounded-md"]}
+            [:div {:class ["absolute" "bottom-0" "right-0"
+                           "p-1" "m-2" "w-44" "h-10"
+                           "flex" "justify-center" "items-center"
+                           "bg-gray-900" "rounded-md" "shadow-inner" "shadow-gray-700"]}
+             (when coordinate (tile-legend coordinate tile))]]
+           (when coordinate
+             [[:div {:class ["w-1/2" "h-full" "flex" "items-center"]}
+               [common/tile->hex-image tile]]
+              [:div {:class ["w-1/2" "h-full" "flex"]}
+               [planets-summary tile]]]))]))

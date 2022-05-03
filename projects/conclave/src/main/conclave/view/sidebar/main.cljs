@@ -14,20 +14,19 @@
         coordinate (or @(rf/subscribe [subs/hovered])
                        @(rf/subscribe [subs/selected-tile]))]
     [:div {:class ["h-full" "w-full"
-                   "flex" "flex-col" "justify-start"]}
-     [:div {:class ["h-1/12"]}
+                   "flex" "flex-col" "justify-between"
+                   "relative" "px-3"]}
+     [:div {:class ["h-1/12" "w-full"]}
       [controls/component]]
      [:div {:class ["h-1/2" "w-full" "flex" "flex-col"]}
       [:div {:class ["w-full" "flex" "items-center"]}
-       [:div {:class ["mr-5" "text-xl" "w-40"]} (if player-edit "Edit Players" "Player Summary")]]
+       [:div {:class ["text-xl" "w-40"]} (if player-edit "Edit Players" "Player Summary")]]
       [summary/component]]
-     [:div {:class ["h-1/12" "w-full" "flex"]}
-      [overlay/component]]
      [:div {:class ["h-1/3" "w-full" "flex"]}
-      (when coordinate
-        [tile/component coordinate])]]))
+      [tile/component coordinate]]
+     [:div {:class ["h-full" "flex" "flex-col" "justify-center" "absolute" "-left-20"]}
+      [overlay/component]]]))
 
 (defn component []
-  [:div {:class ["w-full " "h-full" "flex"]}
-   [:div {:class ["w-2" "bg-blue-900"]}]
+  [:div {:class ["w-full " "h-full" "flex" "border-l-2" "border-blue-600"]}
    [content]])

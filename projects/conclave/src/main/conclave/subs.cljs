@@ -112,6 +112,12 @@
  overlay-mode
  (fn [db _qv] (:overlay-mode db)))
 
+(def overlay-mode-is ::overlay-mode-is)
+(rf/reg-sub
+ overlay-mode-is
+ :<- [overlay-mode]
+ (fn [overlay-mode [_qv v]] (= v overlay-mode)))
+
 (rf/reg-sub
  ::tile-scores
  :<- [galaxy-map]
