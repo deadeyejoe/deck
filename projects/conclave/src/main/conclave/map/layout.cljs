@@ -1,5 +1,6 @@
 (ns conclave.map.layout
-  (:require [conclave.tiles.core :as tiles]
+  (:require [conclave.data.layouts :as layout-data]
+            [conclave.tiles.core :as tiles]
             [conclave.utils.hex :as hex]
             [conclave.utils.random :as random]
             [clojure.math.combinatorics :as comb]
@@ -32,69 +33,49 @@
                                    ::blank-tiles
                                    ::wormhole-pairs]))
 
-(defn ->hyperlane-map [& hyperlane-tiles]
-  (medley/index-by :coordinate hyperlane-tiles))
+(defn ->fixed-tile [{:keys [coordinate key] :as proto-tile}]
+  [coordinate (tiles/key->tile key)])
 
-(def eight-player {:name "8 Player"
-                   :code "8p"
-                   :radius 4
-                   :type-counts {:blue (+ 2 (* 8 4))
-                                 :red  (+ 2 (* 8 2))}
-                   :fixed-tiles {[0 0 0] tiles/mecatol}
-                   :home-tiles {[0   4 -4] (tiles/blank-home-tile :p1)
-                                [3   1 -4] (tiles/blank-home-tile :p2)
-                                [4  -2 -2] (tiles/blank-home-tile :p3)
-                                [3  -4  1] (tiles/blank-home-tile :p4)
-                                [0  -4  4] (tiles/blank-home-tile :p5)
-                                [-3 -1  4] (tiles/blank-home-tile :p6)
-                                [-4  2  2] (tiles/blank-home-tile :p7)
-                                [-3  4 -1] (tiles/blank-home-tile :p8)}})
+(defn ->hyperlane-tile [{:keys [coordinate key] :as proto-tile}]
+  [coordinate (tiles/hyperlane-tile proto-tile)])
 
-(def seven-player {:name "7 Player"
-                   :code "7p"
-                   :radius 4
-                   :type-counts {:blue (+ 3 (* 7 4))
-                                 :red (+ 2 (* 7 2))}
-                   :fixed-tiles {[0 0 0]   tiles/mecatol}
-                   :hyperlane-tiles (->hyperlane-map (tiles/hyperlane-tile :86A [0 -2 2]  0)
-                                                     (tiles/hyperlane-tile :88A [1 -3 2]  0)
-                                                     (tiles/hyperlane-tile :83A [1 -4 3]  0)
-                                                     (tiles/hyperlane-tile :85A [0 -4 4]  0)
-                                                     (tiles/hyperlane-tile :84A [-1 -3 4] 0)
-                                                     (tiles/hyperlane-tile :87A [-1 -2 3] 0))
-                   :home-tiles {[0   4 -4] (tiles/blank-home-tile :p1)
-                                [3   1 -4] (tiles/blank-home-tile :p2)
-                                [4  -2 -2] (tiles/blank-home-tile :p3)
-                                [3  -4  1] (tiles/blank-home-tile :p4)
-                                [-3 -1  4] (tiles/blank-home-tile :p5)
-                                [-4  2  2] (tiles/blank-home-tile :p6)
-                                [-3  4 -1] (tiles/blank-home-tile :p7)}})
+(defn ->home-tile [{:keys [coordinate key] :as proto-tile}]
+  [coordinate (tiles/blank-home-tile key)])
 
-(def seven-player-warp {:name "7 Player Warp"
-                        :code "7pw"
-                        :radius 4
-                        :type-counts {:blue 21
-                                      :red 14}
-                        :fixed-tiles {[0 0 0]   tiles/mecatol}
-                        :blank-tiles [[2 2 -4] [3 1 -4] [4 0 -4] [4 -1 -3] [4 -2 -2]
-                                      [4 -3 -1] [4 -4 0] [3 -4 1] [2 -4 2] [-4 0 4]
-                                      [-4 1 3] [-4 4 0]]
-                        :hyperlane-tiles (->hyperlane-map (tiles/hyperlane-tile :88B [1 2 -3] 0)
-                                                          (tiles/hyperlane-tile :85B [0 1 -1] 0)
-                                                          (tiles/hyperlane-tile :83B [-3 2 1] 2)
-                                                          (tiles/hyperlane-tile :90B [-1 0 1] 0)
-                                                          (tiles/hyperlane-tile :84B [0 -1 1] 0)
-                                                          (tiles/hyperlane-tile :86B [1 -3 2] 0))
-                        :home-tiles {[0 4 -4] (tiles/blank-home-tile :p1)
-                                     [3 0 -3] (tiles/blank-home-tile :p2)
-                                     [3 -3 0] (tiles/blank-home-tile :p3)
-                                     [0 -4 4] (tiles/blank-home-tile :p4)
-                                     [-3 -1 4] (tiles/blank-home-tile :p5)
-                                     [-4 2 2] (tiles/blank-home-tile :p6)
-                                     [-3 4 -1] (tiles/blank-home-tile :p7)}})
+(defn process-proto-tiles [layout]
+  (letfn [(process-tile-list [tiles create-fn]
+            (->> tiles
+                 (map create-fn)
+                 (into {})))]
+    (-> layout
+        (update :fixed-tiles process-tile-list ->fixed-tile)
+        (update :hyperlane-tiles process-tile-list ->hyperlane-tile)
+        (update :home-tiles process-tile-list ->home-tile))))
 
-(def layouts [eight-player seven-player seven-player-warp])
-(def default-layout seven-player-warp)
+(defn bounds-for-quantity [ordered-list n]
+  (let [total (count ordered-list)]
+    {:lower (apply + (drop (- total n) ordered-list))
+     :upper (apply + (take n ordered-list))}))
+
+(defn ->summary [{{:keys [blue]} :type-counts :as layout}]
+  {:resources         (bounds-for-quantity tiles/ordered-by-resources blue)
+   :optimal-resources (bounds-for-quantity tiles/ordered-by-optimal-resources blue)
+   :influence         (bounds-for-quantity tiles/ordered-by-influence blue)
+   :optimal-influence (bounds-for-quantity tiles/ordered-by-optimal-influence blue)})
+
+(defn enrich-layout [layout]
+  (let [processed-layout (process-proto-tiles layout)]
+    (assoc processed-layout :summary (->summary processed-layout))))
+
+(def layouts (mapv enrich-layout [layout-data/eight-player
+                                  layout-data/eight-player-warp
+                                  layout-data/seven-player
+                                  layout-data/seven-player-warp
+                                  layout-data/six-player
+                                  layout-data/five-player-warp
+                                  layout-data/four-player
+                                  layout-data/three-player]))
+(def default-layout (first layouts))
 (def code->layout (medley/index-by :code layouts))
 
 (defn fixed-set [layout]
@@ -106,7 +87,7 @@
        (apply concat)
        (into #{})))
 
-(comment (fixed-set eight-player))
+(comment (fixed-set default-layout))
 
 (defn free-spaces [{:keys [radius] :as layout}]
   (let [all-coordinates (hex/map-coordinates radius)
@@ -114,7 +95,7 @@
     (remove fixed-set all-coordinates)))
 
 (comment
-  (count (free-spaces eight-player)))
+  (count (free-spaces default-layout)))
 
 (defn player-keys [layout]
   (->> (get layout :home-tiles)

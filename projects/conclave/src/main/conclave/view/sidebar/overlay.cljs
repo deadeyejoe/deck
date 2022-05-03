@@ -5,18 +5,29 @@
              [re-frame.core :as rf]))
 
 (defn number []
+  [:div {:class ["cursor-pointer" "border-2" "rounded" "bg-blue-900" "text-gray-200"
+                 "border-blue-700" "active:border-blue-400"
+                 "w-12" "h-12"
+                 "flex" "flex-col" "justify-around" "items-center"]
+         :title "Click to toggle tile number"
+         :on-click #(rf/dispatch [handlers/set-overlay :tile-number])}
+   "#"])
+
+(defn ring []
   [:div {:class ["cursor-pointer" "border-2" "rounded" "bg-blue-900"
                  "border-blue-700" "active:border-blue-400"
                  "w-12" "h-12"
                  "flex" "flex-col" "justify-around" "items-center"]
-         :on-click #(rf/dispatch [handlers/set-overlay :coordinate])}
-   "#"])
+         :title "Click to toggle ring number"
+         :on-click #(rf/dispatch [handlers/set-overlay :ring])}
+   [:div {:class ["w-6" "h-6" "border-2" "rounded-full" "border-gray-200" "bg-transparent"]}]])
 
 (defn res-inf []
   [:div {:class ["cursor-pointer" "border-2" "rounded" "bg-blue-900"
                  "border-blue-700" "active:border-blue-400"
                  "w-12" "h-12"
                  "flex" "flex-col" "justify-around" "items-center"]
+         :title "Click to toggle resource/influence values"
          :on-click #(rf/dispatch [handlers/set-overlay :res-inf])}
    [:div {:class ["w-1/2"]} icons/resource]
    [:div {:class ["w-1/2" "mt-1"]} icons/influence]])
@@ -30,6 +41,7 @@
                        "border-blue-700" "active:border-blue-400"
                        "w-12" "h-12"
                        "flex" "flex-row" "justify-center" "items-center" "flex-wrap"]
+               :title "Click to toggle tech specialties"
                :on-click #(rf/dispatch [handlers/set-overlay :tech])}])))
 
 (defn traits []
@@ -41,6 +53,7 @@
                        "border-blue-700" "active:border-blue-400"
                        "w-12" "h-12"
                        "flex" "flex-row" "justify-center" "items-center" "flex-wrap"]
+               :title "Click to toggle planet traits"
                :on-click #(rf/dispatch [handlers/set-overlay :trait])}])))
 
 (defn wormhole []
@@ -48,15 +61,28 @@
                  "border-blue-700" "active:border-blue-400"
                  "w-12" "h-12"
                  "flex" "flex-row" "justify-center" "items-center" "flex-wrap"]
+         :title "Click to toggle wormholes and legendaries"
          :on-click #(rf/dispatch [handlers/set-overlay :wormhole])}
    [:div {:class ["w-1/2"]} icons/legendary]
    [:div {:class ["w-1/2"]} icons/wormhole-alpha]
    [:div {:class ["w-1/2"]} icons/wormhole-beta]])
 
+(defn frontier []
+  [:div {:class ["cursor-pointer" "border-2" "rounded" "bg-blue-900"
+                 "border-blue-700" "active:border-blue-400"
+                 "w-12" "h-12"
+                 "flex" "flex-col" "justify-center" "items-center"]
+         :title "Click to toggle frontier systems"
+         :on-click #(rf/dispatch [handlers/set-overlay :frontier])}
+   [:div {:class ["w-8" "h-8" "rounded-full" "bg-black" "flex" "justify-center" "items-center"]}
+    icons/frontier]])
+
 (defn component []
   [:div {:class ["flex" "justify-around" "w-full" "my-5"]}
    [number]
+   [ring]
    [res-inf]
    [tech]
    [traits]
-   [wormhole]])
+   [wormhole]
+   [frontier]])

@@ -1,6 +1,6 @@
-(ns conclave.data)
+(ns conclave.data.tiles)
 
-(def tiles-raw
+(def raw
   {:1 {:type :green
        :race "The Federation of Sol"
        :planets [{:name "Jord"
@@ -623,8 +623,3 @@
          :pok true
          :hyperlanes [[0 2] [0 3]]
          :planets []}})
-
-
-
-
-

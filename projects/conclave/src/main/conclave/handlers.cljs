@@ -61,8 +61,8 @@
         [new-map _ _] (map.opt/optimize galaxy-map swaps)]
     (db/set-map db new-map)))
 
-(defn async-generate [{:keys [seed] :as db}]
-  (worker/spawn {:action :generate :seed seed}
+(defn async-generate [{:keys [seed layout] :as db}]
+  (worker/spawn {:action :generate :seed seed :layout layout}
                 {:on-result #(rf/dispatch [map-generated %])
                  :on-error #(rf/dispatch [stop-processing])})
   (db/processing! db))
@@ -70,7 +70,7 @@
 (def generate-map ::generate-map)
 (rf/reg-event-db
  generate-map
- (fn [{:keys [worker-mode _seed] :as db} [_en mode-override]]
+ (fn [{:keys [worker-mode] :as db} [_en mode-override]]
    (let [mode (or mode-override worker-mode)]
      (cond
        (= :sync mode)      (sync-generate db)
@@ -151,8 +151,10 @@
 (def select-tile ::select-tile)
 (rf/reg-event-db
  select-tile
- (fn [db [_en coordinate]]
-   (assoc db :selected coordinate)))
+ (fn [{:keys [selected] :as db} [_en coordinate]]
+   (if (= selected coordinate)
+     (dissoc db :selected)
+     (assoc db :selected coordinate))))
 
 (def toggle-player-edit ::toggle-player-edit)
 (rf/reg-event-db
@@ -177,3 +179,9 @@
  swap-players
  (fn [db [_en pk1 pk2]]
    (db/swap-players db pk1 pk2)))
+
+(def set-layout ::set-layout)
+(rf/reg-event-db
+ set-layout
+ (fn [db [_en code]]
+   (assoc db :layout (layout/code->layout code))))

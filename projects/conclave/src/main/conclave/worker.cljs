@@ -9,10 +9,16 @@
   (let [swaps (layout/generate-swap-list seed)]
     {:map (first (opt/optimize map swaps))}))
 
-(defnp generate [{:keys [seed] :as request}]
-  (let [galaxy-map (map.build/from-layout seed)
-        swaps (layout/generate-swap-list seed)]
+(defnp generate [{:keys [seed layout] :as request}]
+  (let [galaxy-map (if layout
+                     (map.build/from-layout seed layout)
+                     (map.build/from-layout seed))
+        swaps (if layout
+                (layout/generate-swap-list seed layout)
+                (layout/generate-swap-list seed))]
     {:map (first (opt/optimize galaxy-map swaps))}))
+
+(comment (generate {:seed "ABCDE" :layout (layout/code->layout "7pw")}))
 
 (defn profile-request [f]
   (let [[result pstats] (profiled {} (f))]

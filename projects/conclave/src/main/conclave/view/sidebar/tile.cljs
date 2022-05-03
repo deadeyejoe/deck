@@ -29,7 +29,7 @@
 (defn tile-legend [[x y z :as coordinate] {:keys [key rotation] :as _tile}]
   (let [standard-classes ["h-6" "mx-0.5" "text-xs" "bg-gray-600" "text-black"
                           "flex" "justify-around" "items-center"]
-        selected @(rf/subscribe [subs/selected-tile])]
+        distance-from-selected @(rf/subscribe [subs/distance-from-selected coordinate])]
     [:div {:class ["absolute" "bottom-0" "right-0" "flex" "p-1" "m-1"
                    "bg-black" "border" "border-gray-600"]}
      [:div {:class (into standard-classes ["w-6"])
@@ -40,12 +40,10 @@
      [:div {:class (into standard-classes ["w-16"])}
       [:div x] [:div y] [:div z]]
      [:div {:class (into standard-classes ["w-6"])}
-      (get-in @(rf/subscribe [subs/distance-map]) [selected coordinate])]]))
+      distance-from-selected]]))
 
-(defn component []
-  (let [coordinate (or @(rf/subscribe [subs/hovered])
-                       @(rf/subscribe [subs/selected-tile]))
-        tile @(rf/subscribe [subs/tile coordinate])]
+(defn component [coordinate]
+  (let [tile @(rf/subscribe [subs/tile coordinate])]
     (when coordinate
       [:div {:class ["flex" "h-full" "w-full" "relative"]}
        [:div {:class ["w-1/2" "h-full" "flex" "items-center"]}

@@ -63,7 +63,8 @@
 (defn initialize [seed]
   (merge
    {:seed seed
-    :map (map.build/from-layout seed)}
+    :layout layout/default-layout
+    :map (map.build/from-layout seed layout/default-layout)}
    default-flags))
 
 (defn initialize-with-map [map]

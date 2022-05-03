@@ -1,11 +1,11 @@
 (ns conclave.map.serialization
   (:require [conclave.map.beta.build :as build]
-            [superstring.core :as str]
-            [conclave.utils.hex :as hex]
             [conclave.tiles.core :as tile]
-            [medley.core :as medley]
+            [conclave.utils.hex :as hex]
+            [cognitect.transit :as t]
             [goog.crypt.base64 :as b64]
-            [cognitect.transit :as t]))
+            [medley.core :as medley]
+            [superstring.core :as str]))
 
 (defn tile-map->coordinate-spiral [tile-map]
   (->> tile-map
@@ -17,7 +17,6 @@
 (defn tile->tts [{:keys [key rotation] :as tile}]
   (cond
     (nil? tile) "0"
-    (tile/home? tile) "0"
     (tile/hyperlane? tile) (str (name key) rotation)
     :else (name key)))
 
@@ -35,7 +34,6 @@
 (defn serialize-tile [{:keys [key rotation] :as tile}]
   (cond
     (nil? tile) empty-place
-    (tile/home? tile) empty-place
     (tile/hyperlane? tile) (str (name key) rotation)
     :else (name key)))
 
@@ -46,17 +44,26 @@
        (interpose " ")
        (apply str)))
 
-(defn serialize [{:keys [layout] :as galaxy-map}]
+(defn serialize [galaxy-map]
   (let [writer (t/writer :json)
         compact-map {:version 1
-                     :tiles (serialize-tiles galaxy-map)
-                     :layout (:code layout)}]
+                     :tiles (serialize-tiles galaxy-map)}]
     (->> (t/write writer compact-map)
          (b64/encodeString))))
 
-(defn resolve-key [key-str]
-  ;;TODO handle hyperlane orientation
-  (tile/key->tile (keyword key-str)))
+(defn resolve-key [coordinate key-str]
+  (cond
+    (str/starts-with? key-str "p") (tile/blank-home-tile (keyword key-str))
+    (= 4 (count key-str)) (let [tile-key (str/substring key-str 0 3)
+                                tile-rotation (js/parseInt (str/substring key-str 3 4))]
+                            (tile/hyperlane-tile {:key (keyword tile-key)
+                                                  :coordinate coordinate
+                                                  :rotation tile-rotation}))
+    :else (tile/key->tile (keyword key-str))))
+
+(comment
+  (resolve-key [0 0 0] "18")
+  (resolve-key [0 0 0] "88B5"))
 
 (defn deserialize-tiles [tile-string]
   (let [coordinate-spiral (hex/map-coordinates 4)]
@@ -64,7 +71,7 @@
          (map vector coordinate-spiral)
          (into {})
          (medley/remove-vals empty-place?)
-         (medley/map-vals resolve-key))))
+         (medley/map-kv-vals resolve-key))))
 
 (defn decode [string]
   (let [reader (t/reader :json)]
@@ -82,8 +89,8 @@
 (comment
   (try
     (let [sample-map (build/from-layout "ABCDE")]
-      (= sample-map
-         (-> sample-map
-             (serialize)
-             (deserialize))))
+      (=  sample-map
+          (-> sample-map
+              (serialize)
+              (deserialize))))
     (catch js/Error e (js/console.log e))))

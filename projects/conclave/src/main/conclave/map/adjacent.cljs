@@ -36,17 +36,17 @@
                        (conj results target)
                        rest))))))
 
-(def sample-hyperlane-map {[0 -2  2]  (tiles/hyperlane-tile :86A [0 -2  2] 0)
-                           [1 -3  2]  (tiles/hyperlane-tile :88A [1 -3  2] 0)
-                           [1 -4  3]  (tiles/hyperlane-tile :83A [1 -4  3] 0)
-                           [0 -4  4]  (tiles/hyperlane-tile :85A [0 -4  4] 0)
-                           [-1 -3 4]  (tiles/hyperlane-tile :84A [-1 -3 4] 0)
-                           [-1 -2 3]  (tiles/hyperlane-tile :87A [-1 -2 3] 0)})
+(def sample-hyperlane-map {[0 -2  2]  (tiles/hyperlane-tile {:key :86A :coordinate [0 -2  2] :rotation 0})
+                           [1 -3  2]  (tiles/hyperlane-tile {:key :88A :coordinate [1 -3  2] :rotation 0})
+                           [1 -4  3]  (tiles/hyperlane-tile {:key :83A :coordinate [1 -4  3] :rotation 0})
+                           [0 -4  4]  (tiles/hyperlane-tile {:key :85A :coordinate [0 -4  4] :rotation 0})
+                           [-1 -3 4]  (tiles/hyperlane-tile {:key :84A :coordinate [-1 -3 4] :rotation 0})
+                           [-1 -2 3]  (tiles/hyperlane-tile {:key :87A :coordinate [-1 -2 3] :rotation 0})})
 
-(def broken-ring-map {[1 -3 2]  (tiles/hyperlane-tile :85A [1 -3 2] 4)
-                      [1 -4 3]  (tiles/hyperlane-tile :85A [1 -4 3] 5)
-                      [-1 -3 4]  (tiles/hyperlane-tile :85A [-1 -3 4] 1)
-                      [-1 -2 3]  (tiles/hyperlane-tile :85A [-1 -2 3] 2)})
+(def broken-ring-map {[1 -3 2]   (tiles/hyperlane-tile {:key :85A :coordinate [1 -3 2]  :rotation 4})
+                      [1 -4 3]   (tiles/hyperlane-tile {:key :85A :coordinate [1 -4 3]  :rotation 5})
+                      [-1 -3 4]  (tiles/hyperlane-tile {:key :85A :coordinate [-1 -3 4] :rotation 1})
+                      [-1 -2 3]  (tiles/hyperlane-tile {:key :85A :coordinate [-1 -2 3] :rotation 2})})
 
 (comment
   (traverse-hyperlanes sample-hyperlane-map [0 -3 3])

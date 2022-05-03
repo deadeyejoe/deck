@@ -84,6 +84,13 @@
        (filter (comp f second))
        (map first)))
 
+(defn player-keys [{:keys [tiles] :as galaxy-map}]
+  (->> tiles
+       (vals)
+       (filter tile/home?)
+       (map :key)
+       (sort)))
+
 (defn swap-tiles [galaxy-map c1 c2]
   (let [t1 (coordinate->tile galaxy-map c1)
         t2 (coordinate->tile galaxy-map c2)]

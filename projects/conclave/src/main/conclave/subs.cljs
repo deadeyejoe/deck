@@ -8,6 +8,7 @@
             [conclave.map.beta.stake :as stake]
             [conclave.map.beta.score :as score]
             [conclave.map.summary :as map-summary]
+            [conclave.utils.hex :as hex]
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]
             [clojure.string :as str]
@@ -30,7 +31,7 @@
 (rf/reg-sub
  layout
  (fn [db _qv]
-   layout/default-layout))
+   (:layout db)))
 
 (def processing? ::processing?)
 (rf/reg-sub
@@ -76,6 +77,21 @@
  :<- [galaxy-map]
  (fn [galaxy-map _qv]
    (:distances galaxy-map)))
+
+(def distance-from-origin ::distance-from-origin)
+(rf/reg-sub
+ distance-from-origin
+ :<- [distance-map]
+ (fn [distance-map [_q coordinate]]
+   (get-in distance-map [hex/origin coordinate])))
+
+(def distance-from-selected ::distance-from-selected)
+(rf/reg-sub
+ distance-from-selected
+ :<- [distance-map]
+ :<- [selected-tile]
+ (fn [[distance-map selected-tile] [_q coordinate]]
+   (get-in distance-map [selected-tile coordinate])))
 
 (def stake-map ::stake-map)
 (rf/reg-sub
@@ -174,9 +190,9 @@
 (def player-keys ::player-keys)
 (rf/reg-sub
  player-keys
- :<- [layout]
- (fn [layout _qv]
-   (layout/player-keys layout)))
+ :<- [galaxy-map]
+ (fn [galaxy-map _qv]
+   (map/player-keys galaxy-map)))
 
 (def player-name ::player-name)
 (rf/reg-sub

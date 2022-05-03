@@ -18,6 +18,22 @@
   (when-let [selected @(rf/subscribe [subs/selected-tile])]
     [:div (get-in @(rf/subscribe [subs/distance-map]) [selected coordinate])]))
 
+(defn ring->bg-colour [ring]
+  (case ring
+    1 "bg-yellow-200"
+    2 "bg-yellow-500"
+    3 "bg-orange-500"
+    4 "bg-red-500"
+    "bg-black"))
+
+(defn ring-content [coordinate]
+  (let [ring @(rf/subscribe [subs/distance-from-origin coordinate])]
+    (when (pos-int? ring)
+      [:div {:class [(ring->bg-colour ring) "text-black"
+                     "w-10" "h-10" "rounded-full"
+                     "flex" "justify-center" "items-center"]}
+       ring])))
+
 (defn legendary-content [{:keys [legendary] :as _tile}]
   (when legendary
     [:div icons/legendary]))
@@ -40,17 +56,21 @@
          (doall)
          (into [:div]))))
 
+(defn trait-content [{{:keys [traits]} :total :as _tile}]
+  (when (seq traits)
+    (->> traits
+         (map-indexed (fn [i t] [:div {:key i :class ["w-1/2"]} (icons/trait->img t)]))
+         (into [:div {:class ["flex" "flex-wrap" "justify-center"]}]))))
+
 (defn wormhole-content [{:keys [wormhole legendary] :as _tile}]
   (or (when wormhole
         [:div (icons/wormhole->img wormhole)])
       (when legendary
         [:div icons/legendary])))
 
-(defn trait-content [{{:keys [traits]} :total :as _tile}]
-  (when (seq traits)
-    (->> traits
-         (map-indexed (fn [i t] [:div {:key i :class ["w-1/2"]} (icons/trait->img t)]))
-         (into [:div {:class ["flex" "flex-wrap" "justify-center"]}]))))
+(defn frontier-content [tile]
+  (when (tile/frontier? tile)
+    [:div icons/frontier]))
 
 (defn content [coordinate tile]
   (let [overlay-mode @(rf/subscribe [subs/overlay-mode])]
@@ -58,11 +78,13 @@
       :tile-number (tile-number-content tile)
       :coordinate (coordinate-content coordinate)
       :distance-score (distance-content coordinate)
+      :ring (ring-content coordinate)
       :legendary (legendary-content tile)
       :res-inf (res-inf-content tile)
       :tech (tech-content tile)
       :trait (trait-content tile)
       :wormhole (wormhole-content tile)
+      :frontier (frontier-content tile)
       nil)))
 
 (defn home-content [{player-key :key :as _tile}]

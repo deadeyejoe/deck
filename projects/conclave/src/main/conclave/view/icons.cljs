@@ -35,6 +35,7 @@
 
 (def resource [:img (image-props "general/resource-bg")])
 (def influence [:img (image-props "general/influence-bg")])
+(def frontier [:img (image-props "general/frontier")])
 
 (defn race [code]
   [:img (image-props (str "race/" (name code)))])

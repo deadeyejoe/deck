@@ -1,5 +1,5 @@
 (ns conclave.tiles.core
-  (:require [conclave.data :as data]
+  (:require [conclave.data.tiles :as tile-data]
             [conclave.tiles.static :refer [green-tile]]
             [conclave.utils.hex :as hex]
             [conclave.utils.vector :as vect]
@@ -76,7 +76,7 @@
 
 (def key->tile (reduce-kv #(assoc %1 %2 (enrich %2 %3))
                           {}
-                          data/tiles-raw))
+                          tile-data/raw))
 
 (def tiles (vals key->tile))
 
@@ -141,6 +141,11 @@
 (defn has-specialties? [tile] (-> tile :total :specialties seq))
 (def with-specialties (filter has-specialties? tiles))
 
+(defn frontier? [{:keys [planets] :as tile}] (and (empty? planets)
+                                                  (not (hyperlane? tile))
+                                                  (or (:race tile)
+                                                      (not (home? tile)))))
+
 (defn matching-wormholes [tile]
   (let [wormhole (:wormhole tile)]
     (case wormhole
@@ -164,7 +169,8 @@
                                tiles))
 
 (defn image [tile]
-  (or (:image tile) (str "tile/ST_" (-> tile :key name) ".png")))
+  (when tile
+    (or (:image tile) (str "tile/ST_" (-> tile :key name) ".png"))))
 
 (defn stakeable? [tile]
   (and (not (home? tile))
@@ -184,7 +190,7 @@
   (lane->edge [0 0 0] 5 [1 4])
   (lane->edge [0 0 0] 6 [1 4]))
 
-(defn hyperlane-tile [key coordinate rotation]
+(defn hyperlane-tile [{:keys [key coordinate rotation] :as proto-tile}]
   (let [{:keys [hyperlanes] :as tile} (key->tile key)]
     (assoc tile
            :coordinate coordinate
@@ -194,3 +200,14 @@
 (comment
   (:edges (hyperlane-tile :87A [0 0 0] 0))
   (:edges (hyperlane-tile :87A [0 0 0] 2)))
+
+(defn blues-ordered [quantity]
+  (->> blues
+       (filter default?)
+       (map #(get-in % [:total quantity]))
+       (sort >)))
+
+(def ordered-by-resources         (blues-ordered :resources))
+(def ordered-by-influence         (blues-ordered :influence))
+(def ordered-by-optimal-resources (blues-ordered :optimal-resources))
+(def ordered-by-optimal-influence (blues-ordered :optimal-influence))

@@ -11,6 +11,7 @@
             [conclave.map.serialization :as serialize]
             [conclave.utils.hex :as hex]
             [conclave.map.core :as core]
+            [conclave.db :as db]
             [conclave.map.layout :as layout]
             [conclave.utils.score :as util-score]
             [conclave.tiles.core :as tile]
@@ -22,6 +23,11 @@
             [taoensso.tufte :as tufte :refer-macros (profiled)]))
 
 (def current-map (:map @rfdb/app-db))
+(:layout @rfdb/app-db)
+(map.build/from-layout "ABCDE" (layout/code->layout "7pw"))
+
+(adjacent/hyperlane-submap current-map)
+(get (adjacent/adjacency current-map) [-4 2 2])
 
 (let [map (:map @rfdb/app-db)
       stakes (stake/stakes-for-map map (:distances map))

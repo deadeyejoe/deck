@@ -10,22 +10,22 @@
             [re-frame.core :as rf]))
 
 (defn content []
-  (let [player-edit @(rf/subscribe [subs/player-edit])]
+  (let [player-edit @(rf/subscribe [subs/player-edit])
+        coordinate (or @(rf/subscribe [subs/hovered])
+                       @(rf/subscribe [subs/selected-tile]))]
     [:div {:class ["h-full" "w-full"
                    "flex" "flex-col" "justify-start"]}
      [:div {:class ["h-1/12"]}
       [controls/component]]
      [:div {:class ["h-1/2" "w-full" "flex" "flex-col"]}
       [:div {:class ["w-full" "flex" "items-center"]}
-       [:div {:class ["mr-5" "text-xl" "w-40"]} (if player-edit "Edit Players" "Player Summary")]
-       [common/button (if player-edit "Done" "Edit") [handlers/toggle-player-edit]]]
-      (if player-edit
-        [edit/component]
-        [summary/component])]
+       [:div {:class ["mr-5" "text-xl" "w-40"]} (if player-edit "Edit Players" "Player Summary")]]
+      [summary/component]]
      [:div {:class ["h-1/12" "w-full" "flex"]}
       [overlay/component]]
      [:div {:class ["h-1/3" "w-full" "flex"]}
-      [tile/component]]]))
+      (when coordinate
+        [tile/component coordinate])]]))
 
 (defn component []
   [:div {:class ["w-full " "h-full" "flex"]}
