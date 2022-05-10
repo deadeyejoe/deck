@@ -5,7 +5,8 @@
             [conclave.view.sidebar.controls :as controls]
             [conclave.view.sidebar.edit :as edit]
             [conclave.view.sidebar.overlay :as overlay]
-            [conclave.view.sidebar.summary :as summary]
+            [conclave.view.sidebar.map-summary :as map-summary]
+            [conclave.view.sidebar.player-summary :as player-summary]
             [conclave.view.sidebar.tile :as tile]
             [re-frame.core :as rf]))
 
@@ -19,14 +20,14 @@
      [:div {:class ["h-1/12" "w-full"]}
       [controls/component]]
      [:div {:class ["h-1/2" "w-full" "flex" "flex-col"]}
-      [:div {:class ["w-full" "flex" "items-center"]}
-       [:div {:class ["text-xl" "w-40"]} (if player-edit "Edit Players" "Player Summary")]]
-      [summary/component]]
-     [:div {:class ["h-1/3" "w-full" "flex"]}
-      [tile/component coordinate]]
+      [player-summary/component]]
+     [:div {:class ["h-1/3" "w-full" "flex" "mb-2"]}
+      (if coordinate
+        [tile/component coordinate]
+        [map-summary/component])]
      [:div {:class ["h-full" "flex" "flex-col" "justify-center" "absolute" "-left-20"]}
       [overlay/component]]]))
 
 (defn component []
-  [:div {:class ["w-full " "h-full" "flex" "border-l-2" "border-blue-600"]}
+  [:div {:class ["w-full " "h-full" "flex" "border-l-2" "border-blue-800"]}
    [content]])

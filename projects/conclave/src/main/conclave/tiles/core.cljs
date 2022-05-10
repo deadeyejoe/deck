@@ -201,13 +201,20 @@
   (:edges (hyperlane-tile :87A [0 0 0] 0))
   (:edges (hyperlane-tile :87A [0 0 0] 2)))
 
-(defn blues-ordered [quantity]
-  (->> blues
+(defn tiles-ordered [tiles quantity]
+  (->> tiles
        (filter default?)
        (map #(get-in % [:total quantity]))
        (sort >)))
 
-(def ordered-by-resources         (blues-ordered :resources))
-(def ordered-by-influence         (blues-ordered :influence))
-(def ordered-by-optimal-resources (blues-ordered :optimal-resources))
-(def ordered-by-optimal-influence (blues-ordered :optimal-influence))
+(def type->quantity->ordering
+  {:red {:planets  (tiles-ordered reds :planets)
+         :resources (tiles-ordered reds :resources)
+         :optimal-resources (tiles-ordered reds :optimal-resources)
+         :influence (tiles-ordered reds :influence)
+         :optimal-influence (tiles-ordered reds :optimal-influence)}
+   :blue {:planets  (tiles-ordered blues :planets)
+          :resources (tiles-ordered blues :resources)
+          :optimal-resources (tiles-ordered blues :optimal-resources)
+          :influence (tiles-ordered blues :influence)
+          :optimal-influence (tiles-ordered blues :optimal-influence)}})

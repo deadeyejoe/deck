@@ -9,6 +9,7 @@
             [conclave.map.adjacent :as adjacent]
             [conclave.map.summary :as summary]
             [conclave.map.serialization :as serialize]
+            [conclave.storage :as storage]
             [conclave.utils.hex :as hex]
             [conclave.map.core :as core]
             [conclave.db :as db]
@@ -23,9 +24,15 @@
             [taoensso.tufte :as tufte :refer-macros (profiled)]))
 
 (def current-map (:map @rfdb/app-db))
-(:layout @rfdb/app-db)
-(map.build/from-layout "ABCDE" (layout/code->layout "7pw"))
 
+
+(some (partial storage/match-entry? (storage/->map-entry current-map)) (:maps @storage/local-store))
+(storage/map-stored? storage/local-store current-map)
+
+(map.build/compute-summary current-map)
+(:map-index @rfdb/app-db)
+(map.build/from-layout "ABCDE" (layout/code->layout "7pw"))
+(serialize/serialize-tts current-map)
 (adjacent/hyperlane-submap current-map)
 (get (adjacent/adjacency current-map) [-4 2 2])
 

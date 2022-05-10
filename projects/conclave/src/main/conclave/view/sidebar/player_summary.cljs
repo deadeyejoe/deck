@@ -1,4 +1,4 @@
-(ns conclave.view.sidebar.summary
+(ns conclave.view.sidebar.player-summary
   (:require [conclave.handlers :as handlers]
             [conclave.view.icons :as icons]
             [conclave.view.common :as common]
@@ -72,9 +72,15 @@
          [:div {:class ["flex" "w-full" "justify-center"]} icons/resource]
          [:div {:class ["flex" "w-full" "justify-center"]} icons/influence] "" "" "")))
 
+(defn player-table [player-keys]
+  (into [:<> [header-row]]
+        (map (fn [pk] [summary-row pk]) player-keys)))
+
 (defn component []
   (let [player-keys @(rf/subscribe [subs/player-keys])]
-    (->> player-keys
-         (map (fn [pk] [summary-row pk]))
-         (into [:div {:class ["flex" "flex-col" "justify-center"  "mb-1" "w-full"]}
-                [header-row]]))))
+    [common/o-box {:class ["p-1"]}
+     [common/v-box {:class ["justify-center" "w-full" "bg-gray-900"
+                            "border" "border-gray-800" "rounded-lg" "p-2"]}
+      (if (seq player-keys)
+        [player-table player-keys]
+        [:div "No players yet..."])]]))

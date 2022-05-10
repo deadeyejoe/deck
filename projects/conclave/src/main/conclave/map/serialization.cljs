@@ -17,6 +17,7 @@
 (defn tile->tts [{:keys [key rotation] :as tile}]
   (cond
     (nil? tile) "0"
+    (tile/home? tile) "0"
     (tile/hyperlane? tile) (str (name key) rotation)
     :else (name key)))
 

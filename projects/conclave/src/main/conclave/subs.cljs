@@ -43,6 +43,17 @@
  worker-mode
  (fn [db] (:worker-mode db)))
 
+(def storage-index ::storage-index)
+(rf/reg-sub
+ storage-index
+ (fn [db] (when-let [index (:storage-index db)]
+            (inc index))))
+
+(def storage-total ::storage-total)
+(rf/reg-sub
+ storage-total
+ (fn [db] (:storage-total db)))
+
 (rf/reg-sub
  :score/variance
  (fn [db] (utils/format-number (:score/variance db))))

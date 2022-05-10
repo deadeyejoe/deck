@@ -6,7 +6,8 @@
             [conclave.map.beta.specs :as map.specs]
             [conclave.map.core :as map.core]
             [conclave.map.layout :as layout]
-            [conclave.player :as player]))
+            [conclave.player :as player]
+            [medley.core :as medley]))
 
 (s/def ::map ::map.specs/instance)
 (s/def ::seed (s/and string?
@@ -41,6 +42,9 @@
 (s/def ::players (s/map-of ::player/key
                            ::player/instance))
 
+(s/def ::storage-index nat-int?)
+(s/def ::storage-total nat-int?)
+
 (s/def ::db (s/keys :req-un [::seed
                              ::map
                              ::overlay-mode
@@ -52,7 +56,9 @@
                              ::variance-score
                              ::processing
                              ::player-edit]
-                    :opt-un [::players]))
+                    :opt-un [::players
+                             ::storage-index
+                             ::storage-total]))
 
 (def default-flags
   {:player-edit false
@@ -60,24 +66,16 @@
    :overlay-mode :none
    :highlight-mode :single})
 
-(defn initialize [seed]
+(defn initialize []
   (merge
-   {:seed seed
-    :layout layout/default-layout
-    :map (map.build/from-layout seed layout/default-layout)}
-   default-flags))
-
-(defn initialize-with-map [map]
-  (merge
-   {:seed ""
-    :map map}
+   {:layout layout/default-layout}
    default-flags))
 
 (defn set-map [db new-map]
-  (assoc db
-         :map new-map
-         :variance-score (score/compute-variance new-map)
-         :constraint-score (constraint/compute-score new-map)))
+  (-> db
+      (assoc :map new-map
+             :variance-score (score/compute-variance new-map)
+             :constraint-score (constraint/compute-score new-map))))
 
 (defn processing! [db]
   (assoc db :processing true))
@@ -87,6 +85,12 @@
 
 (defn finished! [db]
   (assoc db :processing false))
+
+(defn toggle-overlay [{:keys [overlay-mode] :as db} new-mode]
+  (assoc db :overlay-mode
+         (if (= overlay-mode new-mode)
+           :none
+           new-mode)))
 
 (defn highlight-set [{:keys [map highlight-mode] :as db} focus-coordinate]
   (case highlight-mode

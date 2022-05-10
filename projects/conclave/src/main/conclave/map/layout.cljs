@@ -52,20 +52,8 @@
         (update :hyperlane-tiles process-tile-list ->hyperlane-tile)
         (update :home-tiles process-tile-list ->home-tile))))
 
-(defn bounds-for-quantity [ordered-list n]
-  (let [total (count ordered-list)]
-    {:lower (apply + (drop (- total n) ordered-list))
-     :upper (apply + (take n ordered-list))}))
-
-(defn ->summary [{{:keys [blue]} :type-counts :as layout}]
-  {:resources         (bounds-for-quantity tiles/ordered-by-resources blue)
-   :optimal-resources (bounds-for-quantity tiles/ordered-by-optimal-resources blue)
-   :influence         (bounds-for-quantity tiles/ordered-by-influence blue)
-   :optimal-influence (bounds-for-quantity tiles/ordered-by-optimal-influence blue)})
-
 (defn enrich-layout [layout]
-  (let [processed-layout (process-proto-tiles layout)]
-    (assoc processed-layout :summary (->summary processed-layout))))
+  (process-proto-tiles layout))
 
 (def layouts (mapv enrich-layout [layout-data/eight-player
                                   layout-data/eight-player-warp

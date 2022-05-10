@@ -38,6 +38,16 @@
                    "cursor-pointer" "border" "rounded-sm" "m-1" "p-1"]
            :on-click #(rf/dispatch dispatch)}])
 
+(defn real-button [content dispatch]
+  [:div {:class ["text-gray-200"
+                 "bg-gradient-to-br" "from-gray-600" "to-gray-400" "border-gray-400"
+                 "hover:from-gray-500" "hover:to-gray-400"
+                 "active:from-gray-100" "active:to-gray-400" "active:border-gray-100"
+                 "cursor-pointer" "border" "rounded" "m-1" "p-1"
+                 "flex" "justify-center" "items-center"]
+         :on-click #(rf/dispatch dispatch)}
+   content])
+
 (defn labeled-value [label query-vector]
   (let [sub @(rf/subscribe query-vector)]
     [:div
@@ -71,7 +81,7 @@
     (tile->hex-image tile)))
 
 (defn resource [{:keys [optimal-resources resources] :as _summary}]
-  [:div {:class ["flex" "justify-between" "w-full"]}
+  [:div {:class ["flex" "justify-between" "w-12"]}
    [:div {:class ["text-amber-400"]} (str optimal-resources)]
    [:div {:class ["text-amber-800"]} resources]])
 
@@ -79,3 +89,21 @@
   [:div {:class ["flex" "justify-between" "w-12"]}
    [:div {:class ["text-cyan-400"]} (str optimal-influence)]
    [:div {:class ["text-cyan-800"]} influence]])
+
+(defn o-box [props & content]
+  (into [:div (merge-with into
+                          {:class ["flex" "h-full" "w-full" "justify-center" "items-center"]}
+                          props)]
+        content))
+
+(defn h-box [props & content]
+  (into [:div (merge-with into
+                          {:class ["flex" "w-full" "items-center"]}
+                          props)]
+        content))
+
+(defn v-box [props & content]
+  (into [:div (merge-with into
+                          {:class ["flex" "flex-col" "h-full" "items-center"]}
+                          props)]
+        content))

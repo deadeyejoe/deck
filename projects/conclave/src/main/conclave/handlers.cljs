@@ -7,18 +7,83 @@
             [conclave.map.layout :as layout]
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as map.opt]
+            [conclave.storage :as storage]
             [conclave.utils.random :as random]
             [conclave.worker.client :as worker]))
+
+(declare start-tutorial load-external-map load-internal-map)
 
 (def initialize ::initialize)
 (rf/reg-event-fx
  initialize
+ [(rf/inject-cofx cofx/read-map-from-location) (rf/inject-cofx cofx/local-store)]
+ (fn [{:keys [map-from-location local-store] :as _cofx} [_en _seed]]
+   {:db (db/initialize)
+    :fx (cond
+          map-from-location [[:dispatch [load-external-map map-from-location]]]
+          (storage/has-maps? local-store) [[:dispatch [load-internal-map (storage/retrieve-map local-store)]]]
+          :else [[:dispatch [start-tutorial]]])}))
+
+(def start-tutorial ::start-tutorial)
+(rf/reg-event-db
+ start-tutorial
+ (fn [db _ev]
+   (assoc db :tutorial {})))
+
+(def location-changed ::location-changed)
+(rf/reg-event-fx
+ location-changed
  [(rf/inject-cofx cofx/read-map-from-location)]
- (fn [{:keys [map-from-location] :as coeffects} [_en seed]]
-   {:db (if map-from-location
-          (db/initialize-with-map map-from-location)
-          (db/initialize (or seed
-                             (random/random-seed))))}))
+ (fn [{:keys [map-from-location] :as _cofx} _ev]
+   (when map-from-location
+     {:fx [[:dispatch [load-external-map map-from-location]]]})))
+
+(def load-external-map ::load-external-map)
+(rf/reg-event-db
+ load-external-map
+ [ix/store-map-locally]
+ (fn [db [_en map]]
+   (db/set-map db map)))
+
+(def load-internal-map ::load-internal-map)
+(rf/reg-event-db
+ load-internal-map
+ [ix/write-map-to-location]
+ (fn [db [_en {:keys [index map] :as _internal-map-entry}]]
+   (-> db
+       (db/set-map map)
+       (assoc :storage-index index))))
+
+(def map-generated ::map-generated)
+(rf/reg-event-db
+ map-generated
+ [ix/write-map-to-location ix/store-map-locally]
+ (fn [db [_en {:keys [map] :as _worker-result}]]
+   (-> db
+       (db/finished!)
+       (db/set-map map))))
+
+(def navigate-map ::navigate-map)
+(rf/reg-event-fx
+ navigate-map
+ [(rf/inject-cofx cofx/local-store)]
+ (fn [{:keys [local-store db] :as _cofx} [_en direction quantity]]
+   (let [current-index (:storage-index db)
+         new-index (case direction
+                     :next (+ current-index quantity)
+                     :previous (- current-index quantity))
+         retrieved-map-entry (storage/retrieve-map local-store new-index)]
+     (when retrieved-map-entry {:fx [[:dispatch [load-internal-map retrieved-map-entry]]]}))))
+
+(comment
+  (rf/dispatch [navigate-map :next])
+  (rf/dispatch [navigate-map :previous]))
+
+(def clear-local-store ::clear-local-store)
+(rf/reg-event-fx
+ clear-local-store
+ (fn [_ _ev]
+   (storage/clear!)))
 
 (def set-seed ::set-seed)
 (rf/reg-event-db
@@ -33,15 +98,6 @@
    (->> seed
         (map.build/from-layout)
         (db/set-map db))))
-
-(def map-generated ::map-generated)
-(rf/reg-event-db
- map-generated
- [ix/write-map-to-location]
- (fn [db [_en {:keys [map] :as _worker-result}]]
-   (-> db
-       (db/finished!)
-       (db/set-map map))))
 
 (def stop-processing ::stop-processing)
 (rf/reg-event-db
@@ -65,7 +121,8 @@
   (worker/spawn {:action :generate :seed seed :layout layout}
                 {:on-result #(rf/dispatch [map-generated %])
                  :on-error #(rf/dispatch [stop-processing])})
-  (db/processing! db))
+  (-> db
+      (db/processing!)))
 
 (def generate-map ::generate-map)
 (rf/reg-event-db
@@ -84,34 +141,11 @@
    {:db (assoc db :seed (random/random-seed))
     :fx [[:dispatch [generate-map :async]]]}))
 
-(defn sync-optimize [{:keys [map seed] :as db}]
-  (let [swaps (layout/generate-swap-list seed)
-        [new-map _ _] (map.opt/optimize map swaps)]
-    (db/set-map db new-map)))
-
-(defn async-optimize [{:keys [map seed] :as db}]
-  (worker/spawn {:action :optimize :map map :seed seed}
-                {:on-result #(rf/dispatch [map-generated %])
-                 :on-error #(rf/dispatch [stop-processing])})
-  (db/processing! db))
-
-(def optimize-map ::optimize-map)
-(rf/reg-event-db
- optimize-map
- (fn [{:keys [worker-mode _seed] :as db} _ev]
-   (cond
-     (= :sync worker-mode) (sync-optimize db)
-     (db/processing? db)   db
-     :else     (async-optimize db))))
-
 (def set-overlay ::set-overlay)
 (rf/reg-event-db
  set-overlay
- (fn [{:keys [overlay-mode] :as db} [_ new-mode]]
-   (assoc db :overlay-mode
-          (if (= overlay-mode new-mode)
-            :none
-            new-mode))))
+ (fn [db [_ new-mode]]
+   (db/toggle-overlay db new-mode)))
 
 (def set-highlight ::set-highlight)
 (rf/reg-event-db

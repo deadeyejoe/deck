@@ -52,7 +52,7 @@
   [:div {:class ["relative"]} content])
 
 (defn component []
-  (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
+  (when-let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
     [origin
      (into
       [:<> [hex-tile [0 0 0]]]

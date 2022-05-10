@@ -33,6 +33,7 @@ module.exports = {
         "highlight" : 2,
         "overlay" : 3,
         "app-overlay": 4,
+        "tutorial": 5,
       }
     },
     variants: {

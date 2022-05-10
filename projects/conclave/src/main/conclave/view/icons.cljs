@@ -50,3 +50,12 @@
 
 (defn race [code]
   [:img (image-props (str "race/" (name code)))])
+
+(def green-tile
+  [:img (image-props "tile/ST_0" "35px")])
+(def blue-tile
+  [:img (image-props "tile/ST_18_Back" "35px")])
+(def red-tile
+  [:img (image-props "tile/ST_39_Back" "35px")])
+(def grey-tile
+  [:img (merge (image-props "tile/ST_18_Back" "35px") {:class ["grayscale"]})])
