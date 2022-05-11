@@ -44,7 +44,7 @@
         influence (rc/atom 1)]
     (fn []
       [:div {:class ["text-lg" "flex" "items-center" "h-24" "py-1"]}
-       [:span {:class ["mr-4"]} "A planet with normal values: "]
+       [:span {:class ["mr-4"]} "A planet with base values: "]
        [col {}
         [input-container
          resource-icon

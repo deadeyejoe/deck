@@ -40,16 +40,14 @@
                                   (- upper lower))
                                100)))]
     [h-box {:class ["h-8" "flex"]}
-     [:div {:class ["w-10"]}]
-     [:div {:class ["flex" "justify-end" "w-10" "pr-2"]} lower]
+     [:div {:class ["flex" "justify-end" "w-16" "pr-2"]} lower]
      [:div {:class ["p-1" "border" "border-gray-800" "w-full" "h-full"]}
       [:div (merge-with into
-                        {:class ["h-full" "flex" "items-center" "justify-end" "pr-2"]
+                        {:class ["h-full" "flex" "items-center" "justify-end" "pr-2" "transition-all"]
                          :style {:width (str percent "%")}}
                         props)
        value]]
-     [:div {:class ["flex" "justify-start" "w-10" "pl-2"]} upper]
-     [:div {:class ["w-10"]}]]))
+     [:div {:class ["flex" "justify-start" "w-16" "pl-2"]} upper]]))
 
 (defn icon-count [icon value title]
   (let [effective-value (or value 0)]
@@ -81,6 +79,22 @@
    [icon-count [:div {:class ["grayscale"]} (icons/biotic "35px")] (:tech map-summary)
     "Number of systems with tech specialties"]])
 
+(defn bounds [map-summary]
+  (let [optimal? (= :optimal @(rf/subscribe [subs/value-mode]))]
+    [:<>
+     [h-box {:class ["pr-3"]}
+      [label "Planets:"]
+      [percentage {:class ["bg-gradient-to-r" "from-gray-800" "to-gray-400" "text-black"]}
+       (:planets map-summary)]]
+     [h-box {:class ["mt-1" "pr-3"]}
+      [label "Resources:"]
+      [percentage {:class ["bg-gradient-to-r" "from-amber-800" "to-amber-400" "text-black"]}
+       ((if optimal? :optimal-resources :resources) map-summary)]]
+     [h-box {:class ["mt-1" "pr-3"]}
+      [label "Influence:"]
+      [percentage {:class ["bg-gradient-to-r" "from-cyan-800" "to-cyan-400" "text-black"]}
+       ((if optimal? :optimal-influence :influence) map-summary)]]]))
+
 (defn component []
   (let [{map-summary :summary :as galaxy-map} @(rf/subscribe [subs/galaxy-map])]
     [o-box {:class ["p-1"]}
@@ -89,17 +103,5 @@
         [v-box {:class ["w-full" "justify-around"]}
          [tile-row map-summary]
          [feature-row map-summary]
-         [h-box {} [:div {:class ["w-10"]}] [label "Planets:"]]
-         [h-box {:class ["justify-start"]
-                 :title "Planets"}
-          [percentage {:class ["bg-gradient-to-r" "from-gray-800" "to-gray-400" "text-black"]}
-           (:planets map-summary)]]
-         [h-box {:class ["mt-1"]} [:div {:class ["w-10"]}] "Optimal Resources:"]
-         [h-box {:class ["justify-start"]}
-          [percentage {:class ["bg-gradient-to-r" "from-amber-800" "to-amber-400" "text-black"]}
-           (:optimal-resources map-summary)]]
-         [h-box {:class ["mt-1"]} [:div {:class ["w-10"]}] "Optimal Influence:"]
-         [h-box {:class ["justify-start"]}
-          [percentage {:class ["bg-gradient-to-r" "from-cyan-800" "to-cyan-400" "text-black"]}
-           (:optimal-influence map-summary)]]]
+         [bounds map-summary]]
         [:div "No map yet..."])]]))

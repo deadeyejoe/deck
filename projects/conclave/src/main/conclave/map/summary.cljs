@@ -28,6 +28,6 @@
              (reduce collect {}))
         (update :traits (comp vec sort))
         (update :specialties (comp vec sort))
-        (update :wormholes (comp vec sort))
+        (update :wormholes (comp vec sort set))
         (assoc :problems problems
                :valid valid?))))

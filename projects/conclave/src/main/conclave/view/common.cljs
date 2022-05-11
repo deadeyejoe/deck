@@ -80,15 +80,29 @@
   (let [tile @(rf/subscribe [subs/tile coordinate])]
     (tile->hex-image tile)))
 
-(defn resource [{:keys [optimal-resources resources] :as _summary}]
-  [:div {:class ["flex" "justify-between" "w-12"]}
-   [:div {:class ["text-amber-400"]} (str optimal-resources)]
-   [:div {:class ["text-amber-800"]} resources]])
+(defn value-container [props & content]
+  (into [:div (merge-with into
+                          {:class ["flex" "items-center" "w-6"]}
+                          props)]
+        content))
 
-(defn influence [{:keys [optimal-influence influence] :as _summary}]
-  [:div {:class ["flex" "justify-between" "w-12"]}
-   [:div {:class ["text-cyan-400"]} (str optimal-influence)]
-   [:div {:class ["text-cyan-800"]} influence]])
+(defn resource
+  ([summary] (resource summary {}))
+  ([{:keys [optimal-resources resources] :as _summary} props]
+   (let [resource-mode @(rf/subscribe [subs/value-mode])]
+     [value-container (merge-with into {:class ["text-amber-400"]} props)
+      (if (= :optimal resource-mode)
+        (str optimal-resources)
+        (str resources))])))
+
+(defn influence
+  ([summary] (influence summary {}))
+  ([{:keys [optimal-influence influence] :as _summary} props]
+   (let [resource-mode @(rf/subscribe [subs/value-mode])]
+     [value-container (merge-with into {:class ["text-cyan-400"]} props)
+      (if (= :optimal resource-mode)
+        (str optimal-influence)
+        (str influence))])))
 
 (defn o-box [props & content]
   (into [:div (merge-with into

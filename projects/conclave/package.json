@@ -12,7 +12,8 @@
     "tailwind:release": "npx tailwindcss -i ./src/css/tailwind.css -o ./release/main.css",
     "dev": "run-p -l *:watch",
     "release": "run-s *:release",
-    "deploy": "aws s3 sync --profile personal release/ s3://galactic-conclave"
+    "deploy": "aws s3 sync --profile personal release/ s3://galactic-conclave",
+    "deploy:test": "aws s3 sync --profile personal release/ s3://test.mistake-not.net/conclave"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.4",
@@ -27,7 +28,6 @@
     "highlight.js": "10.7.2",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "react-select": "^5.3.0",
     "xregexp": "^5.0.2"
   }
 }

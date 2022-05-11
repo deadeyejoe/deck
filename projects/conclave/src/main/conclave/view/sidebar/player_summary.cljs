@@ -9,9 +9,9 @@
 
 (defn trait [trait count]
   [:div {:key trait
-         :class (concat ["flex" "mx-1" "items-center"]
+         :class (concat ["flex" "ml-1" "items-center"]
                         (when-not (pos-int? count) ["opacity-20"]))}
-   [:div {:class ["mx-1"]} [icons/trait->img trait]]
+   [:div {:class ["mr-1"]} [icons/trait->img trait]]
    [:div count]])
 
 (defn traits [{:keys [traits] :as _summary}]
@@ -37,9 +37,9 @@
           [[:div {:class (into standard-classes ["w-1/5"])}]
            [:div {:class (into standard-classes ["w-1/12"])}]
            [:div {:class (into standard-classes ["w-1/12"])}]
-           [:div {:class (into standard-classes ["w-1/4"])}]
            [:div {:class (into standard-classes ["w-1/6"])}]
-           [:div {:class (into standard-classes ["w-1/6"])}]]
+           [:div {:class (into standard-classes ["w-1/6"])}]
+           [:div {:class (into standard-classes ["w-1/4"])}]]
           content)))
 
 (defn summary-row [player-key]
@@ -59,18 +59,18 @@
                                   "hover:from-blue-800"]
                                  ["bg-gradient-to-r" "from-red-900"
                                   "hover:from-red-800"]))} (or player-name player-key)]
-           [:div {:class ["px-1" "w-full"]} [common/resource summary]]
-           [:div {:class ["px-1" "w-full"]} [common/influence summary]]
-           [traits summary]
+           [:div {:class ["px-1" "w-full" "flex" "justify-center"]} [common/resource summary {:class ["justify-end"]}]]
+           [:div {:class ["px-1" "w-full"  "flex" "justify-center"]} [common/influence summary {:class ["justify-end"]}]]
            [specialties summary]
-           [others summary]))))
+           [others summary]
+           [traits summary]))))
 
 (defn header-row []
   (into [:div {:class ["flex" "w-full" "h-8" "my-1"]}]
         (summary-row-structure
          ""
-         [:div {:class ["flex" "w-full" "justify-center"]} icons/resource]
-         [:div {:class ["flex" "w-full" "justify-center"]} icons/influence] "" "" "")))
+         [:div {:class ["flex" "w-full" "justify-end" "p-2"]} icons/resource]
+         [:div {:class ["flex" "w-full" "justify-end" "p-2"]} icons/influence] "" "" "")))
 
 (defn player-table [player-keys]
   (into [:<> [header-row]]

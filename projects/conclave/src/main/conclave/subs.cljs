@@ -54,6 +54,11 @@
  storage-total
  (fn [db] (:storage-total db)))
 
+(def value-mode ::value-mode)
+(rf/reg-sub
+ value-mode
+ (fn [db] (:value-mode db)))
+
 (rf/reg-sub
  :score/variance
  (fn [db] (utils/format-number (:score/variance db))))

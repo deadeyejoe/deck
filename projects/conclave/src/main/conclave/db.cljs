@@ -33,6 +33,9 @@
 (s/def ::hovered ::layout/coordinate)
 (s/def ::selected ::layout/coordinate)
 
+(def value-modes [:optimal :normal])
+(s/def ::value-mode (set value-modes))
+
 (s/def ::processing boolean?)
 (s/def ::worker-mode #{:async :sync})
 (s/def ::constraint-score number?)
@@ -48,6 +51,7 @@
 (s/def ::db (s/keys :req-un [::seed
                              ::map
                              ::overlay-mode
+                             ::value-mode
                              ::highlight-mode
                              ::worker-mode
                              ::hovered
@@ -64,6 +68,7 @@
   {:player-edit false
    :worker-mode :sync
    :overlay-mode :none
+   :value-mode :optimal
    :highlight-mode :single})
 
 (defn initialize []

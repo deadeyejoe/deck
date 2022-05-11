@@ -24,7 +24,7 @@
             [taoensso.tufte :as tufte :refer-macros (profiled)]))
 
 (def current-map (:map @rfdb/app-db))
-
+(map.build/compute-summary current-map)
 
 (some (partial storage/match-entry? (storage/->map-entry current-map)) (:maps @storage/local-store))
 (storage/map-stored? storage/local-store current-map)

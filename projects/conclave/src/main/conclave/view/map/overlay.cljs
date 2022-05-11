@@ -2,6 +2,7 @@
   (:require [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
             [conclave.view.icons :as icons]
+            [conclave.view.common :as common]
             [clojure.string :as str]
             [re-frame.core :as rf]))
 
@@ -39,15 +40,11 @@
     [:div icons/legendary]))
 
 (defn res-inf-content [{{:keys [resources
-                                influence
-                                optimal-resources
-                                optimal-influence]} :total :as _tile}]
+                                influence] :as total} :total :as _tile}]
   (when (or (pos-int? resources) (pos-int? influence))
-    [:div {:class ["flex" "text-sm" "flex-wrap"]}
-     [:div {:class ["text-center" "w-1/2" "text-amber-400"]} optimal-resources]
-     [:div {:class ["text-center" "w-1/2" "text-amber-800"]} resources]
-     [:div {:class ["text-center" "w-1/2" "text-cyan-400"]} optimal-influence]
-     [:div {:class ["text-center" "w-1/2" "text-cyan-800"]} influence]]))
+    [:div {:class ["flex" "flex-col" "justify-center" "items-center"]}
+     [common/resource total {:class ["justify-center"]}]
+     [common/influence total {:class ["justify-center"]}]]))
 
 (defn tech-content [{{:keys [specialties]} :total :as _tile}]
   (when (seq specialties)

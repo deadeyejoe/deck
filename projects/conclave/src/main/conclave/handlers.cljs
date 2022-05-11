@@ -153,6 +153,14 @@
  (fn [db [_ mode]]
    (assoc db :highlight-mode mode)))
 
+(def set-value-mode ::set-value-mode)
+(rf/reg-event-db
+ set-value-mode
+ (fn [{:keys [value-mode] :as db} [_ mode]]
+   (assoc db :value-mode (or mode
+                             ({:optimal :normal
+                               :normal :optimal} value-mode)))))
+
 (def set-stake ::set-stake)
 (rf/reg-event-db
  set-stake
