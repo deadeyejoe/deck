@@ -59,8 +59,8 @@
 (defn trait-content [{{:keys [traits]} :total :as _tile}]
   (when (seq traits)
     (->> traits
-         (map-indexed (fn [i t] [:div {:key i :class ["w-1/2"]} (icons/trait->img t)]))
-         (into [:div {:class ["flex" "flex-wrap" "justify-center"]}]))))
+         (map-indexed (fn [i t] [:div {:key i :class ["w-1/2" "h-1/2" "p-1" "flex" "justify-center" "items-center"]} (icons/trait->img t "19px")]))
+         (into [:div {:class ["flex" "flex-wrap" "justify-center" "items-center" "w-2/3" "h-2/3"]}]))))
 
 (defn wormhole-content [{:keys [wormhole legendary] :as _tile}]
   (or (when wormhole
@@ -95,8 +95,11 @@
 (defn component [coordinate]
   (let [tile @(rf/subscribe [subs/tile coordinate])
         content (content coordinate tile)]
-    (when (or content (tile/home? tile))
-      [:div {:class ["flex" "flex-col" "items-center"]}
-       (when (tile/home? tile)
-         [home-content tile])
+    (cond
+      (tile/home? tile)
+      [:div {:class ["flex" "justify-center" "items-center" "h-full" "w-full" "text-white" "text-4xl"]}
+       [home-content tile]]
+
+      content
+      [:div {:class ["flex" "justify-center" "items-center" "h-full" "w-full" "bg-black"]}
        content])))

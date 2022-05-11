@@ -24,7 +24,8 @@
            :on-click #(rf/dispatch [tutorial-handlers/cancel])}]))
 
 (defn ui []
-  [:div {:class ["h-screen" "w-screen" "flex" "justify-center" "items-center" "bg-gray-900" "text-gray-200"]}
+  [:div {:class ["h-screen" "w-screen" "flex" "justify-center" "items-center" "bg-gray-900" "text-gray-200"
+                 "font-sans"]}
    [app-overlay]
    [:div {:class ["flex" "flex-col" "justify-center" "items-center" "w-2/3" "h-full"]
           :on-mouse-enter #(rf/dispatch [handlers/clear-hover])}

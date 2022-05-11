@@ -10,18 +10,28 @@
 (defn cultural [size] [:img (image-props "general/trait-cultural" size)])
 (defn hazardous [size] [:img (image-props "general/trait-hazardous" size)])
 (defn industrial [size] [:img (image-props "general/trait-industrial" size)])
-(def trait->img {:cultural   [cultural   "20px"]
-                 :hazardous  [hazardous  "20px"]
-                 :industrial [industrial "20px"]})
+(defn trait->img
+  ([t] (trait->img t "20px"))
+  ([t s]
+   (case t
+     :cultural   [cultural   s]
+     :hazardous  [hazardous  s]
+     :industrial [industrial s]
+     nil)))
 
 (defn biotic     [size] [:img (image-props "general/specialty-biotic-dark" size)])
 (defn cybernetic [size] [:img (image-props "general/specialty-cybernetic-dark" size)])
 (defn propulsion [size] [:img (image-props "general/specialty-propulsion-dark" size)])
 (defn warfare    [size] [:img (image-props "general/specialty-warfare-dark" size)])
-(def specialty->img {:biotic [biotic "20px"]
-                     :cybernetic [cybernetic "20px"]
-                     :propulsion [propulsion "20px"]
-                     :warfare [warfare "20px"]})
+(defn specialty->img
+  ([s] (specialty->img s "20px"))
+  ([s size]
+   (case s
+     :biotic [biotic size]
+     :cybernetic [cybernetic size]
+     :propulsion [propulsion size]
+     :warfare [warfare size]
+     nil)))
 
 (defn alpha [size] [:img (image-props "wormhole-alpha" size)])
 (def wormhole-alpha [alpha "30px"])
