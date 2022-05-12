@@ -1,24 +1,31 @@
 (ns conclave.view.sidebar.overlay
   (:require  [conclave.handlers :as handlers]
+             [conclave.map.serialization :as serialization]
              [conclave.subs :as subs]
-             [conclave.tiles.core :as tile]
+             [conclave.view.common :as common]
              [conclave.view.icons :as icons]
+             [conclave.view.heroicons :as hicons]
+[conclave.utils.web :as web-util]
              [re-frame.core :as rf]))
 
-(defn button-classes [active]
-  (into
-   ["cursor-pointer" "text-3xl" "text-white"
-    "border-2" "rounded"
-    "bg-gradient-to-br"
-    "transition-colors" "delay-100"
-    "w-14" "h-14"
-    "flex" "flex-wrap" "justify-center" "items-center"]
-   (if active
-     ["border-white"
-      "from-blue-600" "to-blue-300"]
-     ["border-blue-600"
-      "from-blue-900" "to-blue-600"
-      "hover:from-blue-800" "hover:to-blue-500" "hover:border-blue-500"])))
+(defn button-classes
+  ([active] (button-classes active :large))
+  ([active size]
+   (concat
+    ["cursor-pointer" "text-white"
+     "border-2" "rounded"
+     "bg-gradient-to-br"
+     "transition-colors" "delay-100"
+     "flex" "flex-wrap" "justify-center" "items-center"]
+    (if active
+      ["border-white"
+       "from-blue-600" "to-blue-300"]
+      ["border-blue-600"
+       "from-blue-900" "to-blue-600"
+       "hover:from-blue-800" "hover:to-blue-500" "hover:border-blue-500"])
+    (case size
+      :small ["w-8" "h-8"]
+      :large ["w-14" "h-14"]))))
 
 (defn number []
   [:div {:class (button-classes @(rf/subscribe [subs/overlay-mode-is :tile-number]))
@@ -73,12 +80,32 @@
    [:div {:class ["w-8" "h-8" "rounded-full" "bg-black" "border-2" "border-white" "flex" "justify-center" "items-center"]}
     icons/frontier]])
 
+(defn tts-button []
+  (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
+    [:div {:class (into (button-classes false :small)
+                        ["text-xs"])
+           :on-click #(web-util/copy-to-clipboard (serialization/serialize-tts galaxy-map))
+           :title "Copy TTS String to clipboard"}
+     "TTS"]))
+
+(defn share-button []
+  [:div {:class (into (button-classes false :small))
+         :on-click #(web-util/copy-to-clipboard (web-util/location))
+         :title "Copy URL to clipboard"}
+   hicons/share])
+
 (defn component []
-  [:div {:class ["flex" "flex-col" "justify-around" "w-full" "h-2/3" "my-5"]}
-   [number]
-   [ring]
-   [res-inf]
-   [tech]
-   [traits]
-   [wormhole]
-   [frontier]])
+  [:<>
+   [:div {:class ["h-1/6"]}]
+   [:div {:class ["flex" "flex-col" "justify-around" "w-full" "h-2/3" "text-3xl"]}
+    [number]
+    [ring]
+    [res-inf]
+    [tech]
+    [traits]
+    [wormhole]
+    [frontier]]
+   [:div {:class ["flex" "flex-col" "justify-end" "items-end" "w-full" "h-1/6" "pb-2"]}
+    [share-button]
+    [:div {:class ["h-2"]}]
+    [tts-button]]])
