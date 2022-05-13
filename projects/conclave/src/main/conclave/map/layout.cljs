@@ -52,8 +52,17 @@
         (update :hyperlane-tiles process-tile-list ->hyperlane-tile)
         (update :home-tiles process-tile-list ->home-tile))))
 
+(defn compute-tts-fingerprint [{:keys [radius blank-tiles home-tiles] :as layout}]
+  (let [coordinate-spiral (drop 1 (hex/map-coordinates radius))
+        blank-coordinates (into (set blank-tiles) (keys home-tiles))]
+    (->> coordinate-spiral
+         (map (fn [c] (if (blank-coordinates c) "0" "1")))
+         (apply str))))
+
 (defn enrich-layout [layout]
-  (process-proto-tiles layout))
+  (let [processed-layout (process-proto-tiles layout)]
+    (assoc processed-layout
+           :tts-fingerprint (compute-tts-fingerprint processed-layout))))
 
 (def layouts (mapv enrich-layout [layout-data/eight-player
                                   layout-data/eight-player-warp
@@ -65,6 +74,7 @@
                                   layout-data/three-player]))
 (def default-layout (first layouts))
 (def code->layout (medley/index-by :code layouts))
+(def tts-fingerprint->layout (medley/index-by :tts-fingerprint layouts))
 
 (defn fixed-set [layout]
   (->> layout

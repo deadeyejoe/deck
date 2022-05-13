@@ -1,5 +1,6 @@
 (ns conclave.map.serialization
   (:require [conclave.map.beta.build :as build]
+            [conclave.map.layout :as layout]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
             [cognitect.transit :as t]
@@ -7,12 +8,16 @@
             [medley.core :as medley]
             [superstring.core :as str]))
 
+;; Serialize ===========================================
+
 (defn tile-map->coordinate-spiral [tile-map]
   (->> tile-map
        keys
        (map hex/ring)
        (apply max)
        (hex/map-coordinates)))
+
+;; Serialize TTS
 
 (defn tile->tts [{:keys [key rotation] :as tile}]
   (cond
@@ -28,6 +33,8 @@
        (map tile->tts)
        (interpose " ")
        (apply str)))
+
+;; Serialize Conclave
 
 (def empty-place "X")
 (def empty-place? #{empty-place})
@@ -52,6 +59,8 @@
     (->> (t/write writer compact-map)
          (b64/encodeString))))
 
+;; Deserialize ===========================================
+
 (defn resolve-key [coordinate key-str]
   (cond
     (str/starts-with? key-str "p") (tile/blank-home-tile (keyword key-str))
@@ -65,6 +74,31 @@
 (comment
   (resolve-key [0 0 0] "18")
   (resolve-key [0 0 0] "88B5"))
+
+;; TTS Deserialize
+
+(defn infer-layout [tts-string]
+  (->> (str/split tts-string #" ")
+       (map (fn [s]
+              (if (= "0" s) "0" "1")))
+       (apply str)
+       (layout/tts-fingerprint->layout)))
+
+(defn deserialize-tts-tiles [tts-string]
+  (let [coordinate-spiral (drop 1 (hex/map-coordinates 4))]
+    (->> (str/split tts-string #" ")
+         (map vector coordinate-spiral)
+         (into {})
+         (medley/remove-vals #{"0"})
+         (medley/map-kv-vals resolve-key))))
+
+(defn deserialize-tts [tts-string {:keys [home-tiles] :as layout}]
+  (-> (deserialize-tts-tiles tts-string)
+      (merge {[0 0 0] tile/mecatol}
+             home-tiles)
+      (build/from-map)))
+
+;; Conclave Deserialize
 
 (defn deserialize-tiles [tile-string]
   (let [coordinate-spiral (hex/map-coordinates 4)]

@@ -5,8 +5,9 @@
              [conclave.view.common :as common]
              [conclave.view.icons :as icons]
              [conclave.view.heroicons :as hicons]
-[conclave.utils.web :as web-util]
-             [re-frame.core :as rf]))
+             [conclave.utils.web :as web-util]
+             [re-frame.core :as rf]
+             [reagent.core :as r]))
 
 (defn button-classes
   ([active] (button-classes active :large))
@@ -25,6 +26,7 @@
        "hover:from-blue-800" "hover:to-blue-500" "hover:border-blue-500"])
     (case size
       :small ["w-8" "h-8"]
+      :medium ["w-10" "h-10"]
       :large ["w-14" "h-14"]))))
 
 (defn number []
@@ -80,19 +82,56 @@
    [:div {:class ["w-8" "h-8" "rounded-full" "bg-black" "border-2" "border-white" "flex" "justify-center" "items-center"]}
     icons/frontier]])
 
-(defn tts-button []
-  (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
-    [:div {:class (into (button-classes false :small)
-                        ["text-xs"])
-           :on-click #(web-util/copy-to-clipboard (serialization/serialize-tts galaxy-map))
-           :title "Copy TTS String to clipboard"}
-     "TTS"]))
+(defn tts-export-button []
+  (let [success (r/atom nil)]
+    (fn []
+      (let [galaxy-map @(rf/subscribe [subs/galaxy-map])
+            success? @success]
+        [:div {:class (concat (button-classes false :small)
+                              ["text-xs"]
+                              (when success? ["text-green-500"]))
+               :on-click #(do (web-util/copy-to-clipboard (serialization/serialize-tts galaxy-map))
+                              (reset! success true)
+                              (js/setTimeout (fn [] (reset! success false)) 2000))
+               :title "Copy TTS String to clipboard"}
+         (if success? hicons/check-circle hicons/upload-solid)]))))
+
+(defn handle-tts-string [tts-str]
+  (try
+    (let [inferred-layout (serialization/infer-layout tts-str)]
+      (rf/dispatch [handlers/load-external-map (serialization/deserialize-tts tts-str inferred-layout)]))
+    (catch js/Error e (js/console.log e))))
+
+(defn tts-import-button []
+  (let [active (r/atom nil)]
+    (fn []
+      [:div {:class (into (button-classes false :small)
+                          ["text-xs relative"])
+             :on-click #(when-not @active (reset! active true))
+             :title "Import map from TTS String"}
+       (when @active
+         [:div {:class ["absolute" "text-base" "right-10" "opacity-100" "transition-opacity"]}
+          [:input {:class ["appearance-none"]
+                   :type :text
+                   :placeholder "Paste TTS string here"
+                   :ref #(when % (.focus %))
+                   :on-blur #(reset! active false)
+                   :on-change #(do (handle-tts-string (-> % .-target .-value))
+                                   (reset! active false))}]])
+       hicons/download-solid])))
 
 (defn share-button []
-  [:div {:class (into (button-classes false :small))
-         :on-click #(web-util/copy-to-clipboard (web-util/location))
-         :title "Copy URL to clipboard"}
-   hicons/share])
+  (let [success (r/atom nil)]
+    (fn []
+      (let [success? @success]
+        [:div {:class (concat (button-classes false :small)
+                              ["text-xs"]
+                              (when success? ["text-green-500"]))
+               :on-click #(do (web-util/copy-to-clipboard (web-util/location))
+                              (reset! success true)
+                              (js/setTimeout (fn [] (reset! success false)) 2000))
+               :title "Copy URL to clipboard"}
+         (if success? hicons/check-circle hicons/share)]))))
 
 (defn component []
   [:<>
@@ -107,5 +146,7 @@
     [frontier]]
    [:div {:class ["flex" "flex-col" "justify-end" "items-end" "w-full" "h-1/6" "pb-2"]}
     [share-button]
-    [:div {:class ["h-2"]}]
-    [tts-button]]])
+    [:div {:class ["h-3"]}]
+    [tts-export-button]
+    [:div {:class ["h-1"]}]
+    [tts-import-button]]])

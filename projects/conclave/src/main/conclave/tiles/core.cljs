@@ -197,10 +197,6 @@
            :rotation rotation
            :edges (map (partial lane->edge coordinate rotation) hyperlanes))))
 
-(comment
-  (:edges (hyperlane-tile :87A [0 0 0] 0))
-  (:edges (hyperlane-tile :87A [0 0 0] 2)))
-
 (defn tiles-ordered [tiles quantity]
   (->> tiles
        (filter default?)
