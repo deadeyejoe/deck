@@ -2,6 +2,7 @@
   (:require [conclave.subs :as subs]
             [conclave.view.icons :as icons]
             [conclave.view.common :as common]
+            [conclave.utils.hex :as hex]
             [re-frame.core :as rf]))
 
 (defn res-inf [planet-or-total]
@@ -28,20 +29,23 @@
         (into (map planet-summary planets)))))
 
 (defn tile-legend [[x y z :as coordinate] {:keys [key rotation] :as _tile}]
-  (let [standard-classes ["h-6" "mx-0.5" "text-xs" "bg-gray-600" "text-black"
+  (let [standard-classes ["h-6" "mx-0.5" "text-xs" "bg-gray-600"
                           "flex" "justify-around" "items-center" "cursor-pointer"]
         distance-from-selected @(rf/subscribe [subs/distance-from-selected coordinate])]
     [:<>
+     [:div {:class (into standard-classes ["w-16"])
+            :title "Coordinate"}
+      [:div x] [:div y] [:div z]]
+[:div {:class (into standard-classes ["w-6" "rounded-full" "border-2" "border-gray-400" "bg-gray-600"])
+       :title "ring"}
+ (hex/ring coordinate)]
      [:div {:class (into standard-classes ["w-6"])
             :style {:clip-path common/clipped-hex-path}
             :title "Tile Number"}
       (name key)]
-     [:div {:class (into standard-classes ["rounded-xl" "w-6"])
+     [:div {:class (into standard-classes ["rounded-full" "w-6"])
             :title "Rotation"}
       (or rotation 0)]
-     [:div {:class (into standard-classes ["w-16"])
-            :title "Coordinate"}
-      [:div x] [:div y] [:div z]]
      [:div {:class (into standard-classes ["w-6" (when distance-from-selected "bg-gray-200")])
             :title "Distance from selected"}
       (or distance-from-selected "-")]]))
@@ -55,7 +59,7 @@
               [:div {:class ["absolute" "bottom-0" "right-0"
                              "p-1" "m-2" "w-44" "h-10"
                              "flex" "justify-center" "items-center"
-                             "bg-gray-800" "rounded-md"]}
+                             "bg-gray-800" "rounded-md" "text-black"]}
                (tile-legend coordinate tile)])]
            (when coordinate
              [[:div {:class ["w-1/2" "h-full" "flex" "items-center"]}
