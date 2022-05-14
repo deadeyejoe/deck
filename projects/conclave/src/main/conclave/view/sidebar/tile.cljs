@@ -42,9 +42,9 @@
      [:div {:class (into standard-classes ["w-16"])
             :title "Coordinate"}
       [:div x] [:div y] [:div z]]
-     [:div {:class (into standard-classes ["w-6"])
+     [:div {:class (into standard-classes ["w-6" (when distance-from-selected "bg-gray-200")])
             :title "Distance from selected"}
-      distance-from-selected]]))
+      (or distance-from-selected "-")]]))
 
 (defn component [coordinate]
   (let [tile @(rf/subscribe [subs/tile coordinate])]
