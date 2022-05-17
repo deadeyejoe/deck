@@ -82,8 +82,9 @@
 (def clear-local-store ::clear-local-store)
 (rf/reg-event-fx
  clear-local-store
- (fn [_ _ev]
-   (storage/clear!)))
+ (fn [{:keys [db] :as _cofx} _ev]
+   (storage/clear!)
+   {:db (dissoc db :map :storage-index :storage-total)}))
 
 (def set-seed ::set-seed)
 (rf/reg-event-db
