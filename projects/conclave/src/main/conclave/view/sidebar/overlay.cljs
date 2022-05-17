@@ -2,6 +2,7 @@
   (:require  [conclave.handlers :as handlers]
              [conclave.map.serialization :as serialization]
              [conclave.subs :as subs]
+             [conclave.components.signal :as signal]
              [conclave.view.common :as common]
              [conclave.view.icons :as icons]
              [conclave.view.heroicons :as hicons]
@@ -82,56 +83,56 @@
    [:div {:class ["w-8" "h-8" "rounded-full" "bg-black" "border-2" "border-white" "flex" "justify-center" "items-center"]}
     icons/frontier]])
 
-(defn tts-export-button []
-  (let [success (r/atom nil)]
+(defn share-button []
+  (let [uid (random-uuid)]
     (fn []
-      (let [galaxy-map @(rf/subscribe [subs/galaxy-map])
-            success? @success]
+      [:div {:class (concat (button-classes false :small)
+                            ["text-xs"]
+                            (when (signal/<set? uid) ["text-green-500"]))
+             :on-click #(do (web-util/copy-to-clipboard (web-util/location))
+                            (signal/>flash! uid true 2000))
+             :title "Copy URL to clipboard"}
+       (if (signal/<set? uid) hicons/check-circle hicons/share)])))
+
+(defn tts-export-button []
+  (let [uid (random-uuid)]
+    (fn []
+      (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
         [:div {:class (concat (button-classes false :small)
                               ["text-xs"]
-                              (when success? ["text-green-500"]))
+                              (when (signal/<set? uid) ["text-green-500"]))
                :on-click #(do (web-util/copy-to-clipboard (serialization/serialize-tts galaxy-map))
-                              (reset! success true)
-                              (js/setTimeout (fn [] (reset! success false)) 2000))
+                              (signal/>flash! uid true 2000))
                :title "Copy TTS String to clipboard"}
-         (if success? hicons/check-circle hicons/upload-solid)]))))
+         (if (signal/<set? uid) hicons/check-circle hicons/upload-solid)]))))
 
 (defn handle-tts-string [tts-str]
   (try
-    (let [inferred-layout (serialization/infer-layout tts-str)]
-      (rf/dispatch [handlers/load-external-map (serialization/deserialize-tts tts-str inferred-layout)]))
+    (let [inferred-layout (serialization/infer-layout tts-str)
+          deserialized (serialization/deserialize-tts tts-str inferred-layout)]
+      (rf/dispatch [handlers/load-external-map deserialized])
+      deserialized)
     (catch js/Error e (js/console.log e))))
 
 (defn tts-import-button []
-  (let [active (r/atom nil)]
+  (let [uid (random-uuid)]
     (fn []
-      [:div {:class (into (button-classes false :small)
-                          ["text-xs relative"])
-             :on-click #(when-not @active (reset! active true))
+      [:div {:class (concat (button-classes false :small)
+                            ["text-xs relative"]
+                            (when (signal/<set? [uid :success]) ["text-green-500"]))
+             :on-click #(when (signal/<unset? [uid :active]) (signal/>set! [uid :active]))
              :title "Import map from TTS String"}
-       (when @active
+       (when (signal/<set? [uid :active])
          [:div {:class ["absolute" "text-base" "right-10" "opacity-100" "transition-opacity"]}
           [:input {:class ["appearance-none"]
                    :type :text
                    :placeholder "Paste TTS string here"
                    :ref #(when % (.focus %))
-                   :on-blur #(reset! active false)
-                   :on-change #(do (handle-tts-string (-> % .-target .-value))
-                                   (reset! active false))}]])
-       hicons/download-solid])))
-
-(defn share-button []
-  (let [success (r/atom nil)]
-    (fn []
-      (let [success? @success]
-        [:div {:class (concat (button-classes false :small)
-                              ["text-xs"]
-                              (when success? ["text-green-500"]))
-               :on-click #(do (web-util/copy-to-clipboard (web-util/location))
-                              (reset! success true)
-                              (js/setTimeout (fn [] (reset! success false)) 2000))
-               :title "Copy URL to clipboard"}
-         (if success? hicons/check-circle hicons/share)]))))
+                   :on-blur #(rf/dispatch [signal/toggle! [uid :active]])
+                   :on-change #(do (when (handle-tts-string (-> % .-target .-value))
+                                     (signal/>unset! [uid :active])
+                                     (signal/>flash! [uid :success] true 2000)))}]])
+       (if (signal/<set? [uid :success]) hicons/check-circle hicons/download-solid)])))
 
 (defn component []
   [:<>
