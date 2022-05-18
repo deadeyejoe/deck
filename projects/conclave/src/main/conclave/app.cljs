@@ -24,15 +24,16 @@
            :on-click #(rf/dispatch [tutorial-handlers/cancel])}]))
 
 (defn ui []
-  [:div {:class ["h-screen" "w-screen" "flex" "justify-center" "items-center" "bg-gray-900" "text-gray-200"
+  [:div {:class ["h-screen" "w-screen" "flex" "flex-col" "lg:flex-row" "justify-center" "items-center" "bg-gray-900" "text-gray-200"
                  "font-sans"]}
    [app-overlay]
-   [:div {:class ["flex" "flex-col" "justify-center" "items-center" "w-2/3" "h-full"]
-          :on-mouse-enter #(rf/dispatch [handlers/clear-hover])}
+   [:div {:class ["flex" "flex-col" "justify-center" "items-center"
+                  "w-full" "lg:w-2/3" "h-2/3" "lg:h-full"]}
     [map/component]
     [map-overlay]
     [tutorial/component]]
-   [:div {:class ["flex" "flex-col" "justify-center" "w-1/3" "h-full"]
+   [:div {:class ["flex" "flex-col" "justify-center"
+                  "w-full" "lg:w-1/3" "h-1/3" "lg:h-full"]
           :on-mouse-enter #(rf/dispatch [handlers/clear-hover])}
     [sidebar/component]]])
 

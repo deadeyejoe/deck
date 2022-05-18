@@ -42,7 +42,8 @@
       (if coordinate
         [tile/component coordinate]
         [map-summary/component])]
-     [:div {:class ["h-full" "flex" "flex-col" "justify-center" "absolute" "-left-20"]}
+     [:div {:class ["absolute" "flex" "flex-row" "lg:flex-col" "justify-center"
+                    "lg:h-full" "w-full" "lg:w-14" "-top-20" "lg:-left-20"]}
       [overlay/component]]]))
 
 (defn component []

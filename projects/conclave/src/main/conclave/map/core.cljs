@@ -41,10 +41,15 @@
   (get-in galaxy-map [:tiles-reverse (or (:key tile) tile)]))
 
 (defn origin-distance-map [galaxy-map]
-  (-> galaxy-map :distances (get hex/origin)))
+  (get-in galaxy-map [:distances hex/origin]))
 
 (defn distance-to-origin [galaxy-map coordinate]
   (get-in galaxy-map [:distances hex/origin coordinate]))
+
+(defn radius [galaxy-map]
+  (->> (origin-distance-map galaxy-map)
+       vals
+       (apply max)))
 
 (defn in-bounds? [galaxy-map]
   (fn [coordinate]

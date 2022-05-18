@@ -13,3 +13,9 @@
     (.select el)
     (.execCommand js/document "copy")
     (.removeChild (.-body js/document) el)))
+
+(defn dimension-observer [callback]
+  (new js/ResizeObserver
+       (fn [[^js/ResizeObserverEntry entry]]
+         (callback {:height (-> entry .-contentRect .-height)
+                    :width (-> entry .-contentRect .-width)}))))

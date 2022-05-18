@@ -8,8 +8,14 @@
 (defn height [size]
   (* sqr3 size))
 
+(defn height->side [height]
+  (/ height sqr3))
+
 (defn width [size]
   (* 2 size))
+
+(defn width->side [width]
+  (/ width 2))
 
 (defn q-basis [size]
   [(* (/ 3 2) size)

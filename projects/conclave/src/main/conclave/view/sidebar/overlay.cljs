@@ -137,7 +137,7 @@
 (defn component []
   [:<>
    [:div {:class ["h-1/6"]}]
-   [:div {:class ["flex" "flex-col" "justify-around" "w-full" "h-2/3" "text-3xl"]}
+   [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-around" "w-full" "h-2/3" "text-3xl"]}
     [number]
     [ring]
     [res-inf]
@@ -145,7 +145,7 @@
     [traits]
     [wormhole]
     [frontier]]
-   [:div {:class ["flex" "flex-col" "justify-end" "items-end" "w-full" "h-1/6" "pb-2"]}
+   [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-end" "items-end" "w-full" "h-1/6" "pb-2"]}
     [share-button]
     [:div {:class ["h-3"]}]
     [tts-export-button]
