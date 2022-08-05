@@ -1,6 +1,5 @@
 (ns conclave.handlers
-  (:require [re-frame.core :as rf]
-            [conclave.coeffects :as cofx]
+  (:require [conclave.coeffects :as cofx]
             [conclave.db :as db]
             [conclave.interceptors :as ix]
             [conclave.map.core :as map]
@@ -8,8 +7,9 @@
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as map.opt]
             [conclave.storage :as storage]
-            [conclave.utils.random :as random]
-            [conclave.worker.client :as worker]))
+            [conclave.worker.client :as worker]
+            [deck.random.interface :as random]
+            [re-frame.core :as rf]))
 
 (declare start-tutorial load-external-map load-internal-map)
 

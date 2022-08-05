@@ -2,7 +2,7 @@
   (:require [conclave.data.layouts :as layout-data]
             [conclave.tiles.core :as tiles]
             [conclave.utils.hex :as hex]
-            [conclave.utils.random :as random]
+            [deck.random.interface :as random]
             [clojure.math.combinatorics :as comb]
             [clojure.spec.alpha :as s]
             [medley.core :as medley]))
