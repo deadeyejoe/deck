@@ -1,6 +1,6 @@
-(ns conclave.map.beta.specs
+(ns conclave.map.specs
   (:require [conclave.tiles.core :as tile]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [clojure.spec.alpha :as s]))
 
 (s/def ::tiles (s/map-of ::layout/coordinate ::layout/tile))

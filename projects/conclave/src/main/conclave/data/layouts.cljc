@@ -21,7 +21,7 @@
                         :type-counts {:blue (* 8 3)
                                       :red (* 8 2)}
                         :fixed-tiles [{:coordinate [0 0 0] :key :18}]
-                        :blank-tiles [[4 0 -4] [4 -1 -3] [4 -4 0] [-4 0 4] [-4 1 3] [-4 4 0]]
+                        :blank-coordinates [[4 0 -4] [4 -1 -3] [4 -4 0] [-4 0 4] [-4 1 3] [-4 4 0]]
                         :hyperlane-tiles [{:coordinate [0 1 -1] :key :87A :rotation 1}
                                           {:coordinate [1 0 -1] :key :90B :rotation 3}
                                           {:coordinate [0 -1 1] :key :88A :rotation 2}
@@ -63,7 +63,7 @@
                         :type-counts {:blue (* 7 3)
                                       :red (* 7 2)}
                         :fixed-tiles [{:coordinate [0 0 0] :key :18}]
-                        :blank-tiles [[2 2 -4] [3 1 -4] [4 0 -4] [4 -1 -3] [4 -2 -2]
+                        :blank-coordinates [[2 2 -4] [3 1 -4] [4 0 -4] [4 -1 -3] [4 -2 -2]
                                       [4 -3 -1] [4 -4 0] [3 -4 1] [2 -4 2] [-4 0 4]
                                       [-4 1 3] [-4 4 0]]
                         :hyperlane-tiles [{:coordinate [1 2 -3] :key :88B :rotation 0}
@@ -128,7 +128,7 @@
                    :type-counts {:blue (* 3 6)
                                  :red (* 3 2)}
                    :fixed-tiles [{:coordinate [0 0 0] :key :18}]
-                   :blank-tiles [[-1 3 -2] [0 3 -3] [1 2 -3]
+                   :blank-coordinates [[-1 3 -2] [0 3 -3] [1 2 -3]
                                  [3 -2 -1] [3 -3 0] [2 -3 1]
                                  [-2 -1 3] [-3 0 3] [-3 1 2]]
                    :home-tiles [{:coordinate [3 0 -3] :key :p1}

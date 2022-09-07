@@ -1,13 +1,13 @@
 (ns conclave.map.core
   (:require [conclave.tiles.core :as tile]
-            [conclave.map.layout :as layout]
+            [conclave.specs :as shared-specs]
             [conclave.utils.hex :as hex]
             [clojure.spec.alpha :as s]
             [medley.core :as medley]))
 
 
-(s/def ::tiles (s/map-of ::layout/coordinate ::layout/tile))
-(s/def ::tiles-reverse (s/map-of ::tile/key ::layout/coordinate))
+(s/def ::tiles (s/map-of ::shared-specs/coordinate ::tile/instance))
+(s/def ::tiles-reverse (s/map-of ::tile/key ::shared-specs/coordinate))
 
 (s/def ::galaxy (s/keys :req-un [::tiles
                                  ::tiles-reverse]))

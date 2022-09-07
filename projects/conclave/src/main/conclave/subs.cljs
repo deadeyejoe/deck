@@ -3,7 +3,7 @@
             [conclave.tiles.core :as tile]
             [conclave.tiles.view :as tiles-view]
             [conclave.map.core :as map]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [conclave.map.beta.constraint :as constraint]
             [conclave.map.beta.stake :as stake]
             [conclave.map.beta.score :as score]

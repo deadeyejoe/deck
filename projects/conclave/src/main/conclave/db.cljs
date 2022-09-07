@@ -3,10 +3,11 @@
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.constraint :as constraint]
             [conclave.map.beta.score :as score]
-            [conclave.map.beta.specs :as map.specs]
+            [conclave.map.specs :as map.specs]
             [conclave.map.core :as map.core]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [conclave.player :as player]
+            [conclave.specs :as specs]
             [medley.core :as medley]))
 
 (s/def ::map ::map.specs/instance)
@@ -29,9 +30,9 @@
                       :adjacent
                       :slice])
 (s/def ::highlight-mode (set highlight-modes))
-(s/def ::highlight-set (s/coll-of ::layout/coordinate))
-(s/def ::hovered ::layout/coordinate)
-(s/def ::selected ::layout/coordinate)
+(s/def ::highlight-set (s/coll-of ::specs/coordinate))
+(s/def ::hovered ::specs/coordinate)
+(s/def ::selected ::specs/coordinate)
 
 (def value-modes [:optimal :normal])
 (s/def ::value-mode (set value-modes))

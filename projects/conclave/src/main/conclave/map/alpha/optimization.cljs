@@ -1,7 +1,7 @@
 (ns conclave.map.alpha.optimization
   (:require [conclave.map.core :as core]
             [conclave.map.distance :as distance]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [conclave.tiles.core :as tile]
             [conclave.map.score :as score]
             [conclave.map.constraints :as constraints]

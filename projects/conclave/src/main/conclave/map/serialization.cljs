@@ -1,6 +1,6 @@
 (ns conclave.map.serialization
   (:require [conclave.map.beta.build :as build]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
             [cognitect.transit :as t]

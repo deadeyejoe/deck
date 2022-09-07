@@ -1,6 +1,6 @@
 (ns conclave.view.sidebar.controls
   (:require [conclave.handlers :as handlers]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [conclave.subs :as subs]
             [conclave.view.common :as common]
             [conclave.view.heroicons :as hicons]

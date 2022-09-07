@@ -3,7 +3,7 @@
             [conclave.map.beta.score :as score]
             [conclave.map.beta.starter :as starter]
             [conclave.map.core :as core]
-            [conclave.map.beta.specs :as specs]
+            [conclave.map.specs :as specs]
             [clojure.spec.alpha :as s]
             #?(:clj  [taoensso.tufte :as tufte :refer [defnp]]
                :cljs [taoensso.tufte :as tufte :refer-macros [defnp]])))

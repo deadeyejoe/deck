@@ -13,7 +13,7 @@
             [conclave.utils.hex :as hex]
             [conclave.map.core :as core]
             [conclave.db :as db]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [conclave.utils.score :as util-score]
             [conclave.tiles.core :as tile]
             [clojure.math.combinatorics :as combo]
@@ -25,7 +25,7 @@
 
 (def current-map (:map @rfdb/app-db))
 (map.build/compute-summary current-map)
-
+(core/radius current-map)
 (some (partial storage/match-entry? (storage/->map-entry current-map)) (:maps @storage/local-store))
 (storage/map-stored? storage/local-store current-map)
 

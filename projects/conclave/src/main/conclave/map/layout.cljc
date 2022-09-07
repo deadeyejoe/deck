@@ -4,34 +4,7 @@
             [conclave.utils.hex :as hex]
             [deck.random.interface :as random]
             [clojure.math.combinatorics :as comb]
-            [clojure.spec.alpha :as s]
             [medley.core :as medley]))
-
-(s/def ::name (s/and string?
-                     not-empty))
-(s/def ::code (s/and string?
-                     not-empty))
-(s/def ::radius pos-int?)
-
-(s/def ::coordinate (s/coll-of int? :kind vector? :count 3))
-(s/def ::tile-map (s/map-of ::coordinate ::tiles/instance))
-
-(s/def ::fixed-tiles ::tile-map)
-(s/def ::hyperlane-tiles ::tile-map)
-(s/def ::home-tiles ::tile-map)
-
-(s/def ::type-counts (s/map-of ::tiles/type pos-int?))
-(s/def ::wormhole-pairs pos-int?)
-
-(s/def ::blank-tiles (s/coll-of ::coordinate))
-(s/def ::instance (s/keys :req-un [::name
-                                   ::radius
-                                   ::fixed-tiles
-                                   ::home-tiles
-                                   ::type-counts]
-                          :opt-un [::code
-                                   ::blank-tiles
-                                   ::wormhole-pairs]))
 
 (defn ->fixed-tile [{:keys [coordinate key] :as proto-tile}]
   [coordinate (tiles/key->tile key)])

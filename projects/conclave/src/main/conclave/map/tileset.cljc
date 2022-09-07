@@ -1,6 +1,6 @@
 (ns conclave.map.tileset
   (:require [conclave.map.core :as core]
-            [conclave.map.layout :as layout]
+            [conclave.layout.core :as layout]
             [conclave.tiles.core :as tiles]
             [clojure.math.combinatorics :as combo]
             [deck.random.interface :as random]))
