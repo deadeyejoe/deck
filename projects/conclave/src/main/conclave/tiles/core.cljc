@@ -78,6 +78,8 @@
                           {}
                           tile-data/raw))
 
+(def type-kw :type)
+
 (def tiles (vals key->tile))
 
 (defn blank-home-tile [player-id]
@@ -89,16 +91,16 @@
 (def nexus   (:82 key->tile))
 (defn nexus? [tile] (= tile nexus))
 
-(defn home? [tile] (= (:type tile) :green))
+(defn home? [tile] (= (type-kw tile) :green))
 (def homes (filter home? tiles))
 
-(defn blue? [tile] (= (:type tile) :blue))
+(defn blue? [tile] (= (type-kw tile) :blue))
 (def blues (filter blue? tiles))
 
-(defn red? [tile] (= (:type tile) :red))
+(defn red? [tile] (= (type-kw tile) :red))
 (def reds (filter red? tiles))
 
-(defn hyperlane? [tile] (= (:type tile) :hyperlane))
+(defn hyperlane? [tile] (= (type-kw tile) :hyperlane))
 (def hyperlanes (filter hyperlane? tiles))
 
 (defn wormhole? [tile] (contains? tile :wormhole))
@@ -154,7 +156,7 @@
       (list))))
 
 (defn default? [tile]
-  (and (-> tile :type #{:blue :red})
+  (and (-> tile type-kw #{:blue :red})
        (-> tile :race nil?)
        (not (mecatol? tile))
        (not (nexus? tile))))
@@ -162,7 +164,8 @@
 (def pok? :pok)
 (def non-pok? (complement pok?))
 
-(def default-set (filter default? tiles))
+(def default-pok (filter default? tiles))
+(def default-set default-pok)
 
 (def default-base-game (filter (every-pred default?
                                            non-pok?)

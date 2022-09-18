@@ -1,6 +1,7 @@
 (ns conclave.app
   (:require [conclave.handlers :as handlers]
             [conclave.subs :as subs]
+            [conclave.generate.core]
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]
             [conclave.view.tutorial.main :as tutorial]

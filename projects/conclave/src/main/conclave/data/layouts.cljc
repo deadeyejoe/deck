@@ -2,6 +2,7 @@
 
 (def eight-player {:name "8 Player"
                    :code "8p"
+                   :pok true
                    :radius 4
                    :type-counts {:blue (+ 2 (* 8 4))
                                  :red  (+ 2 (* 8 2))}
@@ -17,6 +18,7 @@
 
 (def eight-player-warp {:name "8 Player Warp"
                         :code "8pw"
+                        :pok true
                         :radius 4
                         :type-counts {:blue (* 8 3)
                                       :red (* 8 2)}
@@ -39,6 +41,7 @@
 
 (def seven-player {:name "7 Player"
                    :code "7p"
+                   :pok true
                    :radius 4
                    :type-counts {:blue (+ 3 (* 7 4))
                                  :red (+ 2 (* 7 2))}
@@ -59,6 +62,7 @@
 
 (def seven-player-warp {:name "7 Player Warp"
                         :code "7pw"
+                        :pok true
                         :radius 4
                         :type-counts {:blue (* 7 3)
                                       :red (* 7 2)}

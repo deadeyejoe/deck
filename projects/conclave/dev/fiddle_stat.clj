@@ -14,10 +14,23 @@
             [conclave.layout.core :as layout]
             [conclave.tiles.core :as tile]
             [conclave.utils.score :as util-score]
-            [conclave.utils.random :as random]
+            [deck.random.interface :as random]
             [clojure.math.combinatorics :as combo]
             [clojure.spec.alpha :as s]
             [medley.core :as medley]))
+
+(->> tile/default-set
+     ((juxt (partial map #(get-in % [:total :optimal-resources]))
+            (partial map #(get-in % [:total :resources]))
+            (partial map #(get-in % [:total :optimal-influence]))
+            (partial map #(get-in % [:total :influence]))))
+     (map (juxt util-score/mean util-score/median))
+     (map (partial map double)))
+
+(def avg-res 1.231)
+(def avg-inf 1.157)
+(* 20 avg-res)
+(* 20 avg-inf)
 
 (def layout (layout/code->layout "8pw"))
 

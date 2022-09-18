@@ -16,7 +16,7 @@
 
 (defn distance [v w]
   (/ (->> (map - v w)
-          (map #?(:clj abs :cljs Math/abs))
+          (map #(Math/abs %))
           (apply +))
      2))
 

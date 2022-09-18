@@ -1,4 +1,4 @@
-(ns conclave.layout.adjacent
+(ns conclave.layout.hyperlane
   (:require [conclave.tiles.core :as tiles]
             [conclave.utils.hex :as hex]
             [clojure.set :as set]
@@ -64,32 +64,16 @@
 (defn hyperlane-submap [{:keys [tiles] :as _galaxy-map}]
   (medley/filter-vals tiles/hyperlane? tiles))
 
-(defn hyperlane-adjacency-map [hyperlane-submap]
+(defn hyperlane-adjacency-map
+  "Combines hyperlanes into a single map. Keys are all coordinates adjacent to
+   a hyperlane edge (i.e. not a blank sides), values are coordinates that are joined
+   to that coordinate by one or more hyperlanes. Does not contain hyperlane coordinates."
+  [hyperlane-submap]
   (->> (vals hyperlane-submap)
        (all-endpoints)
        (reduce (fn [acc c] (let [hyper-adjacent (traverse-hyperlanes hyperlane-submap c)]
                              (cond-> acc (seq hyper-adjacent) (assoc c hyper-adjacent))))
                {})))
-
-(defn adjacent-coordinates [galaxy-map
-                            hyperlane-submap
-                            hyperlane-adjacency-map
-                            coordinate]
-  (if (hyperlane-submap coordinate)
-    #{} ;;hyperlanes aren't adjacent to anything
-    (->> coordinate
-         (map/neighbouring galaxy-map) ;;checks for oob
-         (remove hyperlane-submap)
-         (set)
-         (set/union (hyperlane-adjacency-map coordinate)))))
-
-(defn adjacency [galaxy-map]
-  (let [hyperlane-submap (hyperlane-submap galaxy-map)
-        hyperlane-adjacency (hyperlane-adjacency-map hyperlane-submap)
-        ->adjacent (partial adjacent-coordinates galaxy-map hyperlane-submap hyperlane-adjacency)]
-    (reduce (fn [acc c] (assoc acc c (->adjacent c)))
-            {}
-            (map/coordinates galaxy-map))))
 
 (comment
   (count (all-endpoints (vals sample-hyperlane-map)))

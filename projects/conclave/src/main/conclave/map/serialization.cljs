@@ -1,6 +1,7 @@
 (ns conclave.map.serialization
   (:require [conclave.map.beta.build :as build]
             [conclave.layout.core :as layout]
+            [conclave.layout.directory :as directory]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
             [cognitect.transit :as t]
@@ -82,7 +83,7 @@
        (map (fn [s]
               (if (= "0" s) "0" "1")))
        (apply str)
-       (layout/tts-fingerprint->layout)))
+       (directory/tts-fingerprint->layout)))
 
 (defn deserialize-tts-tiles [tts-string]
   (let [coordinate-spiral (drop 1 (hex/map-coordinates 4))]

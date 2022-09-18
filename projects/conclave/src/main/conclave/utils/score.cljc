@@ -23,6 +23,9 @@
               (int))]
     (nth (sort xs) i)))
 
+(defn median [xs]
+  (quantile 0.5 xs))
+
 (defn dispersion [xs]
   (let [quartile-1 (quantile 0.25 xs)
         quartile-3 (quantile 0.75 xs)]

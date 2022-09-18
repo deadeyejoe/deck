@@ -6,6 +6,7 @@
             [conclave.map.specs :as map.specs]
             [conclave.map.core :as map.core]
             [conclave.layout.core :as layout]
+            [conclave.layout.directory :as directory]
             [conclave.player :as player]
             [conclave.specs :as specs]
             [medley.core :as medley]))
@@ -74,7 +75,7 @@
 
 (defn initialize []
   (merge
-   {:layout layout/default-layout}
+   {:layout directory/default-layout}
    default-flags))
 
 (defn set-map [db new-map]
