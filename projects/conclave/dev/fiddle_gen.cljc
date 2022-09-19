@@ -1,5 +1,6 @@
 (ns fiddle-gen
   (:require [conclave.generate.balance :as balance]
+            [conclave.generate.arrangement :as arrangement]
             [conclave.generate.core :as core]
             [conclave.generate.executor :as executor]
             [conclave.generate.slice :as slice]
@@ -10,11 +11,12 @@
             [deck.random.interface :as random]))
 
 (let [layout directory/default-layout
-      options {:pok true :include-wormholes true :max-swaps 1000
+      options {:pok true :include-wormholes true :max-swaps 50
                :debug true :slice true}
       context (core/init-context layout options)
-      optimized (executor/execute context (into tileset/steps
-                                                slice/steps))]
+      optimized (executor/execute context (concat tileset/steps
+                                                  slice/steps
+                                                  arrangement/steps))]
   [(slice/compute-balance-goal (:slices layout) (:tileset optimized))
    (->> optimized
         :slices

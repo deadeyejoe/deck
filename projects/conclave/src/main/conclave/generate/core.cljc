@@ -1,5 +1,6 @@
 (ns conclave.generate.core
   (:require [conclave.layout.specs :as layout-specs]
+            [conclave.generate.arrangement]
             [conclave.generate.tileset]
             [conclave.generate.balance]
             [conclave.generate.executor :as executor]

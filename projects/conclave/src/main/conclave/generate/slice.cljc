@@ -212,15 +212,16 @@
              (recur rest-swaps (optimize-step current next-swap))))))
 
 (defn generate-map [{{:keys [tile-array slice-array]} :slices
+                     :keys [layout]
                      :as context}]
-  (assoc context :map
+  (assoc context :galaxy-map
          (->> slice-array
               (mapcat (fn [{:keys [coordinates range]}]
                         (map vector
                              coordinates
                              (apply subvec tile-array range))))
               (reduce (partial apply map/set-coordinate)
-                      (map/new)))))
+                      (map/new layout)))))
 
 (def steps
   [{:exec init-slice-context}

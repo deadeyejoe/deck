@@ -12,8 +12,9 @@
 (s/def ::galaxy (s/keys :req-un [::tiles
                                  ::tiles-reverse]))
 
-(defn new []
-  {:tiles {}
+(defn new [layout]
+  {:distances (:distances layout)
+   :tiles {}
    :tiles-reverse {}})
 
 (defn set-coordinate [galaxy-map coordinate tile]
