@@ -1,6 +1,10 @@
 (ns conclave.layout.core
   (:require [clojure.math.combinatorics :as combi]))
 
+(def fixed-coordinates (comp set keys :fixed-tiles))
+(def hyperlane-coordinates (comp set keys :hyperlane-tiles))
+(def home-coordinates (comp set keys :home-tiles))
+
 (defn neighbours [{:keys [neighbours] :as layout} coordinate]
   (get neighbours coordinate))
 

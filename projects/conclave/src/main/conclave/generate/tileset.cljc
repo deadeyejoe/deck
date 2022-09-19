@@ -50,11 +50,11 @@
   (let [{available-red :red available-blue :blue} (group-by :type available)
         {target-red :red target-blue :blue} type-counts
         balance-predicate (balance/tile-set-pred map-balance type-counts available)]
-    (assoc-in context [:tileset :final]
-              (->> (map concat
-                        (sample-remaining seed red available-red target-red)
-                        (sample-remaining seed blue available-blue target-blue))
-                   (medley/find-first balance-predicate)))))
+    (assoc context :tileset
+           (->> (map concat
+                     (sample-remaining seed red available-red target-red)
+                     (sample-remaining seed blue available-blue target-blue))
+                (medley/find-first balance-predicate)))))
 
 (def steps
   [{:exec init-tileset}

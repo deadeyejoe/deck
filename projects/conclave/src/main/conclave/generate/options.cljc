@@ -11,8 +11,9 @@
                           :extreme-influence])
 (s/def ::map-balance (set map-balance-options))
 (s/def ::planets-in-equidistants boolean?)
+(s/def ::legendaries-in-equidistants boolean?)
 (def equidistant-balance-options [:resource
-                                  :balance
+                                  :balanced
                                   :influence])
 (s/def ::equidistant-balance (set equidistant-balance-options))
 
@@ -21,4 +22,5 @@
                                    ::include-legendaries
                                    ::map-balance
                                    ::planets-in-equidistants
+                                   ::legendaries-in-equidistants
                                    ::equidistant-balance]))

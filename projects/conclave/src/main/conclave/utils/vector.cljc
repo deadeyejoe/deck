@@ -33,3 +33,11 @@
        (butlast)
        (cons (last v))
        (vec)))
+
+(defn swap-indices [v [from to]]
+  (-> v
+      (assoc to (get v from))
+      (assoc from (get v to))))
+
+(comment
+  (swap-indices [1 2 3 4 5] [0 3]))

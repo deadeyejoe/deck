@@ -4,6 +4,7 @@
             [conclave.generate.balance]
             [conclave.generate.executor :as executor]
             [conclave.generate.options :as options]
+            [conclave.generate.slice]
             [conclave.map.core :as map]
             [clojure.spec.alpha :as s]
             [conclave.generate.tileset :as tileset]))

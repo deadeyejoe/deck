@@ -1,5 +1,6 @@
 (ns conclave.layout.directory
   (:require [conclave.data.layouts :as layout-data]
+            [conclave.layout.core :as core]
             [conclave.layout.distance :as distance]
             [conclave.layout.hyperlane :as hyperlane]
             [conclave.layout.slice :as slice]
@@ -37,10 +38,6 @@
          (map (fn [c] (if (blank-coordinates c) "0" "1")))
          (apply str))))
 
-(def fixed-coordinates (comp set keys :fixed-tiles))
-(def hyperlane-coordinates (comp set keys :hyperlane-tiles))
-(def home-coordinates (comp set keys :home-tiles))
-
 (defn bounded-coordinates
   "Coordinates that are part of the map"
   [{:keys [radius blank-coordinates] :as _layout}]
@@ -51,14 +48,14 @@
   "Coordinates that are navigable by players"
   [layout]
   (set/difference (bounded-coordinates layout)
-                  (hyperlane-coordinates layout)))
+                  (core/hyperlane-coordinates layout)))
 
 (defn static-coordinates
   "Active coordinates that aren't subject to balancing"
   [layout]
-  (->> ((juxt fixed-coordinates
-              hyperlane-coordinates
-              home-coordinates) layout)
+  (->> ((juxt core/fixed-coordinates
+              core/hyperlane-coordinates
+              core/home-coordinates) layout)
        (apply set/union)))
 
 (defn free-coordinates

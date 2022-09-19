@@ -1,9 +1,11 @@
 (ns conclave.layout.slice
-  (:require [medley.core :as medley]))
+  (:require [conclave.layout.core :as core]
+            [medley.core :as medley]))
 
-(defn pare-distances [distances home-coordinates]
-  (->> (apply dissoc distances home-coordinates)
-       (medley/map-vals #(select-keys % home-coordinates))))
+(defn pare-distances [distances {:keys [free-coordinates] :as layout}]
+  (let [home-coordinates (core/home-coordinates layout)]
+    (->> (select-keys distances free-coordinates)
+         (medley/map-vals #(select-keys % home-coordinates)))))
 
 (defn closest-home-coordinates [home-coordinate->distance]
   (let [[_c min-distance] (apply min-key second home-coordinate->distance)]
@@ -31,8 +33,7 @@
             coordinate->closest-home-coordinates)))
 
 (defn slices [{:keys [distances home-tiles] :as layout}]
-  (let [home-coordinates (keys home-tiles)
-        coordinate->home-coordinate->distance (pare-distances distances home-coordinates)
+  (let [coordinate->home-coordinate->distance (pare-distances distances layout)
         coordinate->closest-home-coordinates (medley/map-vals closest-home-coordinates
                                                               coordinate->home-coordinate->distance)
         slice-key->slice-coordinates (group-slice-coordinates home-tiles coordinate->closest-home-coordinates)]

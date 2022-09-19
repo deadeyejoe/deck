@@ -12,6 +12,10 @@
 (s/def ::galaxy (s/keys :req-un [::tiles
                                  ::tiles-reverse]))
 
+(defn new []
+  {:tiles {}
+   :tiles-reverse {}})
+
 (defn set-coordinate [galaxy-map coordinate tile]
   (-> galaxy-map
       (assoc-in [:tiles coordinate] tile)

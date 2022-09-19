@@ -2,18 +2,29 @@
   (:require [conclave.generate.balance :as balance]
             [conclave.generate.core :as core]
             [conclave.generate.executor :as executor]
+            [conclave.generate.slice :as slice]
             [conclave.generate.tileset :as tileset]
             [conclave.tiles.core :as tiles]
             [conclave.tiles.set :as tile-set]
             [conclave.layout.directory :as directory]
             [deck.random.interface :as random]))
 
-(->> (let [layout directory/default-layout
-           options {:pok true :include-wormholes true}
-           context (core/init-context layout options)]
-       (executor/execute context (take 4 tileset/steps)))
-     :tileset
-     :final
-     (tile-set/sum-optimal-res-inf))
+(let [layout directory/default-layout
+      options {:pok true :include-wormholes true :max-swaps 1000
+               :debug true :slice true}
+      context (core/init-context layout options)
+      optimized (executor/execute context (into tileset/steps
+                                                slice/steps))]
+  [(slice/compute-balance-goal (:slices layout) (:tileset optimized))
+   (->> optimized
+        :slices
+        (slice/sum-slices)
+        (map (juxt :score :balance :summary)))
+   (count (:tiles (:map optimized)))])
 
-(-> executions :tileset :available count)
+(->> (:slices directory/default-layout)
+     (slice/player-slices))
+
+(slice/compute-balance-goal (:slices directory/default-layout)
+                            (first (tile-set/samples {:red 18 :blue 34}
+                                                     tile-set/pok-standard)))

@@ -43,7 +43,7 @@
                (bounds-for-quantity type-counts quantity-kw tile-set)]))
        (into {})))
 
-(defn samples [{number-red :red number-blue :blue :as _type-counts} tile-set]
+(defn ^:lazy samples [{number-red :red number-blue :blue :as _type-counts} tile-set]
   (let [{possible-red :red possible-blue :blue} (group-by core/type-kw tile-set)]
     (map concat
          (random/sample-generator number-red (random/random-seed) possible-red)
