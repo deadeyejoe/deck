@@ -1,8 +1,10 @@
 (ns conclave.worker
-  (:require [conclave.worker.instance :as worker]
+  (:require [conclave.generate.core :as generate]
+            [conclave.layout.directory :as directory]
             [conclave.map.beta.build :as map.build]
             [conclave.map.beta.optimization :as opt]
             [conclave.map.layout :as layout]
+            [conclave.worker.instance :as worker]
             [taoensso.tufte :as tufte :refer-macros [defnp profiled]]))
 
 (defnp optimize [{:keys [map seed] :as request}]
@@ -18,6 +20,9 @@
                 (layout/generate-swap-list seed))]
     {:map (first (opt/optimize galaxy-map swaps))}))
 
+(defnp new-generate [{:keys [options layout] :as request}]
+  {:map (:galaxy-map (generate/generate layout options))})
+
 (comment (generate {:seed "ABCDE" :layout (layout/code->layout "7pw")}))
 
 (defn profile-request [f]
@@ -29,7 +34,8 @@
 (defn handler [{:keys [profile action] :as request}]
   (let [action-handler #(case action
                           :optimize (optimize request)
-                          :generate (generate request))]
+                          :generate (generate request)
+                          :new-generate (new-generate request))]
     (if profile
       (profile-request action-handler)
       (action-handler))))

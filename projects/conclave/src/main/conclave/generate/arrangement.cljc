@@ -39,6 +39,13 @@
              current-map
              (recur rest-swaps (optimize-step current next-swap))))))
 
+(defn finalize [{:keys [layout galaxy-map] :as context}]
+  (assoc context :galaxy-map
+         (-> galaxy-map
+             (map/import-coordinate-map (:fixed-tiles layout))
+             (map/import-coordinate-map (:home-tiles layout)))))
+
 (def steps
   [{:exec init-arrangement-context}
-   {:exec optimize}])
+   {:exec optimize}
+   {:exec finalize}])

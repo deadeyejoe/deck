@@ -24,6 +24,11 @@
         (map (juxt :score :balance :summary)))
    (count (:tiles (:map optimized)))])
 
+(let [layout directory/default-layout
+      options {:pok true :include-wormholes true :max-swaps 50
+               :debug true :slice true}]
+  (:galaxy-map (core/generate layout options)))
+
 (->> (:slices directory/default-layout)
      (slice/player-slices))
 
