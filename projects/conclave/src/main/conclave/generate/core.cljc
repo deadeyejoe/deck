@@ -22,6 +22,8 @@
                                              ::arrangment
                                              ::galaxy-map]))
 
+(defonce last-context (atom nil))
+
 (defn init-steps []
   (concat tileset/steps
           slice/steps

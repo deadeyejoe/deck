@@ -14,17 +14,25 @@
 (defn with-equidistant-first [{:keys [equidistant] :as slices}]
   (into [equidistant] (player-slices slices)))
 
+(def favoured-weight (/ 1 2))
+(def unfavoured-weight (/ 3 2))
+
+(def invert-balance
+  {:balanced :balanced
+   :resource :influence
+   :influence :resource})
+
 (defn weights [key equidistant-balance]
   (let [balance (if (= :equidistant key)
                   equidistant-balance
-                  :balanced)]
+                  (invert-balance equidistant-balance))]
     {:optimal-resources (case balance
-                          :resource (/ 2 3)
-                          :influence (/ 4 3)
+                          :resource favoured-weight
+                          :influence unfavoured-weight
                           1)
      :optimal-influence (case balance
-                          :resource (/ 4 3)
-                          :influence (/ 2 3)
+                          :resource unfavoured-weight
+                          :influence favoured-weight
                           1)
      :legendary 2
      :tech 2}))
@@ -223,14 +231,22 @@
               (reduce (partial apply map/set-coordinate)
                       (map/new layout)))))
 
+(defn debug-summary [label]
+  {:when #{:debug}
+   :exec (fn [context]
+           (tap> [label (->> context
+                                       :slices
+                                       (sum-slices)
+                                       (map (juxt :score :balance :summary)))])
+           context)})
+
 (def steps
   [{:exec init-slice-context}
-   {:when #{:debug :slice}
-    :exec (fn [context]
-            (tap> (->> context
-                       :slices
-                       (sum-slices)
-                       (map (juxt :score :balance :summary))))
-            context)}
+   (debug-summary ::before-optimization)
    {:exec optimize}
+   (debug-summary ::after-pass-1)
+{:exec optimize}
+(debug-summary ::after-pass-2)
+{:exec optimize}
+(debug-summary ::after-pass-3)
    {:exec generate-map}])

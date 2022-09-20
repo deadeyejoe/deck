@@ -11,7 +11,7 @@
             [deck.random.interface :as random]))
 
 (let [layout directory/default-layout
-      options {:pok true :include-wormholes true :max-swaps 50
+      options {:pok true :include-wormholes true :max-swaps 1000
                :debug true :slice true}
       context (core/init-context layout options)
       optimized (executor/execute context (concat tileset/steps
