@@ -11,12 +11,6 @@
             [clojure.string :as str]
             [re-frame.core :as rf]))
 
-(def seed ::seed)
-(rf/reg-sub
- seed
- (fn [db]
-   (:seed db)))
-
 (def galaxy-map ::galaxy-map)
 (rf/reg-sub
  galaxy-map
@@ -214,10 +208,10 @@
  :<- [galaxy-map]
  (fn [[layout galaxy-map] [_q]]
    (when (and layout galaxy-map)
-    (map-summary/map-summary layout galaxy-map))))
+     (map-summary/map-summary layout galaxy-map))))
 
-(def selected-layout ::selected-layout)
+(def generation-option ::generation-option)
 (rf/reg-sub
- selected-layout
- (fn [db [_q]]
-   (:selected-layout db)))
+ generation-option
+ (fn [db [_q option-name]]
+   (db/generation-option db option-name)))

@@ -1,5 +1,6 @@
 (ns conclave.generate.options
-  (:require [clojure.spec.alpha :as s]))
+  (:require [conclave.layout.directory :as directory]
+            [clojure.spec.alpha :as s]))
 
 (s/def ::pok boolean?)
 (s/def ::include-wormholes boolean?)
@@ -17,10 +18,15 @@
                                   :influence])
 (s/def ::equidistant-balance (set equidistant-balance-options))
 
-(s/def ::instance (s/keys :opt-un [::pok
-                                   ::include-wormholes
+(s/def ::instance (s/keys :req-un [::selected-layout
+                                   ::pok]
+                          :opt-un [::include-wormholes
                                    ::include-legendaries
                                    ::map-balance
                                    ::planets-in-equidistants
                                    ::legendaries-in-equidistants
                                    ::equidistant-balance]))
+
+(defn init-db []
+  {:selected-layout (:code directory/default-layout)
+   :pok true})

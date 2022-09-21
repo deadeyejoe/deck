@@ -10,8 +10,6 @@
 
 (s/def ::map ::map.specs/instance)
 (s/def ::layout ::layout.specs/instance)
-(s/def ::seed (s/and string?
-                     not-empty))
 (s/def ::options ::options/instance)
 (def overlay-modes [:none
                     :tile-number
@@ -47,12 +45,12 @@
 (s/def ::storage-index nat-int?)
 (s/def ::storage-total nat-int?)
 
-(s/def ::db (s/keys :req-un [::selected-layout
-                             ::overlay-mode
+(s/def ::db (s/keys :req-un [::overlay-mode
                              ::value-mode
                              ::highlight-mode
                              ::worker-mode
-                             ::player-edit]
+                             ::player-edit
+                             ::options]
                     :opt-un [::map
                              ::layout
                              ::players
@@ -64,14 +62,14 @@
 
 (def default-flags
   {:player-edit false
-   :worker-mode :sync
+   :worker-mode :async
    :overlay-mode :none
    :value-mode :optimal
    :highlight-mode :single})
 
 (defn initialize []
   (merge
-   {:selected-layout directory/default-layout}
+   {:options (options/init-db)}
    default-flags))
 
 (defn set-map [db new-map]
@@ -82,9 +80,6 @@
 
 (defn set-layout-from-code [db layout-code]
   (assoc db :layout (directory/code->layout layout-code)))
-
-(defn set-selected-layout [db layout-code]
-  (assoc db :selected-layout (directory/code->layout layout-code)))
 
 (defn processing! [db]
   (assoc db :processing true))
@@ -126,8 +121,8 @@
            pk1 p2
            pk2 p1)))
 
-(defn set-option [db option-kw option-value]
-  (update-in db [:options option-kw] option-value))
+(defn set-generation-option [db option-kw option-value]
+  (assoc-in db [:options option-kw] option-value))
 
-(defn get-option [db option-kw]
+(defn generation-option [db option-kw]
   (get-in db [:options option-kw]))

@@ -74,7 +74,7 @@
      (merge
       {:db (update db :tutorial enter-stage next-stage)}
       (when (and (= :player next-stage) (not map))
-        {:fx [[:dispatch [handlers/random-map]]]})))))
+        {:fx [[:dispatch [handlers/generate-map]]]})))))
 
 (def cancel ::cancel)
 (rf/reg-event-db

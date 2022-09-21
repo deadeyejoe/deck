@@ -3,11 +3,10 @@
             [conclave.db :as db]
             [conclave.generate.core :as generate]
             [conclave.interceptors :as ix]
-            [conclave.map.core :as map]
             [conclave.storage :as storage]
             [conclave.worker.client :as worker]
-            [deck.random.interface :as random]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [conclave.layout.directory :as directory]))
 
 (declare start-tutorial load-external-map load-internal-map)
 
@@ -15,7 +14,7 @@
 (rf/reg-event-fx
  initialize
  [(rf/inject-cofx cofx/read-map-from-location) (rf/inject-cofx cofx/local-store)]
- (fn [{:keys [layout-and-map-from-location local-store] :as _cofx} [_en _seed]]
+ (fn [{:keys [layout-and-map-from-location local-store] :as _cofx} [_en]]
    {:db (db/initialize)
     :fx (cond
           layout-and-map-from-location [[:dispatch [load-external-map layout-and-map-from-location]]]
@@ -89,12 +88,6 @@
    (storage/clear!)
    {:db (dissoc db :map :storage-index :storage-total)}))
 
-(def set-seed ::set-seed)
-(rf/reg-event-db
- set-seed
- (fn [db [_en seed]]
-   (assoc db :seed seed)))
-
 (def stop-processing ::stop-processing)
 (rf/reg-event-db
  stop-processing
@@ -107,15 +100,19 @@
  (fn [db [_en mode]]
    (assoc db :worker-mode mode)))
 
-(defn sync-generate [{:keys [seed selected-layout] :as db}]
-  (let [generated (-> (generate/generate selected-layout {:seed seed})
+(defn sync-generate [{{:keys [selected-layout] :as options} :options :as db}]
+  (tap> [::sync-gen options])
+  (let [layout (directory/code->layout selected-layout)
+        generated (-> (generate/generate layout options)
                       :galaxy-map)]
     (db/set-map db generated)))
 
-(defn async-generate [{:keys [seed selected-layout] :as db}]
-  (worker/spawn {:action :generate :seed seed :layout selected-layout}
-                {:on-result #(rf/dispatch [map-generated %])
-                 :on-error #(rf/dispatch [stop-processing])})
+(defn async-generate [{{:keys [selected-layout] :as options} :options :as db}]
+  (tap> [::async-gen options])
+  (let [layout (directory/code->layout selected-layout)]
+    (worker/spawn {:action :generate :layout layout :options options}
+                  {:on-result #(rf/dispatch [map-generated %])
+                   :on-error #(rf/dispatch [stop-processing])}))
   (-> db
       (db/processing!)))
 
@@ -124,17 +121,11 @@
  generate-map
  (fn [{:keys [worker-mode] :as db} [_en mode-override]]
    (let [mode (or mode-override worker-mode)]
+     (tap> [::gen mode])
      (cond
        (= :sync mode)      (sync-generate db)
        (db/processing? db) db
        :else               (async-generate db)))))
-
-(def random-map ::random-map)
-(rf/reg-event-fx
- random-map
- (fn [{:keys [db] :as _ctx} _ev]
-   {:db (assoc db :seed (random/random-seed))
-    :fx [[:dispatch [generate-map :async]]]}))
 
 (def set-overlay ::set-overlay)
 (rf/reg-event-db
@@ -216,8 +207,8 @@
  (fn [db [_en pk1 pk2]]
    (db/swap-players db pk1 pk2)))
 
-(def select-layout ::select-layout)
+(def set-generation-option ::set-generation-option)
 (rf/reg-event-db
- select-layout
- (fn [db [_en code]]
-   (db/set-selected-layout db code)))
+ set-generation-option
+ (fn [db [_en option-name option-value]]
+   (db/set-generation-option db option-name option-value)))

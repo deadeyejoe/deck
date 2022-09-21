@@ -24,8 +24,8 @@
     [common/real-button hicons/chevron-double-right [handlers/navigate-map :next 10]]]])
 
 (defn layout-select []
-  (let [selected-layout @(rf/subscribe [subs/selected-layout])]
-    (into [:select {:on-change #(rf/dispatch [handlers/select-layout (-> % .-target .-value)])
+  (let [selected-layout @(rf/subscribe [subs/generation-option :selected-layout])]
+    (into [:select {:on-change #(rf/dispatch [handlers/set-generation-option :selected-layout (-> % .-target .-value)])
                     :value (:code selected-layout)
                     :class ["block"
                             "w-full" "px-3" "py-1.5" "m-0"
@@ -49,7 +49,7 @@
         [layout-select]]]
       [tutorial-component :generate-button
        [:div {:title "Generate a random map with this layout"}
-        [common/real-button "Generate" [handlers/random-map]]]]
+        [common/real-button "Generate" [handlers/generate-map]]]]
       [tutorial-component :tutorial-button
        [:div {:title "View the tutorial"}
         [common/real-button hicons/question-circle [tut-handlers/start]]]]]
