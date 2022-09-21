@@ -1,8 +1,20 @@
 (ns conclave.generate.arrangement
   (:require [conclave.map.core :as map]
-            [conclave.map.beta.constraint :as constraint]
+            [conclave.map.constraint :as constraint]
             [deck.random.interface :as random]
             [clojure.math.combinatorics :as combi]))
+
+(defn generate-map [{{:keys [tile-array slice-array]} :slices
+                     :keys [layout]
+                     :as context}]
+  (assoc context :galaxy-map
+         (->> slice-array
+              (mapcat (fn [{:keys [coordinates range]}]
+                        (map vector
+                             coordinates
+                             (apply subvec tile-array range))))
+              (reduce (partial apply map/set-coordinate)
+                      (map/new layout)))))
 
 (defn generate-swaps [{:keys [slice-array] :as slices}]
   (->> slice-array
@@ -38,14 +50,9 @@
              current-map
              (recur rest-swaps (optimize-step current next-swap))))))
 
-(defn finalize [{:keys [layout galaxy-map] :as context}]
-  (assoc context :galaxy-map
-         (-> galaxy-map
-             (map/import-coordinate-map (:fixed-tiles layout))
-             (map/import-coordinate-map (:home-tiles layout)))))
-
 (def steps
-  [{:exec init-arrangement-context}
+  [{:exec generate-map}
+   {:exec init-arrangement-context}
    {:when #{:debug}
     :exec (fn [c]
             (tap> [:constraint-score-before (-> c :galaxy-map constraint/compute-score)])
@@ -54,5 +61,4 @@
    {:when #{:debug}
     :exec (fn [c]
             (tap> [:constraint-score-after (-> c :galaxy-map constraint/compute-score)])
-            c)}
-   {:exec finalize}])
+            c)}])

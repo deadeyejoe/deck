@@ -8,7 +8,7 @@
   (try
     (let [hash (str/substring (.-hash js/window.location) 1)
           deserialized (serialization/deserialize hash)]
-      (assoc coeffects :map-from-location deserialized))
+      (assoc coeffects :layout-and-map-from-location deserialized))
     (catch js/Error _e coeffects)))
 
 (def read-map-from-location ::read-map-from-location)

@@ -1,8 +1,8 @@
-(ns conclave.map.beta.constraint
+(ns conclave.map.constraint
   (:require [conclave.map.core :as core]
             [conclave.tiles.core :as tile]
             [conclave.utils.score :as score-util]
-            [conclave.map.beta.distance :as distance]))
+            [conclave.layout.distance :as distance]))
 
 (defn coordinate-dispersion-data [{:keys [distances] :as galaxy-map} tiles]
   (let [coordinates (map (comp (partial core/tile->coordinate galaxy-map)

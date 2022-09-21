@@ -1,17 +1,14 @@
 (ns conclave.db
   (:require [clojure.spec.alpha :as s]
-            [conclave.map.beta.build :as map.build]
-            [conclave.map.beta.constraint :as constraint]
-            [conclave.map.beta.score :as score]
             [conclave.map.specs :as map.specs]
-            [conclave.map.core :as map.core]
-            [conclave.layout.core :as layout]
+            [conclave.map.core :as map]
             [conclave.layout.directory :as directory]
+            [conclave.layout.specs :as layout.specs]
             [conclave.player :as player]
-            [conclave.specs :as specs]
-            [medley.core :as medley]))
+            [conclave.specs :as specs]))
 
 (s/def ::map ::map.specs/instance)
+(s/def ::layout ::layout.specs/instance)
 (s/def ::seed (s/and string?
                      not-empty))
 (def overlay-modes [:none
@@ -52,6 +49,8 @@
 
 (s/def ::db (s/keys :req-un [::seed
                              ::map
+                             ::layout
+::selected-layout
                              ::overlay-mode
                              ::value-mode
                              ::highlight-mode
@@ -75,14 +74,20 @@
 
 (defn initialize []
   (merge
-   {:layout directory/default-layout}
+   {:selected-layout directory/default-layout}
    default-flags))
 
 (defn set-map [db new-map]
-  (-> db
-      (assoc :map new-map
-             :variance-score (score/compute-variance new-map)
-             :constraint-score (constraint/compute-score new-map))))
+  (assoc db :map new-map))
+
+(defn set-layout [db layout]
+  (assoc db :layout layout))
+
+(defn set-layout-from-code [db layout-code]
+  (assoc db :layout (directory/code->layout layout-code)))
+
+(defn set-selected-layout [db layout-code]
+  (assoc db :selected-layout (directory/code->layout layout-code)))
 
 (defn processing! [db]
   (assoc db :processing true))
@@ -99,9 +104,9 @@
            :none
            new-mode)))
 
-(defn highlight-set [{:keys [map highlight-mode] :as db} focus-coordinate]
+(defn highlight-set [{:keys [layout map highlight-mode] :as _db} focus-coordinate]
   (case highlight-mode
-    :adjacent (into #{focus-coordinate} (map.core/adjacent map focus-coordinate))
+    :adjacent (into #{focus-coordinate} (map/adjacent layout map focus-coordinate))
     :slice (into #{focus-coordinate} (get-in map [:slices focus-coordinate]))
     #{focus-coordinate}))
 

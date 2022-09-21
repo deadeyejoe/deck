@@ -110,7 +110,7 @@
   (try
     (let [inferred-layout (serialization/infer-layout tts-str)
           deserialized (serialization/deserialize-tts tts-str inferred-layout)]
-      (rf/dispatch [handlers/load-external-map deserialized])
+      (rf/dispatch [handlers/load-external-map {:layout inferred-layout :map deserialized}])
       deserialized)
     (catch js/Error e (js/console.log e))))
 

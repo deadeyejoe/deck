@@ -1,18 +1,14 @@
 (ns conclave.subs
   (:require [conclave.db :as db]
-            [conclave.tiles.core :as tile]
-            [conclave.tiles.view :as tiles-view]
-            [conclave.map.core :as map]
             [conclave.layout.core :as layout]
-            [conclave.map.beta.constraint :as constraint]
-            [conclave.map.beta.stake :as stake]
-            [conclave.map.beta.score :as score]
+            [conclave.map.core :as map]
             [conclave.map.summary :as map-summary]
+            [conclave.tiles.view :as tiles-view]
+[conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]
             [clojure.string :as str]
-            [medley.core :as medley]
             [re-frame.core :as rf]))
 
 (def seed ::seed)
@@ -109,20 +105,6 @@
  (fn [[distance-map selected-tile] [_q coordinate]]
    (get-in distance-map [selected-tile coordinate])))
 
-(def stake-map ::stake-map)
-(rf/reg-sub
- stake-map
- :<- [galaxy-map]
- (fn [galaxy-map _qv]
-   (:stakes galaxy-map)))
-
-(defn highest-stake [galaxy-map coordinate]
-  (when-let [[highest-stake highest-tile-keys] (stake/highest-stake galaxy-map coordinate)]
-    (str (->> highest-tile-keys
-              (interpose ", ")
-              (apply str))
-         ": " (utils/format-number highest-stake))))
-
 (def overlay-mode ::overlay-mode)
 (rf/reg-sub
  overlay-mode
@@ -134,29 +116,14 @@
  :<- [overlay-mode]
  (fn [overlay-mode [_qv v]] (= v overlay-mode)))
 
-(rf/reg-sub
- ::tile-scores
- :<- [galaxy-map]
- (fn [galaxy-map _qv]
-   (score/tile-scores galaxy-map)))
-
-(rf/reg-sub
- ::tile-shares
- :<- [galaxy-map]
- :<- [::tile-scores]
- (fn [[galaxy-map tile-scores] _qv]
-   (score/tile-shares galaxy-map tile-scores)))
-
 (def overlay-content ::overlay-content)
 (rf/reg-sub
  overlay-content
  (fn [[_q _coordinate] _dv]
    [(rf/subscribe [galaxy-map])
     (rf/subscribe [overlay-mode])
-    (rf/subscribe [selected-tile])
-    (rf/subscribe [::tile-scores])
-    (rf/subscribe [::tile-shares])])
- (fn [[{:keys [distances] :as galaxy-map} mode selected tile-scores tile-shares] [_q coordinate]]
+    (rf/subscribe [selected-tile])])
+ (fn [[{:keys [distances] :as galaxy-map} mode selected] [_q coordinate]]
    (let [tile (map/coordinate->tile galaxy-map coordinate)]
      (case mode
        :coordinates (vect/->display coordinate)
@@ -168,10 +135,6 @@
            :res-inf       (tiles-view/res-inf tile)
            :wormhole      (tiles-view/wormhole tile)
            :tech          (tiles-view/tech tile)
-           :tile-score    (tile-scores coordinate)
-           :tile-share    (when-let [share (get-in tile-shares [coordinate selected])]
-                            (utils/format-number share))
-           :highest-stake (highest-stake galaxy-map coordinate)
            nil))))))
 
 (def highlight-mode ::highlight-mode)
@@ -212,9 +175,9 @@
 (def player-keys ::player-keys)
 (rf/reg-sub
  player-keys
- :<- [galaxy-map]
- (fn [galaxy-map _qv]
-   (map/player-keys galaxy-map)))
+ :<- [layout]
+ (fn [layout _qv]
+   (layout/player-keys layout)))
 
 (def player-name ::player-name)
 (rf/reg-sub
@@ -234,39 +197,25 @@
  (fn [db [_q]]
    (db/selected-races db)))
 
-(def player-scores ::player-scores)
-(rf/reg-sub
- player-scores
- :<- [galaxy-map]
- (fn [galaxy-map _qv]
-   (->> galaxy-map
-        (score/tile-scores)
-        (score/player-scores galaxy-map)
-        (medley/map-keys (partial map/coordinate->tile-key galaxy-map)))))
-
 (def player-summary ::player-summary)
 (rf/reg-sub
  player-summary
+ :<- [layout]
  :<- [galaxy-map]
- :<- [player-scores]
- (fn [[galaxy-map player-scores] [_q player-key]]
-   (-> (map-summary/player-summary galaxy-map player-key)
-       (assoc :score (get player-scores player-key)))))
+ (fn [[layout galaxy-map] [_q player-key]]
+   (map-summary/player-summary layout galaxy-map player-key)))
 
-(def variance-score ::variance-score)
+(def map-summary ::map-summary)
 (rf/reg-sub
- variance-score
- :<- [player-scores]
- (fn [player-scores _qv]
-   (-> player-scores
-       (score/variance-score)
-       (utils/format-number))))
-
-(def constraint-contributions ::constraint-contributions)
-(rf/reg-sub
- constraint-contributions
+ map-summary
+ :<- [layout]
  :<- [galaxy-map]
- (fn [galaxy-map _qv]
-   (let [contributions (vec (constraint/evaluate-constraints galaxy-map))
-         total (constraint/summary contributions)]
-     (conj contributions total))))
+ (fn [[layout galaxy-map] [_q]]
+   (when (and layout galaxy-map)
+    (map-summary/map-summary layout galaxy-map))))
+
+(def selected-layout ::selected-layout)
+(rf/reg-sub
+ selected-layout
+ (fn [db [_q]]
+   (:selected-layout db)))

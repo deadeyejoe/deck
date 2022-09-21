@@ -5,8 +5,7 @@
             [conclave.map.serialization :as serialize]
             [conclave.handlers :as handlers]
             [conclave.worker.client :as worker]
-            [re-frame.core :as rf]
-            [conclave.map.layout :as layout]))
+            [re-frame.core :as rf]))
 
 (def generated (atom nil))
 

@@ -219,18 +219,6 @@
              current-context
              (recur rest-swaps (optimize-step current next-swap))))))
 
-(defn generate-map [{{:keys [tile-array slice-array]} :slices
-                     :keys [layout]
-                     :as context}]
-  (assoc context :galaxy-map
-         (->> slice-array
-              (mapcat (fn [{:keys [coordinates range]}]
-                        (map vector
-                             coordinates
-                             (apply subvec tile-array range))))
-              (reduce (partial apply map/set-coordinate)
-                      (map/new layout)))))
-
 (defn debug-summary [label]
   {:when #{:debug}
    :exec (fn [context]
@@ -245,8 +233,7 @@
    (debug-summary ::before-optimization)
    {:exec optimize}
    (debug-summary ::after-pass-1)
-{:exec optimize}
-(debug-summary ::after-pass-2)
-{:exec optimize}
-(debug-summary ::after-pass-3)
-   {:exec generate-map}])
+   {:exec optimize}
+   (debug-summary ::after-pass-2)
+   {:exec optimize}
+   (debug-summary ::after-pass-3)])

@@ -1,13 +1,12 @@
 (ns conclave.map.serialization
-  (:require [conclave.map.beta.build :as build]
-            [conclave.layout.core :as layout]
-            [conclave.layout.directory :as directory]
+  (:require [conclave.layout.directory :as directory]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
             [cognitect.transit :as t]
             [goog.crypt.base64 :as b64]
             [medley.core :as medley]
-            [superstring.core :as str]))
+            [superstring.core :as str]
+            [conclave.map.core :as map]))
 
 ;; Serialize ===========================================
 
@@ -93,13 +92,21 @@
          (medley/remove-vals #{"0"})
          (medley/map-kv-vals resolve-key))))
 
-(defn deserialize-tts [tts-string {:keys [home-tiles] :as layout}]
-  (-> (deserialize-tts-tiles tts-string)
-      (merge {[0 0 0] tile/mecatol}
-             home-tiles)
-      (build/from-map)))
+(defn deserialize-tts [tts-string layout]
+  (map/import-coordinate-map (map/new layout)
+                             (deserialize-tts-tiles tts-string)))
 
 ;; Conclave Deserialize
+
+(defn infer-layout-conclave [string]
+  (->> (str/split string #" ")
+       (drop 1)
+       (map (fn [s]
+              (if (or (= "X" s)
+                      (str/starts-with? s "p"))
+                "0" "1")))
+       (apply str)
+       (directory/tts-fingerprint->layout)))
 
 (defn deserialize-tiles [tile-string]
   (let [coordinate-spiral (hex/map-coordinates 4)]
@@ -116,17 +123,10 @@
          (t/read reader))))
 
 (defn deserialize [string]
-  (-> string
-      (decode)
-      :tiles
-      (deserialize-tiles)
-      (build/from-map)))
-
-(comment
-  (try
-    (let [sample-map (build/from-layout "ABCDE")]
-      (=  sample-map
-          (-> sample-map
-              (serialize)
-              (deserialize))))
-    (catch js/Error e (js/console.log e))))
+  (let [tile-string (-> string
+                        (decode)
+                        :tiles)
+        layout (infer-layout-conclave tile-string)]
+    {:layout layout
+     :map (map/import-coordinate-map (map/new layout)
+                                     (deserialize-tiles tile-string))}))

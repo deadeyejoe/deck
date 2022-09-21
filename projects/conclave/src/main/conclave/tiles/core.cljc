@@ -153,7 +153,7 @@
     (case wormhole
       :alpha wormholes-alpha
       :beta wormholes-beta
-      (list))))
+      nil)))
 
 (defn default? [tile]
   (and (-> tile type-kw #{:blue :red})

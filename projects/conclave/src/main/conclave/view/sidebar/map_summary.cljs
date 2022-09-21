@@ -96,10 +96,10 @@
        ((if optimal? :optimal-influence :influence) map-summary)]]]))
 
 (defn component []
-  (let [{map-summary :summary :as galaxy-map} @(rf/subscribe [subs/galaxy-map])]
+  (let [map-summary @(rf/subscribe [subs/map-summary])]
     [o-box {:class ["p-1"]}
      [o-box {:class ["border" "p-2" "rounded-lg" "border-gray-800"]}
-      (if galaxy-map
+      (if map-summary
         [v-box {:class ["w-full" "justify-around"]}
          [tile-row map-summary]
          [feature-row map-summary]

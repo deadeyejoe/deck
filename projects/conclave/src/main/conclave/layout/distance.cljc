@@ -1,5 +1,6 @@
 (ns conclave.layout.distance
-  (:require #?(:clj [taoensso.tufte :as tufte :refer [defnp]]
+  (:require [clojure.math.combinatorics :as combi]
+            #?(:clj [taoensso.tufte :as tufte :refer [defnp]]
                :cljs [taoensso.tufte :as tufte :refer-macros (defnp)])))
 
 (defn ->queue [element]
@@ -26,3 +27,7 @@
   (->> (keys adjacents)
        (map (juxt identity (partial distances-from adjacents)))
        (into {})))
+
+(defn mutual-distances [coordinate->coordinate->distance coordinates]
+  (->> (combi/combinations coordinates 2)
+       (keep (partial get-in coordinate->coordinate->distance))))

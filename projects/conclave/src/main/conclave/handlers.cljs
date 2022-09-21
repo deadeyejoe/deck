@@ -1,11 +1,9 @@
 (ns conclave.handlers
   (:require [conclave.coeffects :as cofx]
             [conclave.db :as db]
+            [conclave.generate.core :as generate]
             [conclave.interceptors :as ix]
             [conclave.map.core :as map]
-            [conclave.map.layout :as layout]
-            [conclave.map.beta.build :as map.build]
-            [conclave.map.beta.optimization :as map.opt]
             [conclave.storage :as storage]
             [conclave.worker.client :as worker]
             [deck.random.interface :as random]
@@ -17,10 +15,10 @@
 (rf/reg-event-fx
  initialize
  [(rf/inject-cofx cofx/read-map-from-location) (rf/inject-cofx cofx/local-store)]
- (fn [{:keys [map-from-location local-store] :as _cofx} [_en _seed]]
+ (fn [{:keys [layout-and-map-from-location local-store] :as _cofx} [_en _seed]]
    {:db (db/initialize)
     :fx (cond
-          map-from-location [[:dispatch [load-external-map map-from-location]]]
+          layout-and-map-from-location [[:dispatch [load-external-map layout-and-map-from-location]]]
           (storage/has-maps? local-store) [[:dispatch [load-internal-map (storage/retrieve-map local-store)]]]
           :else [[:dispatch [start-tutorial]]])}))
 
@@ -42,26 +40,31 @@
 (rf/reg-event-db
  load-external-map
  [ix/store-map-locally]
- (fn [db [_en map]]
-   (db/set-map db map)))
+ (fn [db [_en {:keys [map layout] :as _external-map}]]
+   (-> db
+       (db/set-map map)
+       (db/set-layout layout))))
 
 (def load-internal-map ::load-internal-map)
 (rf/reg-event-db
  load-internal-map
  [ix/write-map-to-location]
- (fn [db [_en {:keys [index map] :as _internal-map-entry}]]
+ (fn [db [_en {:keys [index map layout] :as _internal-map-entry}]]
+   (tap> [::load-internal _internal-map-entry])
    (-> db
        (db/set-map map)
+       (db/set-layout layout)
        (assoc :storage-index index))))
 
 (def map-generated ::map-generated)
 (rf/reg-event-db
  map-generated
  [ix/write-map-to-location ix/store-map-locally]
- (fn [db [_en {:keys [map] :as _worker-result}]]
+ (fn [db [_en {:keys [map layout-code] :as _worker-result}]]
    (-> db
        (db/finished!)
-       (db/set-map map))))
+       (db/set-map map)
+       (db/set-layout-from-code layout-code))))
 
 (def navigate-map ::navigate-map)
 (rf/reg-event-fx
@@ -92,14 +95,6 @@
  (fn [db [_en seed]]
    (assoc db :seed seed)))
 
-(def raw-map ::raw-map)
-(rf/reg-event-db
- raw-map
- (fn [{:keys [seed] :as db} _ev]
-   (->> seed
-        (map.build/from-layout)
-        (db/set-map db))))
-
 (def stop-processing ::stop-processing)
 (rf/reg-event-db
  stop-processing
@@ -112,14 +107,13 @@
  (fn [db [_en mode]]
    (assoc db :worker-mode mode)))
 
-(defn sync-generate [{:keys [seed] :as db}]
-  (let [galaxy-map (map.build/from-layout seed)
-        swaps (layout/generate-swap-list seed)
-        [new-map _ _] (map.opt/optimize galaxy-map swaps)]
-    (db/set-map db new-map)))
+(defn sync-generate [{:keys [seed selected-layout] :as db}]
+  (let [generated (-> (generate/generate selected-layout {:seed seed})
+                      :galaxy-map)]
+    (db/set-map db generated)))
 
-(defn async-generate [{:keys [seed layout] :as db}]
-  (worker/spawn {:action :generate :seed seed :layout layout}
+(defn async-generate [{:keys [seed selected-layout] :as db}]
+  (worker/spawn {:action :generate :seed seed :layout selected-layout}
                 {:on-result #(rf/dispatch [map-generated %])
                  :on-error #(rf/dispatch [stop-processing])})
   (-> db
@@ -180,9 +174,8 @@
 (def highlight-player ::highlight-player)
 (rf/reg-event-db
  highlight-player
- (fn [{:keys [map] :as db} [_en player-key]]
-   (let [home-coordinate (map/tile->coordinate map player-key)
-         slice (get-in map [:slices home-coordinate])]
+ (fn [{:keys [layout] :as db} [_en player-key]]
+   (let [slice (get-in layout [:slices player-key :coordinates])]
      (assoc db :highlight-set (set slice)))))
 
 (def clear-hover ::clear-hover)
@@ -223,8 +216,8 @@
  (fn [db [_en pk1 pk2]]
    (db/swap-players db pk1 pk2)))
 
-(def set-layout ::set-layout)
+(def select-layout ::select-layout)
 (rf/reg-event-db
- set-layout
+ select-layout
  (fn [db [_en code]]
-   (assoc db :layout (layout/code->layout code))))
+   (db/set-selected-layout db code)))

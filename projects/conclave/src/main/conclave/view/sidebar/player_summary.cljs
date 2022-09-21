@@ -43,22 +43,19 @@
           content)))
 
 (defn summary-row [player-key]
-  (let [{:keys [valid problems] :as summary} @(rf/subscribe [subs/player-summary player-key])
+  (let [summary @(rf/subscribe [subs/player-summary player-key])
         player-name @(rf/subscribe [subs/player-name player-key])]
     (into [:div {:key player-key
                  :class (into ["flex" "w-full" "h-10" "my-1"
                                "hover:bg-gray-800" ;"border-gray-800" "rounded-sm"
                                "transition-colors"])
                  :on-mouse-enter #(rf/dispatch [handlers/highlight-player player-key])
-                 :on-mouse-leave #(rf/dispatch [handlers/clear-hover])
-                 :title (apply str (interpose "\n " problems))}]
+                 :on-mouse-leave #(rf/dispatch [handlers/clear-hover])}]
           (summary-row-structure
-           [:div {:class (into ["w-full" "h-full" "flex" "items-center"]
-                               (if valid
-                                 ["bg-gradient-to-r" "from-blue-900"
-                                  "hover:from-blue-800"]
-                                 ["bg-gradient-to-r" "from-red-900"
-                                  "hover:from-red-800"]))} (or player-name player-key)]
+           [:div {:class (into ["w-full" "h-full" "flex" "items-center"
+                                "bg-gradient-to-r" "from-blue-900"
+                                "hover:from-blue-800"])}
+            (or player-name player-key)]
            [:div {:class ["px-1" "w-full" "flex" "justify-center"]} [common/resource summary {:class ["justify-end"]}]]
            [:div {:class ["px-1" "w-full"  "flex" "justify-center"]} [common/influence summary {:class ["justify-end"]}]]
            [specialties summary]

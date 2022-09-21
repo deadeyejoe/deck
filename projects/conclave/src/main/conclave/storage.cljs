@@ -55,8 +55,9 @@
 (defn retrieve-map
   ([local-storage] (retrieve-map local-storage :last))
   ([local-storage n]
-   (when-let [retrieved-map (get-map local-storage n)]
-     (update retrieved-map :map serialization/deserialize))))
+   (when-let [{:keys [index map]} (get-map local-storage n)]
+     (assoc (serialization/deserialize map)
+            :index index))))
 
 
 
