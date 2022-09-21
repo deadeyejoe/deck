@@ -70,7 +70,9 @@
          [:div {:class ["flex" "w-full" "justify-end" "p-2"]} icons/influence] "" "" "")))
 
 (defn player-table [player-keys]
-  (into [:<> [header-row]]
+  (into [:<>
+         [header-row]
+         [summary-row :equidistant]]
         (map (fn [pk] [summary-row pk]) player-keys)))
 
 (defn component []

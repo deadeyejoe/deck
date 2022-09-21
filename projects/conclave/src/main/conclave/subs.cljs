@@ -183,7 +183,9 @@
 (rf/reg-sub
  player-name
  (fn [db [_q player-key]]
-   (not-empty (get-in db [:players player-key :name]))))
+   (if (= player-key :equidistant)
+     "Equidistants"
+     (not-empty (get-in db [:players player-key :name])))))
 
 (def player-race ::player-race)
 (rf/reg-sub
