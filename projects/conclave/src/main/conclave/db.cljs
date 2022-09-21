@@ -1,16 +1,18 @@
 (ns conclave.db
-  (:require [clojure.spec.alpha :as s]
-            [conclave.map.specs :as map.specs]
-            [conclave.map.core :as map]
+  (:require [conclave.generate.options :as options]
             [conclave.layout.directory :as directory]
             [conclave.layout.specs :as layout.specs]
+            [conclave.map.core :as map]
+            [conclave.map.specs :as map.specs]
             [conclave.player :as player]
-            [conclave.specs :as specs]))
+            [conclave.specs :as specs]
+            [clojure.spec.alpha :as s]))
 
 (s/def ::map ::map.specs/instance)
 (s/def ::layout ::layout.specs/instance)
 (s/def ::seed (s/and string?
                      not-empty))
+(s/def ::options ::options/instance)
 (def overlay-modes [:none
                     :tile-number
                     :coordinates
@@ -37,8 +39,6 @@
 
 (s/def ::processing boolean?)
 (s/def ::worker-mode #{:async :sync})
-(s/def ::constraint-score number?)
-(s/def ::variance-score number?)
 
 (s/def ::player-edit boolean?)
 (s/def ::players (s/map-of ::player/key
@@ -47,22 +47,19 @@
 (s/def ::storage-index nat-int?)
 (s/def ::storage-total nat-int?)
 
-(s/def ::db (s/keys :req-un [::seed
-                             ::map
-                             ::layout
-::selected-layout
+(s/def ::db (s/keys :req-un [::selected-layout
                              ::overlay-mode
                              ::value-mode
                              ::highlight-mode
                              ::worker-mode
+                             ::player-edit]
+                    :opt-un [::map
+                             ::layout
+                             ::players
                              ::hovered
                              ::selected
-                             ::constraint-score
-                             ::variance-score
-                             ::processing
-                             ::player-edit]
-                    :opt-un [::players
                              ::storage-index
+                             ::processing
                              ::storage-total]))
 
 (def default-flags
@@ -128,3 +125,9 @@
     (assoc db
            pk1 p2
            pk2 p1)))
+
+(defn set-option [db option-kw option-value]
+  (update-in db [:options option-kw] option-value))
+
+(defn get-option [db option-kw]
+  (get-in db [:options option-kw]))

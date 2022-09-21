@@ -22,11 +22,10 @@
 (s/def ::player-key keyword?)
 (s/def ::size pos-int?)
 (s/def ::home ::specs/coordinate)
-(s/def ::slice (s/keys :req-un [::player-key
-                                ::size
-                                ::type-counts
+(s/def ::slice (s/keys :req-un [::size
                                 ::specs/coordinates]
                        :opt-un [::home
+                                ::player-key
                                 ::blocking-tile]))
 (s/def ::slices (s/map-of ::player-key ::slice))
 

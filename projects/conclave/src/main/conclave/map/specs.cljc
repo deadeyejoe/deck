@@ -1,17 +1,17 @@
 (ns conclave.map.specs
   (:require [conclave.tiles.core :as tile]
-            [conclave.layout.core :as layout]
+            [conclave.specs :as specs]
             [clojure.spec.alpha :as s]))
 
-(s/def ::tiles (s/map-of ::layout/coordinate ::layout/tile))
-(s/def ::tiles-reverse (s/map-of ::tile/key ::layout/coordinate))
+(s/def ::tiles (s/map-of ::specs/coordinate ::tile/instance))
+(s/def ::tiles-reverse (s/map-of ::tile/key ::specs/coordinate))
 
-(s/def ::distances (s/map-of ::layout/coordinate
-                             (s/map-of ::layout/coordinate
+(s/def ::distances (s/map-of ::specs/coordinate
+                             (s/map-of ::specs/coordinate
                                        nat-int?)))
 
-(s/def ::stakes (s/map-of ::layout/coordinate
-                          (s/map-of ::layout/coordinate
+(s/def ::stakes (s/map-of ::specs/coordinate
+                          (s/map-of ::specs/coordinate
                                     number?)))
 
 (s/def ::instance (s/keys :req-un [::tiles

@@ -4,7 +4,7 @@
             [conclave.map.core :as map]
             [conclave.map.summary :as map-summary]
             [conclave.tiles.view :as tiles-view]
-[conclave.tiles.core :as tile]
+            [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]

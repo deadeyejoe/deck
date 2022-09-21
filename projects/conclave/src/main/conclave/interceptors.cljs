@@ -1,6 +1,8 @@
 (ns conclave.interceptors
-  (:require [conclave.map.serialization :as serialization]
+  (:require [conclave.db :as db]
+            [conclave.map.serialization :as serialization]
             [conclave.storage :as storage]
+            [clojure.spec.alpha :as s]
             [re-frame.core :as rf]))
 
 (defn set-hash! [loc]
@@ -30,3 +32,15 @@
   (rf/->interceptor
    :id :store-map-in-local-store
    :after store-map-and-update-db!))
+
+
+(defn check-and-throw
+  "Throws an exception if `db` doesn't match the Spec `a-spec`."
+  [a-spec db]
+  (when-not (s/valid? a-spec db)
+    (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
+
+;; now we create an interceptor using `after`
+(def check-spec-interceptor (rf/after (partial check-and-throw ::db/db)))
+
+(rf/reg-global-interceptor check-spec-interceptor)
