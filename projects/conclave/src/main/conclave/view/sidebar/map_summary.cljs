@@ -60,9 +60,8 @@
 (defn tile-row [map-summary]
   [h-box {:class ["h-12"]}
    [:div {:class ["w-10"]}]
-   [icon-count icons/grey-tile (:total-tiles map-summary) "Total tiles (excluding mecatol)"]
-   [icon-count icons/green-tile (:green map-summary) "Total home tiles"]
-   [icon-count icons/blue-tile (:blue map-summary) "Total blue tiles (excluding mecatol)"]
+   [icon-count icons/grey-tile (:total-tiles map-summary) "Total tiles (excluding fixed tiles)"]
+   [icon-count icons/blue-tile (:blue map-summary) "Total blue tiles (excluding fixed tiles)"]
    [icon-count icons/red-tile (:red map-summary) "Total red tiles"]])
 
 (defn feature-row [map-summary]

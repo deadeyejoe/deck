@@ -1,5 +1,6 @@
 (ns conclave.map.summary
   (:require [conclave.map.core :as core]
+            [conclave.layout.core :as layout]
             [conclave.tiles.core :as tiles]
             [conclave.tiles.set :as tile-set]
             [medley.core :as medley]))
@@ -29,38 +30,37 @@
         (update :specialties (comp vec sort))
         (update :wormholes (comp vec sort set)))))
 
-(defn bounds-for-quantity [n ordered-list]
-  (let [total (count ordered-list)]
-    {:lower (apply + (drop (- total n) ordered-list))
-     :upper (apply + (take n ordered-list))}))
+(defn infer-base-tileset [{:keys [pok] :as layout} included-tiles]
+  (if (or pok (some tiles/pok? included-tiles))
+    tile-set/pok-standard
+    tile-set/base-standard))
 
-(defn quantities-for-map [included-tiles]
+(defn bounds [{:keys [type-counts] :as layout} base-tileset]
   (reduce (fn [acc quantity-kw]
-            (assoc-in acc [quantity-kw :value]
-                      (tile-set/sum-quantity quantity-kw included-tiles)))
+            (assoc acc quantity-kw (tile-set/bounds-for-quantity type-counts
+                                                                 quantity-kw
+                                                                 base-tileset)))
           {}
-          [:planets :resources :optimal-resources :influence :optimal-influence])
-  #_(->> included-tiles
-       (map (comp #(select-keys % [:planets :resources :optimal-resources :influence :optimal-influence])
-                  :total))
-       (apply merge-with +)
-       (medley/map-vals (partial hash-map :value))))
+          tile-set/quantity-kws))
 
-(defn compute-bounds [included-tiles]
-  (let [{:keys [red blue]} (medley/map-vals count (group-by :type included-tiles))]
-    (merge-with (partial merge-with +)
-                (medley/map-vals (partial bounds-for-quantity red)
-                                 (:red tiles/type->quantity->ordering))
-                (medley/map-vals (partial bounds-for-quantity blue)
-                                 (:blue tiles/type->quantity->ordering)))))
+(defn layout-summary [{{:keys [red blue] :as type-counts} :type-counts
+                       :as layout}
+                      base-tileset]
+  (merge (bounds layout base-tileset)
+         type-counts
+         {:total-tiles (+ red blue)}))
 
-(defn map-summary [layout {:keys [tiles] :as galaxy-map}]
-  (let [included-tiles (remove tiles/mecatol? (vals tiles))]
-    (merge (medley/map-vals count (group-by :type included-tiles))
-           {:total-tiles (count included-tiles)}
-           (merge-with merge
-                       (compute-bounds included-tiles)
-                       (quantities-for-map included-tiles))
+(defn add-map-values [layout-summary included-tiles]
+  (reduce (fn [summary quantity-kw]
+            (assoc-in summary [quantity-kw :value]
+                      (tile-set/sum-quantity quantity-kw included-tiles)))
+          layout-summary
+          tile-set/quantity-kws))
+
+(defn map-summary [layout {:keys [tiles] :as _galaxy-map}]
+  (let [included-tiles (vals (apply dissoc tiles (layout/static-coordinates layout)))
+        base-tileset (infer-base-tileset layout (vals tiles))]
+    (merge (add-map-values (layout-summary layout base-tileset) included-tiles)
            {:legendary (count (filter tiles/legendary? included-tiles))
             :alpha (count (filter tiles/alpha-wormhole? included-tiles))
             :beta (count (filter tiles/beta-wormhole? included-tiles))

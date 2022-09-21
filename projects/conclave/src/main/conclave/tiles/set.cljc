@@ -43,12 +43,6 @@
                (bounds-for-quantity type-counts quantity-kw tile-set)]))
        (into {})))
 
-(defn ^:lazy samples [{number-red :red number-blue :blue :as _type-counts} tile-set]
-  (let [{possible-red :red possible-blue :blue} (group-by core/type-kw tile-set)]
-    (map concat
-         (random/sample-generator number-red (random/random-seed) possible-red)
-         (random/sample-generator number-blue (random/random-seed) possible-blue))))
-
 (defn sum-quantity [quantity-kw tiles]
   (->> tiles
        (map #(get-in % [:total quantity-kw]))
@@ -57,3 +51,9 @@
 (defn sum-optimal-res-inf [tiles]
   {:optimal-resources (sum-quantity :optimal-resources tiles)
    :optimal-influence (sum-quantity :optimal-influence tiles)})
+
+(defn ^:lazy samples [{number-red :red number-blue :blue :as _type-counts} tile-set]
+  (let [{possible-red :red possible-blue :blue} (group-by core/type-kw tile-set)]
+    (map concat
+         (random/sample-generator number-red (random/random-seed) possible-red)
+         (random/sample-generator number-blue (random/random-seed) possible-blue))))
