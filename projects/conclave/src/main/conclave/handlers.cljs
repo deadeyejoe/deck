@@ -15,11 +15,12 @@
  initialize
  [(rf/inject-cofx cofx/read-map-from-location) (rf/inject-cofx cofx/local-store)]
  (fn [{:keys [layout-and-map-from-location local-store] :as _cofx} [_en]]
-   {:db (db/initialize)
-    :fx (cond
-          layout-and-map-from-location [[:dispatch [load-external-map layout-and-map-from-location]]]
-          (storage/has-maps? local-store) [[:dispatch [load-internal-map (storage/retrieve-map local-store)]]]
-          :else [[:dispatch [start-tutorial]]])}))
+   (let [options (storage/retrieve-options local-store)]
+     {:db (db/initialize options)
+      :fx (cond
+            layout-and-map-from-location [[:dispatch [load-external-map layout-and-map-from-location]]]
+            (storage/has-maps? local-store) [[:dispatch [load-internal-map (storage/retrieve-map local-store)]]]
+            :else [[:dispatch [start-tutorial]]])})))
 
 (def start-tutorial ::start-tutorial)
 (rf/reg-event-db
@@ -49,7 +50,6 @@
  load-internal-map
  [ix/write-map-to-location]
  (fn [db [_en {:keys [index map layout] :as _internal-map-entry}]]
-   (tap> [::load-internal _internal-map-entry])
    (-> db
        (db/set-map map)
        (db/set-layout layout)
@@ -101,14 +101,12 @@
    (assoc db :worker-mode mode)))
 
 (defn sync-generate [{{:keys [selected-layout] :as options} :options :as db}]
-  (tap> [::sync-gen options])
   (let [layout (directory/code->layout selected-layout)
         generated (-> (generate/generate layout options)
                       :galaxy-map)]
     (db/set-map db generated)))
 
 (defn async-generate [{{:keys [selected-layout] :as options} :options :as db}]
-  (tap> [::async-gen options])
   (let [layout (directory/code->layout selected-layout)]
     (worker/spawn {:action :generate :layout layout :options options}
                   {:on-result #(rf/dispatch [map-generated %])
@@ -121,7 +119,6 @@
  generate-map
  (fn [{:keys [worker-mode] :as db} [_en mode-override]]
    (let [mode (or mode-override worker-mode)]
-     (tap> [::gen mode])
      (cond
        (= :sync mode)      (sync-generate db)
        (db/processing? db) db
@@ -210,11 +207,13 @@
 (def set-generation-option ::set-generation-option)
 (rf/reg-event-db
  set-generation-option
+ [ix/store-options-locally]
  (fn [db [_en option-name option-value]]
    (db/set-generation-option db option-name option-value)))
 
 (def toggle-generation-option ::toggle-generation-option)
 (rf/reg-event-db
  toggle-generation-option
+ [ix/store-options-locally]
  (fn [db [_en option-name]]
    (db/toggle-generation-option db option-name)))

@@ -37,9 +37,6 @@
                    "h-full" (if open? "w-1/6" "w-0") "left-0" "transition-[width]"]}
      [generation/component]]))
 
-(comment
-  (signal/>toggle! generation/open-signal))
-
 (defn ui []
   [:div {:class ["h-screen" "w-screen" "flex" "flex-col" "lg:flex-row" "justify-center" "items-center" "bg-gray-900" "text-gray-200"
                  "font-sans"]}

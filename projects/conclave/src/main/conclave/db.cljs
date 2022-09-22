@@ -67,9 +67,9 @@
    :value-mode :optimal
    :highlight-mode :single})
 
-(defn initialize []
+(defn initialize [options]
   (merge
-   {:options (options/init-db)}
+   {:options (or options (options/init-db))}
    default-flags))
 
 (defn set-map [db new-map]

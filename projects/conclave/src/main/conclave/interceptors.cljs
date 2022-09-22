@@ -33,6 +33,12 @@
    :id :store-map-in-local-store
    :after store-map-and-update-db!))
 
+(defn persist-options [{:keys [options] :as db} _ev]
+  (swap! storage/local-store storage/store-options options))
+
+(def store-options-locally
+  (rf/after persist-options))
+
 
 (defn check-and-throw
   "Throws an exception if `db` doesn't match the Spec `a-spec`."

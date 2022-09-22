@@ -13,7 +13,8 @@
 (s/def ::maps (s/coll-of ::map-entry :kind vector?))
 (s/def ::local-storage (s/keys :req-un [::maps]))
 
-(defonce local-store (sa/local-storage (atom {:maps []}) :conclave))
+(defonce local-store (sa/local-storage (atom {:maps []
+                                              :options {}}) :conclave))
 
 (defn clear! []
   (reset! local-store {:maps []}))
@@ -59,7 +60,13 @@
      (assoc (serialization/deserialize map)
             :index index))))
 
+(defn store-options
+  [local-storage options]
+  (assoc local-storage :options options))
 
+(defn retrieve-options
+  [local-storage]
+  (get local-storage :options))
 
 (comment
   @local-store

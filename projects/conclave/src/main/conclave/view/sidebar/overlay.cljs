@@ -1,14 +1,13 @@
 (ns conclave.view.sidebar.overlay
-  (:require  [conclave.handlers :as handlers]
+  (:require  [conclave.components.signal :as signal]
+             [conclave.handlers :as handlers]
              [conclave.map.serialization :as serialization]
              [conclave.subs :as subs]
-             [conclave.components.signal :as signal]
-             [conclave.view.common :as common]
              [conclave.view.icons :as icons]
              [conclave.view.heroicons :as hicons]
+             [conclave.view.tutorial.handlers :as tut-handlers]
              [conclave.utils.web :as web-util]
-             [re-frame.core :as rf]
-             [reagent.core :as r]))
+             [re-frame.core :as rf]))
 
 (defn button-classes
   ([active] (button-classes active :large))
@@ -136,7 +135,12 @@
 
 (defn component []
   [:<>
-   [:div {:class ["h-1/6"]}]
+   [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-start" "items-end"
+                  "w-full" "h-1/6" "pt-2"]}
+    [:div {:class (concat (button-classes false :small))
+           :title "View help"
+           :on-click #(rf/dispatch [tut-handlers/start])}
+     hicons/question-circle]]
    [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-around" 
                   "w-full" "h-2/3" "text-3xl"]}
     [number]

@@ -35,7 +35,7 @@
         [tile/component coordinate]
         [map-summary/component])]
      [:div {:class ["absolute" "flex" "flex-row" "lg:flex-col" "justify-center"
-                    "lg:h-full" "w-full" "lg:w-14" "-top-20" "lg:-left-20"]}
+                    "lg:h-full" "w-full" "lg:w-14" "lg:-left-20"]}
       [overlay/component]]]))
 
 (defn component []
