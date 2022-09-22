@@ -38,15 +38,26 @@
                    "cursor-pointer" "border" "rounded-sm" "m-1" "p-1"]
            :on-click #(rf/dispatch dispatch)}])
 
-(defn real-button [content dispatch]
-  [:div {:class ["text-gray-200"
-                 "bg-gradient-to-br" "from-gray-600" "to-gray-400" "border-gray-400"
-                 "hover:from-gray-500" "hover:to-gray-400"
-                 "active:from-gray-100" "active:to-gray-400" "active:border-gray-100"
-                 "cursor-pointer" "border" "rounded" "m-1" "p-1"
-                 "flex" "justify-center" "items-center"]
-         :on-click #(rf/dispatch dispatch)}
-   content])
+(defn real-button [{:keys [dispatch dispatch-fn]} & content]
+  (into [:div {:class ["text-gray-200"
+                       "bg-gradient-to-br" "from-gray-600" "to-gray-400" "border-gray-400"
+                       "hover:from-gray-500" "hover:to-gray-400"
+                       "active:from-gray-100" "active:to-gray-400" "active:border-gray-100"
+                       "cursor-pointer" "border" "rounded" "m-1" "p-1"
+                       "flex" "justify-center" "items-center"]
+               :on-click (or dispatch-fn #(rf/dispatch dispatch))}]
+        content))
+
+(defn primary-button [{:keys [dispatch]} & content]
+  (into [:div {:class ["text-gray-200"
+                       "border-blue-600"
+                       "bg-gradient-to-br"
+                       "from-blue-900" "to-blue-600"
+                       "hover:from-blue-800" "hover:to-blue-500" "hover:border-blue-500"
+                       "cursor-pointer" "border" "rounded" "m-1" "p-1"
+                       "flex" "justify-center" "items-center"]
+               :on-click #(rf/dispatch dispatch)}]
+        content))
 
 (defn labeled-value [label query-vector]
   (let [sub @(rf/subscribe query-vector)]

@@ -1,10 +1,14 @@
 (ns conclave.view.generation.main
-  (:require [conclave.generate.options :as options]
+  (:require [conclave.components.signal :as signal]
+            [conclave.generate.options :as options]
             [conclave.handlers :as handlers]
             [conclave.layout.directory :as directory]
             [conclave.subs :as subs]
+            [conclave.view.heroicons :as hicons]
             [conclave.view.common :as common]
             [re-frame.core :as rf]))
+
+(def open-signal ::open)
 
 (defn layout-select []
   (into [common/select {:sub-query [subs/generation-option :selected-layout]
@@ -92,6 +96,23 @@
                   [:option {:value name} label])
                 options/equidistant-balance-options))]]])
 
+(defn button []
+  [:div {:title "Generate a map with the current options"
+         :class ["text-2xl"]}
+   [common/primary-button {:dispatch [handlers/generate-map]} "Generate"]])
+
+(defn pane-control []
+  (let [open? (signal/<set? open-signal)]
+    [:div {:title (if open?
+                    "Collapse map generation options"
+                    "Expand map generation options")
+           :class ["absolute" "-right-12" "top-1/2" "bottom-1/2"]}
+     [common/real-button
+      {:dispatch-fn #(signal/>toggle! open-signal)}
+      (if open?
+        hicons/chevron-double-left
+        hicons/chevron-double-right)]]))
+
 (defn component []
   [:div {:class ["w-full " "h-full" "flex-col" "justify-center" "items-center" "overflow-scroll"
                  "border-r-2" "border-blue-800" "bg-gray-900"]}
@@ -102,5 +123,6 @@
    [section {:class ["h-1/3"]}
     [equidistant-balance-section]]
    [section {:class ["h-1/12"]}
-    [:div {:title "Generate a random map with this layout"}
-     [common/real-button "Generate" [handlers/generate-map]]]]])
+    [:div {:class ["w-5/6"]}
+     [button]]]
+   [pane-control]])

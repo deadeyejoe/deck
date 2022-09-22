@@ -1,7 +1,8 @@
 (ns conclave.app
-  (:require [conclave.handlers :as handlers]
-            [conclave.subs :as subs]
+  (:require [conclave.components.signal :as signal]
             [conclave.generate.core]
+            [conclave.handlers :as handlers]
+            [conclave.subs :as subs]
             [conclave.view.generation.main :as generation]
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]
@@ -25,16 +26,28 @@
                    "flex" "justify-center" "items-center" "text-9xl"]
            :on-click #(rf/dispatch [tutorial-handlers/cancel])}]))
 
+(defn generation-button []
+  [:div {:class ["absolute" "z-menu" "bottom-0" "left-0"
+                 "flex" "justify-center" "items-center" "w-1/12" "h-1/12"]}
+   [generation/button]])
+
+(defn generation-sidebar []
+  (let [open? (signal/<set? generation/open-signal)]
+    [:div {:class ["absolute" "z-menu" "flex" "flex-col" "justify-center" "items-center"
+                   "h-full" (if open? "w-1/6" "w-0") "left-0" "transition-[width]"]}
+     [generation/component]]))
+
+(comment
+  (signal/>toggle! generation/open-signal))
+
 (defn ui []
   [:div {:class ["h-screen" "w-screen" "flex" "flex-col" "lg:flex-row" "justify-center" "items-center" "bg-gray-900" "text-gray-200"
                  "font-sans"]}
    [app-overlay]
    [:div {:class ["flex" "flex-col" "justify-center" "items-center"
                   "w-full" "lg:w-2/3" "h-2/3" "lg:h-full"]}
-    (when false
-      [:div {:class ["absolute" "z-menu" "flex" "flex-col" "justify-center" "items-center"
-                     "h-full" "w-1/6" "left-0"]}
-       [generation/component]])
+    [generation-button]
+    [generation-sidebar]
     [map/component]
     [map-overlay]
     [tutorial/component]]
