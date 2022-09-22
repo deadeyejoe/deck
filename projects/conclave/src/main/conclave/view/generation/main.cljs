@@ -11,11 +11,14 @@
 (def open-signal ::open)
 
 (defn layout-select []
-  (into [common/select {:sub-query [subs/generation-option :selected-layout]
-                        :build-dispatch (partial vector handlers/set-generation-option :selected-layout)}]
-        (map (fn [{:keys [code name] :as _layout}]
-               [:option {:value code} name])
-             directory/layouts)))
+  (let [pok? @(rf/subscribe [subs/generation-option :pok])]
+    (into [common/select {:sub [subs/generation-option :selected-layout]
+                          :dispatch-fn (partial vector handlers/set-generation-option :selected-layout)}]
+          (map (fn [{:keys [code name] :as _layout}]
+                 [:option {:value code} name])
+               (if pok? 
+                 directory/layouts
+                 directory/base-layouts)))))
 
 (defn section [props & content]
   [common/o-box (merge-with into {:class ["p-1"]} props)
@@ -32,8 +35,8 @@
           :class ["h-8"]}
     [common/switch {:on-label "PoK"
                     :off-label "Base"
-                    :sub-query [subs/generation-option :pok]
-                    :dispatch-event [handlers/toggle-generation-option :pok]}]]
+                    :sub [subs/generation-option :pok]
+                    :dispatch [handlers/toggle-pok]}]]
    [:div {:title "Select a map layout"
           :class ["w-5/6"]}
     [:div "Layout"]
@@ -43,7 +46,7 @@
           :class ["flex-col" "w-5/6"]}
     [:div "Seed"]
     [:div {:class ["h-8"]}
-     [common/text-input {:sub-query [subs/generation-option :seed]
+     [common/text-input {:sub [subs/generation-option :seed]
                          :placeholder "Use random seed"
                          :build-dispatch (partial vector handlers/set-generation-option :seed)}]]]])
 
@@ -53,19 +56,20 @@
    [:div {:title "Force inclusion of all wormholes"
           :class ["w-5/6" "flex" "justify-start" "h-1/3"]}
     [:div [common/switch {:on-label "Include all Wormholes"
-                          :sub-query [subs/generation-option :include-wormholes]
-                          :dispatch-event [handlers/toggle-generation-option :include-wormholes]}]]]
+                          :sub [subs/generation-option :include-wormholes]
+                          :dispatch [handlers/toggle-generation-option :include-wormholes]}]]]
    [:div {:title "Force inclusion of all legendary planets"
           :class ["w-5/6" "flex" "justify-start" "h-1/3"]}
     [:div
      [common/switch {:on-label "Include all Legendaries"
-                     :sub-query [subs/generation-option :include-legendaries]
-                     :dispatch-event [handlers/toggle-generation-option :include-legendaries]}]]]
+                     :sub [subs/generation-option :include-legendaries]
+                     :dispatch [handlers/toggle-generation-option :include-legendaries]
+                     :disabled (not @(rf/subscribe [subs/generation-option :pok]))}]]]
    [:div {:title "Select balance of resources vs influence in the map overall"
           :class ["w-5/6" "h-1/3"]}
     [:div "Balance"]
     [:div {:class ["w-full" "h-10"]}
-     (into [common/select {:sub-query [subs/generation-option :map-balance]
+     (into [common/select {:sub [subs/generation-option :map-balance]
                            :build-dispatch (fn [v] [handlers/set-generation-option :map-balance (keyword v)])}]
            (map (fn [{:keys [name label]}]
                   [:option {:value name} label])
@@ -74,24 +78,25 @@
 (defn equidistant-balance-section []
   [common/v-box {:class ["flex-col" "justify-around" "items-center" "w-full"]}
    [section-title "Equidistants"]
-   [:div {:title "Force legendaries to be in equidistants"
-          :class ["w-5/6" "flex" "justify-start" "h-1/3"]}
-    [:div
-     [common/switch {:on-label "Legendaries in Equidistants"
-                     :sub-query [subs/generation-option :legendaries-in-equidistants]
-                     :dispatch-event [handlers/toggle-generation-option :legendaries-in-equidistants]}]]]
    [:div {:title "All tiles in equidistants contain planets"
           :class ["w-5/6" "flex" "justify-start" "h-1/3"]}
     [:div
      [common/switch {:on-label "Planets in Equidistants"
-                     :sub-query [subs/generation-option :planets-in-equidistants]
-                     :dispatch-event [handlers/toggle-generation-option :planets-in-equidistants]}]]]
+                     :sub [subs/generation-option :planets-in-equidistants]
+                     :dispatch [handlers/toggle-generation-option :planets-in-equidistants]}]]]
+   [:div {:title "Force legendaries to be in equidistants"
+          :class ["w-5/6" "flex" "justify-start" "h-1/3"]}
+    [:div
+     [common/switch {:on-label "Legendaries in Equidistants"
+                     :sub [subs/generation-option :legendaries-in-equidistants]
+                     :dispatch [handlers/toggle-generation-option :legendaries-in-equidistants]
+                     :disabled (not @(rf/subscribe [subs/generation-option :pok]))}]]]
    [:div {:title "Select balance of resources vs influence between equidistants and player slices"
           :class ["w-5/6" "h-1/3"]}
     [:div "Balance"]
     [:div {:class ["w-full" "h-10"]}
-     (into [common/select {:sub-query [subs/generation-option :equidistant-balance]
-                           :build-dispatch (fn [v] [handlers/set-generation-option :equidistant-balance (keyword v)])}]
+     (into [common/select {:sub [subs/generation-option :equidistant-balance]
+                           :dispatch-fn (fn [v] [handlers/set-generation-option :equidistant-balance (keyword v)])}]
            (map (fn [{:keys [name label]}]
                   [:option {:value name} label])
                 options/equidistant-balance-options))]]])

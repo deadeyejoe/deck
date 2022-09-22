@@ -217,3 +217,12 @@
  [ix/store-options-locally]
  (fn [db [_en option-name]]
    (db/toggle-generation-option db option-name)))
+
+(def toggle-pok ::toggle-pok)
+(rf/reg-event-db
+ toggle-pok
+ [ix/store-options-locally]
+ (fn [db _ev]
+   (-> db
+       (db/toggle-generation-option :pok)
+       (db/ensure-layout-pok))))

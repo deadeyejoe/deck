@@ -71,4 +71,5 @@
 (comment
   @local-store
   (has-maps? @local-store)
-  (get-map @local-store 1))
+  (get-map @local-store 1)
+  (clear!))

@@ -108,6 +108,10 @@
                                   layout-data/five-player-warp
                                   layout-data/four-player
                                   layout-data/three-player]))
-(def default-layout (first layouts))
+(def base-layouts (remove :pok layouts))
+
 (def code->layout (medley/index-by :code layouts))
+(def default-layout-code "6p")
+(def default-layout (code->layout default-layout-code))
+
 (def tts-fingerprint->layout (medley/index-by :tts-fingerprint layouts))

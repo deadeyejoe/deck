@@ -69,7 +69,7 @@
 
 (defn initialize [options]
   (merge
-   {:options (or options (options/init-db))}
+   {:options (or (not-empty options) (options/init-db))}
    default-flags))
 
 (defn set-map [db new-map]
@@ -129,3 +129,16 @@
 
 (defn generation-option [db option-kw]
   (get-in db [:options option-kw]))
+
+(defn- pok-layout-selected? [db]
+  (-> (get-in db [:options :selected-layout])
+      (directory/code->layout)
+      :pok))
+
+(defn ensure-layout-pok [db]
+  (if (not (generation-option db :pok))
+    (cond-> db
+      (pok-layout-selected? db) (set-generation-option :selected-layout directory/default-layout-code)
+      :always (set-generation-option :include-legendaries false)
+      :always (set-generation-option :legendaries-in-equidistants false))
+    db))

@@ -126,33 +126,44 @@
                           props)]
         content))
 
-(defn text-input [{:keys [sub-query build-dispatch placeholder]}]
-  (let [sub @(rf/subscribe sub-query)]
+(defn ->dispatch-fn [{:keys [dispatch dispatch-fn disabled] :as props}]
+  (if disabled
+    (constantly true)
+    (or dispatch-fn #(rf/dispatch dispatch))))
+
+(defn dispatch-with-value [props]
+  (comp (->dispatch-fn props)
+        #(-> % .-target .-value)))
+
+(defn text-input [{:keys [sub placeholder] :as props}]
+  (let [sub @(rf/subscribe sub)]
     [:input {:type "text"
              :value sub
              :placeholder placeholder
-             :on-change #(rf/dispatch-sync (-> % .-target .-value build-dispatch))
+             :on-change (dispatch-with-value props)
              :class ["rounded" "back" "text-gray-200" "bg-gray-600" "w-full" "h-full" "pl-2"]}]))
 
-(defn switch [{:keys [on-label off-label sub-query dispatch-event]}]
-  (let [on? @(rf/subscribe sub-query)]
+(defn switch [{:keys [on-label off-label sub disabled] :as props}]
+  (let [on? @(rf/subscribe sub)]
     [o-box {:class ["text-gray-300"]}
      (when off-label
-       [:span {:class ["mr-2" "transition-opacity" (when on? "opacity-30")]}
+       [:span {:class ["mr-3" "transition-opacity" (when on? "opacity-30")]}
         off-label])
      [:span {:class ["relative" "inline-block" "p-0.5" "w-12" "h-6"
                      "border-2" "rounded-full" "border-gray-300"
-                     (if (or off-label on?) "bg-blue-900" "bg-gray-600") "cursor-pointer"]
-             :on-click #(rf/dispatch dispatch-event)}
+                     (if (or off-label on?) "bg-blue-900" "bg-gray-600") 
+                     (if disabled "cursor-not-allowed" "cursor-pointer")
+                     (when disabled "opacity-30")]
+             :on-click (->dispatch-fn props)}
       [:span {:class (into ["w-4" "h-4" "absolute" "rounded-full" "transition-all"
                             "bg-gray-300"
                             (if on? "right-1" "right-6")])}]]
-     [:span {:class ["ml-2" "transition-opacity" (when-not on? "opacity-30")]}
+     [:span {:class ["ml-3" "transition-opacity" (when-not on? "opacity-30")]}
       on-label]]))
 
-(defn select [{:keys [sub-query build-dispatch]} & options]
-  (let [selected-value @(rf/subscribe sub-query)]
-    (into [:select {:on-change #(rf/dispatch (build-dispatch (-> % .-target .-value)))
+(defn select [{:keys [sub] :as props} & options]
+  (let [selected-value @(rf/subscribe sub)]
+    (into [:select {:on-change (dispatch-with-value props)
                     :value selected-value
                     :class ["block"
                             "h-full" "w-full" "px-3" "py-1.5" "m-0"

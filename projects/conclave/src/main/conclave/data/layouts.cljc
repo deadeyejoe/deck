@@ -98,6 +98,7 @@
                               {:coordinate [-3 3 0] :key :p6}]})
 
 (def five-player-warp {:name "5 Player Warp"
+                       :pok true
                        :code "5pw"
                        :radius 3
                        :type-counts {:blue (* 5 3)
