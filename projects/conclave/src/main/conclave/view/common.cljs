@@ -48,7 +48,7 @@
                :on-click (or dispatch-fn #(rf/dispatch dispatch))}]
         content))
 
-(defn primary-button [{:keys [dispatch]} & content]
+(defn primary-button [{:keys [dispatch dispatch-fn]} & content]
   (into [:div {:class ["text-gray-200"
                        "border-blue-600"
                        "bg-gradient-to-br"
@@ -56,7 +56,7 @@
                        "hover:from-blue-800" "hover:to-blue-500" "hover:border-blue-500"
                        "cursor-pointer" "border" "rounded" "m-1" "p-1"
                        "flex" "justify-center" "items-center"]
-               :on-click #(rf/dispatch dispatch)}]
+               :on-click (or dispatch-fn #(rf/dispatch dispatch))}]
         content))
 
 (defn labeled-value [label query-vector]

@@ -107,11 +107,10 @@
                     "Collapse map generation options"
                     "Expand map generation options")
            :class ["absolute" "-right-12" "top-1/2" "bottom-1/2"]}
-     [common/real-button
+     [common/primary-button
       {:dispatch-fn #(signal/>toggle! open-signal)}
-      (if open?
-        hicons/chevron-double-left
-        hicons/chevron-double-right)]]))
+      [:span {:class ["transition-transform" "duration-500" (when open? "rotate-180")]}
+       hicons/chevron-double-right]]]))
 
 (defn component []
   [:div {:class ["w-full " "h-full" "flex-col" "justify-center" "items-center" "overflow-scroll"
