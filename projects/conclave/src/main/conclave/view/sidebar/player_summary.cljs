@@ -2,9 +2,10 @@
   (:require [conclave.handlers :as handlers]
             [conclave.view.icons :as icons]
             [conclave.view.common :as common]
-            [conclave.tiles.core :as tile]
+            [conclave.specs :as specs]
             [conclave.subs :as subs]
             [medley.core :as medley]
+
             [re-frame.core :as rf]))
 
 (defn trait [trait count]
@@ -20,7 +21,7 @@
                           (medley/map-vals count))]
     [:div {:class ["w-full" "flex" "justify-center" "items-center"]}
      (doall
-      (map (fn [t] (trait t (get trait->count t 0))) tile/traits))]))
+      (map (fn [t] (trait t (get trait->count t 0))) specs/traits))]))
 
 (defn specialties [{:keys [specialties] :as _summary}]
   (into [:div {:class ["w-full" "flex" "justify-end" "items-center"]}]

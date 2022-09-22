@@ -1,6 +1,14 @@
 (ns conclave.layout.slice
   (:require [conclave.layout.core :as core]
-            [medley.core :as medley]))
+            [conclave.specs :as specs]
+            [medley.core :as medley]
+            [clojure.spec.alpha :as s]))
+
+(s/def ::key keyword?)
+(s/def ::size pos-int?)
+(s/def ::instance (s/keys :opt-un [::key
+                             ::specs/coordinates
+                             ::size]))
 
 (defn pare-distances [distances {:keys [free-coordinates] :as layout}]
   (let [home-coordinates (core/home-coordinates layout)]
@@ -42,3 +50,9 @@
                            :coordinates coordinates
                            :size (count coordinates)})
                         slice-key->slice-coordinates)))
+
+(defn player-slices [slices]
+  (vals (dissoc slices :equidistant)))
+
+(defn with-equidistant-first [{:keys [equidistant] :as slices}]
+  (into [equidistant] (player-slices slices)))

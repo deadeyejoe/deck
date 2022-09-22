@@ -4,7 +4,7 @@
             [conclave.generate.balance]
             [conclave.generate.executor :as executor]
             [conclave.generate.options :as options]
-            [conclave.generate.slice :as slice]
+            [conclave.generate.optimize :as optimize]
 [conclave.generate.tileset :as tileset]
             [conclave.map.core :as map]
             [clojure.spec.alpha :as s]))
@@ -26,7 +26,7 @@
 
 (defn init-steps []
   (concat tileset/steps
-          slice/steps
+          optimize/steps
           arrangement/steps))
 
 (defn init-context [layout options]

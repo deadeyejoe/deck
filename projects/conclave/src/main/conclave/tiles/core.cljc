@@ -6,21 +6,12 @@
             [clojure.spec.alpha :as s]))
 
 (s/def ::key keyword?)
-(s/def ::type #{:green :red :blue :hyperlane})
-(s/def ::wormhole #{:alpha :beta :gamma :delta})
-(s/def ::anomaly #{:asteroid-field :nebula :gravity-rift :supernova})
 (s/def ::pok boolean?)
 
 (s/def ::name (s/and string?
                      not-empty))
 (s/def ::resources nat-int?)
 (s/def ::influence nat-int?)
-
-(def specialties [:biotic :cybernetic :propulsion :warfare])
-(s/def ::specialty (set specialties))
-
-(def traits [:cultural :hazardous :industrial])
-(s/def ::trait (set traits))
 
 (s/def ::legendary boolean?)
 (s/def ::planet (s/keys :req-un [::name
@@ -56,7 +47,8 @@
       :specialties (keep :specialty planets)
       :tech (count (keep :specialty planets))
       :legendary (count (keep :legendary planets))}
-     (when anomaly {anomaly 1}))))
+     (when anomaly {anomaly 1
+                    :anomaly 1}))))
 
 (defn enrich-planet [{:keys [resources influence _specialty] :as planet}]
   (merge planet
