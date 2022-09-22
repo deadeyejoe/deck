@@ -124,5 +124,8 @@
 (defn set-generation-option [db option-kw option-value]
   (assoc-in db [:options option-kw] option-value))
 
+(defn toggle-generation-option [db option-kw]
+  (update-in db [:options option-kw] not))
+
 (defn generation-option [db option-kw]
   (get-in db [:options option-kw]))

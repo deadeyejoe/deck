@@ -131,7 +131,7 @@
 (def gravity-rifts (filter gravity-rift? tiles))
 
 (defn legendary? [tile] (and (not (nexus? tile))
-                             (:legendary tile)))
+                              (contains? tile :legendary)))
 (def legendaries (filter legendary? tiles))
 
 (defn has-planets? [tile] (-> tile :planets seq))

@@ -212,3 +212,9 @@
  set-generation-option
  (fn [db [_en option-name option-value]]
    (db/set-generation-option db option-name option-value)))
+
+(def toggle-generation-option ::toggle-generation-option)
+(rf/reg-event-db
+ toggle-generation-option
+ (fn [db [_en option-name]]
+   (db/toggle-generation-option db option-name)))

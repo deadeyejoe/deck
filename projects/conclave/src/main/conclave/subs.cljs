@@ -49,6 +49,13 @@
  value-mode
  (fn [db] (:value-mode db)))
 
+(def optimal-values ::optimal-values)
+(rf/reg-sub
+ optimal-values
+ :<- [value-mode]
+ (fn [value-mode [_q]]
+   (= :optimal value-mode)))
+
 (rf/reg-sub
  :score/variance
  (fn [db] (utils/format-number (:score/variance db))))

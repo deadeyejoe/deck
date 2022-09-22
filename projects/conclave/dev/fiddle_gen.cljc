@@ -11,13 +11,21 @@
             [deck.random.interface :as random]))
 
 (let [layout directory/default-layout
-      options {:pok true :include-wormholes true :max-swaps 1000
-               :debug true :slice true}
+      options {:pok true
+               :selected-layout "8p"
+               :include-wormholes true
+               :include-legendaries true
+               :map-balance :balanced
+               :planets-in-equidistants false
+               :legendaries-in-equidistants false
+               :equidistant-balance :balanced
+               :max-swaps 1000}
       context (core/init-context layout options)
       optimized (executor/execute context (concat tileset/steps
-                                                  slice/steps
-                                                  arrangement/steps))]
-  [(slice/compute-balance-goal (:slices layout) (:tileset optimized))
+                                                  #_slice/steps
+                                                  #_arrangement/steps))]
+  [#_(slice/compute-balance-goal (:slices layout) (:tileset optimized))
+   (count (:tileset optimized))
    (->> optimized
         :slices
         (slice/sum-slices)

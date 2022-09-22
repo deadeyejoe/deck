@@ -10,20 +10,12 @@
             [re-frame.core :as rf]))
 
 (defn display-controls []
-  (let [optimal? (= :optimal @(rf/subscribe [subs/value-mode]))]
-    [common/o-box {:class ["p-1" "mt-1"]}
-     [common/o-box {:class ["border" "rounded-lg" "border-gray-800" "p-2" "text-gray-300" "h-16"]}
-      [:span {:class ["mr-2" "transition-opacity" (when-not optimal? "opacity-30")]}
-       "Optimal Values"]
-      [:span {:class ["relative" "inline-block" "p-0.5" "w-12" "h-6"
-                      "border-2" "rounded-full" "border-gray-300"
-                      "bg-blue-900" "cursor-pointer"]
-              :on-click #(rf/dispatch [handlers/set-value-mode])}
-       [:span {:class (into ["w-4" "h-4" "absolute" "rounded-full" "transition-all"
-                             "bg-gray-300"
-                             (if optimal? "right-6" "right-1")])}]]
-      [:span {:class ["ml-2" "transition-opacity" (when optimal? "opacity-30")]}
-       "Base Values"]]]))
+  [common/o-box {:class ["p-1" "mt-1"]}
+   [common/o-box {:class ["border" "rounded-lg" "border-gray-800" "p-2" "text-gray-300" "h-16"]}
+    [common/switch {:on-label "Optimal Values"
+                    :off-label "Base Values"
+                    :sub-query [subs/optimal-values]
+                    :dispatch-event [handlers/set-value-mode]}]]])
 
 (defn content []
   (let [coordinate (or @(rf/subscribe [subs/hovered])

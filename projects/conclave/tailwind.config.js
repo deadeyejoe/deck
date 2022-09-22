@@ -9,6 +9,9 @@ module.exports = {
   darkMode: 'class', // or 'media' or 'class'
   theme: {
     extend: {
+      height: {
+        '1/12': "8.333333%"
+      },
       gridTemplateRows: {
          '8': 'repeat(8, minmax(0, 1fr))',
          '9': 'repeat(9, minmax(0, 1fr))',
@@ -31,9 +34,10 @@ module.exports = {
         "base": 0,
         "border": 1,
         "highlight" : 2,
-        "overlay" : 3,
-        "app-overlay": 4,
-        "tutorial": 5,
+        "menu": 3,
+        "overlay" : 4,
+        "app-overlay": 5,
+        "tutorial": 6,
       }
     },
     variants: {

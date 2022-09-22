@@ -5,18 +5,18 @@
 (s/def ::pok boolean?)
 (s/def ::include-wormholes boolean?)
 (s/def ::include-legendaries boolean?)
-(def map-balance-options [:extreme-resource
-                          :favour-resource
-                          :balanced
-                          :favour-influence
-                          :extreme-influence])
-(s/def ::map-balance (set map-balance-options))
+(def map-balance-options [{:name :extreme-resource :label "Extreme Resource"}
+                          {:name :favour-resource :label "Favour Resource"}
+                          {:name :balanced :label "Balanced"}
+                          {:name :favour-influence :label "Favour Influence"}
+                          {:name :extreme-influence :label "Extreme Influence"}])
+(s/def ::map-balance (set (map :name map-balance-options)))
 (s/def ::planets-in-equidistants boolean?)
 (s/def ::legendaries-in-equidistants boolean?)
-(def equidistant-balance-options [:resource
-                                  :balanced
-                                  :influence])
-(s/def ::equidistant-balance (set equidistant-balance-options))
+(def equidistant-balance-options [{:name :favour-resource :label "Favour Resource"}
+                                  {:name :balanced :label "Balanced"}
+                                  {:name :favour-influence :label "Favour Influence"}])
+(s/def ::equidistant-balance (set (map :name equidistant-balance-options)))
 
 (s/def ::instance (s/keys :req-un [::selected-layout
                                    ::pok]
@@ -28,5 +28,11 @@
                                    ::equidistant-balance]))
 
 (defn init-db []
-  {:selected-layout (:code directory/default-layout)
-   :pok true})
+  {:pok true
+   :selected-layout (:code directory/default-layout)
+   :include-wormholes true
+   :include-legendaries false
+   :map-balance :balanced
+   :planets-in-equidistants false
+   :legendaries-in-equidistants false
+   :equidistant-balance :balanced})

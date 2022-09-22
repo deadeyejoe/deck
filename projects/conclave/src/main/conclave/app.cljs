@@ -2,6 +2,7 @@
   (:require [conclave.handlers :as handlers]
             [conclave.subs :as subs]
             [conclave.generate.core]
+            [conclave.view.generation.main :as generation]
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]
             [conclave.view.tutorial.main :as tutorial]
@@ -30,6 +31,10 @@
    [app-overlay]
    [:div {:class ["flex" "flex-col" "justify-center" "items-center"
                   "w-full" "lg:w-2/3" "h-2/3" "lg:h-full"]}
+    (when false
+      [:div {:class ["absolute" "z-menu" "flex" "flex-col" "justify-center" "items-center"
+                     "h-full" "w-1/6" "left-0"]}
+       [generation/component]])
     [map/component]
     [map-overlay]
     [tutorial/component]]
