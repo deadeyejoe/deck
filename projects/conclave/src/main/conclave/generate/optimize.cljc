@@ -1,9 +1,7 @@
 (ns conclave.generate.optimize
-  (:require [conclave.generate.slice :as slice]
-            [conclave.layout.slice :as layout-slice]
+  (:require [conclave.generate.constraints :as constraints]
+            [conclave.generate.slice :as slice]
             [conclave.tiles.core :as tiles]
-            [conclave.tiles.set :as tile-set]
-            [conclave.utils.score :as stats]
             [conclave.utils.vector :as vector-util]
             [deck.random.interface :as random]
             [clojure.math.combinatorics :as combi]))
@@ -40,45 +38,26 @@
     (->> (combi/combinations parts 2)
          (mapcat (partial apply combi/cartesian-product)))))
 
-(defn compute-balance-goal [{:keys [equidistant] :as slices} tileset]
-  (let [player-slices (layout-slice/player-slices slices)
-        total-tiles (count tileset)
-        player-tiles (apply + (map :size player-slices))
-        player-count (count player-slices)
-        per-slice (fn [n]
-                    (/ (* n player-tiles)
-                       total-tiles player-count))
-        per-player (fn [n] (Math/floor (/ n player-count)))
-        res-per-slice (per-slice (tile-set/sum-quantity :optimal-resources tileset))
-        inf-per-slice (per-slice (tile-set/sum-quantity :optimal-influence tileset))]
-    (assert (= total-tiles (+ player-tiles (:size equidistant)))
-            (str "Slice totals (" (+ player-tiles (:size equidistant)) ") should sum to number of tiles (" total-tiles ")!"))
-    {:balance-goal (- res-per-slice inf-per-slice)
-     :resources-per-slice res-per-slice
-     :influence-per-slice inf-per-slice
-     :anomalies-per-player (per-player (tile-set/sum-quantity :anomalies tileset))
-     :wormholes-per-player (per-player (tile-set/sum-quantity :anomalies tileset))}))
-
 (defn init-slice-context [{{:keys [slices]} :layout
                            :keys [options tileset]
                            :as context}]
   (let [slice-array (slice/init-slice-array slices options)
         tile-array (init-tile-array slice-array options tileset)
         owner-mask (owner-mask slice-array)
-        constraint-mask (slice/constraint-mask slice-array options)]
+        constraint-mask (slice/constraint-mask slice-array options)
+        balance-goals (constraints/compute-balance-goal options slice-array tileset)]
     (assoc context :slices (merge {:slice-array slice-array
                                    :tile-array tile-array
                                    :owner-mask owner-mask
                                    :constraint-mask constraint-mask
-                                   :swaps (swaps owner-mask)}
-                                  (compute-balance-goal slices tileset)))))
+                                   :swaps (swaps owner-mask)
+                                   :balance-goals balance-goals}
+                                  balance-goals))))
 
-(defn compute-scores [{:keys [balance-goal] :as _slice-context} slice-sums]
-  [(stats/variation (map :score slice-sums))
-   (apply + (->> (rest slice-sums)
-                 (map :balance)
-                 (map (comp Math/abs (partial - balance-goal)))
-                 (map #(Math/pow % 2))))])
+(defn compute-scores [{:keys [balance-goals] :as slice-context}]
+  (let [slices-with-summary (slice/add-summary-to-slices slice-context)]
+    [(constraints/variance-score balance-goals slices-with-summary)
+     (constraints/balance-score balance-goals slices-with-summary)]))
 
 (defn apply-swap? [{:keys [constraint-mask tile-array] :as _slice-context}
                    [from-index to-index :as _swap]]
@@ -104,7 +83,7 @@
 (defn optimize-step [[current-score slice-context] swap]
   (if (apply-swap? slice-context swap)
     (let [new-context (apply-swap! slice-context swap)
-          next-score (compute-scores new-context (slice/sum-slices new-context))]
+          next-score (compute-scores new-context)]
       (if (improved-score? current-score next-score)
         [next-score new-context]
         [current-score slice-context]))
@@ -116,10 +95,7 @@
   (assoc context :slices
          (loop [[next-swap & rest-swaps] (cond->> (random/seed-shuffle seed swaps)
                                            max-swaps (take max-swaps))
-                [_current-score
-                 current-context
-                 :as current] [(compute-scores slice-context (slice/sum-slices slice-context))
-                               slice-context]]
+                [_current-score current-context :as current] [(compute-scores slice-context) slice-context]]
            (if (nil? next-swap)
              current-context
              (recur rest-swaps (optimize-step current next-swap))))))
@@ -127,10 +103,8 @@
 (defn debug-summary [label]
   {:when #{:debug}
    :exec (fn [context]
-           (tap> [label (->> context
-                             :slices
-                             (slice/sum-slices)
-                             (map (juxt :score :balance :summary)))])
+           (tap> [label (->> (map (juxt :score :balance :summary)
+                                  (compute-scores context)))])
            context)})
 
 (def steps

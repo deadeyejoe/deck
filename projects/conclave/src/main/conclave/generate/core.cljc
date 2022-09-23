@@ -2,10 +2,12 @@
   (:require [conclave.layout.specs :as layout-specs]
             [conclave.generate.arrangement :as arrangement]
             [conclave.generate.balance]
+            [conclave.generate.constraints]
+            [conclave.generate.slice]
             [conclave.generate.executor :as executor]
             [conclave.generate.options :as options]
             [conclave.generate.optimize :as optimize]
-[conclave.generate.tileset :as tileset]
+            [conclave.generate.tileset :as tileset]
             [conclave.map.core :as map]
             [clojure.spec.alpha :as s]))
 

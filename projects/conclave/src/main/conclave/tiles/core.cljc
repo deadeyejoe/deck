@@ -36,6 +36,7 @@
                         (vec))]
     (merge
      {:planets (count planets)
+      :has-planets (if (not-empty planets) 1 0)
       :resources (apply + (map :resources planets))
       :influence (apply + (map :influence planets))
       :optimal-resources (apply + (map :optimal-resources planets))

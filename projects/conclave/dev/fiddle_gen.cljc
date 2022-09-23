@@ -1,5 +1,6 @@
 (ns fiddle-gen
   (:require [conclave.generate.balance :as balance]
+            [conclave.generate.constraints :as constraints]
             [conclave.generate.arrangement :as arrangement]
             [conclave.generate.core :as core]
             [conclave.generate.executor :as executor]
@@ -42,3 +43,7 @@
 (tile-set/collect-totals [:optimal-influence :traits]
                          (first (tile-set/samples {:red 18 :blue 34}
                                                   tile-set/pok-standard)))
+
+(let [tileset                    (first (tile-set/samples {:red 18 :blue 34}
+                                                          tile-set/pok-standard))])
+(constraints/balance-cardinality 14 :favour-resource)

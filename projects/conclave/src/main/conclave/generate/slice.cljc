@@ -77,7 +77,7 @@
           (apply +))
      size))
 
-(defn sum-slice [tile-array {:keys [range] :as slice}]
+(defn add-summary-to-slice [tile-array {:keys [range] :as slice}]
   (let [tiles (apply subvec tile-array range)
         {:keys [optimal-resources optimal-influence] :as summary} (tile-set/collect-totals tiles)]
     (merge slice {:tiles tiles
@@ -85,5 +85,5 @@
                   :balance (- optimal-resources optimal-influence)
                   :score (slice->score slice summary)})))
 
-(defn sum-slices [{:keys [tile-array slice-array] :as _slice-context}]
-  (map (partial sum-slice tile-array) slice-array))
+(defn add-summary-to-slices [{:keys [tile-array slice-array] :as _slice-context}]
+  (map (partial add-summary-to-slice tile-array) slice-array))
