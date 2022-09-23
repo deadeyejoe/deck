@@ -131,7 +131,7 @@
     (constantly true)
     (or dispatch-fn #(rf/dispatch dispatch))))
 
-(defn dispatch-with-value [props]
+(defn ->dispatch-with-value [props]
   (comp (->dispatch-fn props)
         #(-> % .-target .-value)))
 
@@ -140,7 +140,7 @@
     [:input {:type "text"
              :value sub
              :placeholder placeholder
-             :on-change (dispatch-with-value props)
+             :on-change (->dispatch-with-value props)
              :class ["rounded" "back" "text-gray-200" "bg-gray-600" "w-full" "h-full" "pl-2"]}]))
 
 (defn switch [{:keys [on-label off-label sub disabled] :as props}]
@@ -163,7 +163,7 @@
 
 (defn select [{:keys [sub] :as props} & options]
   (let [selected-value @(rf/subscribe sub)]
-    (into [:select {:on-change (dispatch-with-value props)
+    (into [:select {:on-change (->dispatch-with-value props)
                     :value selected-value
                     :class ["block"
                             "h-full" "w-full" "px-3" "py-1.5" "m-0"

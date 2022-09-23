@@ -16,7 +16,7 @@
 (s/def ::home-tiles ::tile-map)
 (s/def ::blank-coordinates ::specs/coordinates)
 
-(s/def ::type-counts (s/map-of ::tiles/type pos-int?))
+(s/def ::type-counts (s/map-of ::specs/type pos-int?))
 (s/def ::tts-fingerprint string?)
 
 (s/def ::player-key keyword?)

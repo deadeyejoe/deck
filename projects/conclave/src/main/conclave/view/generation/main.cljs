@@ -13,7 +13,7 @@
 (defn layout-select []
   (let [pok? @(rf/subscribe [subs/generation-option :pok])]
     (into [common/select {:sub [subs/generation-option :selected-layout]
-                          :dispatch-fn (partial vector handlers/set-generation-option :selected-layout)}]
+                          :dispatch-fn #(rf/dispatch [handlers/set-generation-option :selected-layout %])}]
           (map (fn [{:keys [code name] :as _layout}]
                  [:option {:value code} name])
                (if pok? 
@@ -48,7 +48,7 @@
     [:div {:class ["h-8"]}
      [common/text-input {:sub [subs/generation-option :seed]
                          :placeholder "Use random seed"
-                         :build-dispatch (partial vector handlers/set-generation-option :seed)}]]]])
+                         :dispatch-fn #(rf/dispatch [handlers/set-generation-option :seed %])}]]]])
 
 (defn map-balance-section []
   [common/v-box {:class ["flex-col" "justify-between" "items-center" "w-full"]}
@@ -70,7 +70,7 @@
     [:div "Balance"]
     [:div {:class ["w-full" "h-10"]}
      (into [common/select {:sub [subs/generation-option :map-balance]
-                           :build-dispatch (fn [v] [handlers/set-generation-option :map-balance (keyword v)])}]
+                           :dispatch-fn #(rf/dispatch [handlers/set-generation-option :map-balance (keyword %)])}]
            (map (fn [{:keys [name label]}]
                   [:option {:value name} label])
                 options/map-balance-options))]]])
@@ -96,7 +96,7 @@
     [:div "Balance"]
     [:div {:class ["w-full" "h-10"]}
      (into [common/select {:sub [subs/generation-option :equidistant-balance]
-                           :dispatch-fn (fn [v] [handlers/set-generation-option :equidistant-balance (keyword v)])}]
+                           :dispatch-fn #(rf/dispatch [handlers/set-generation-option :equidistant-balance (keyword %)])}]
            (map (fn [{:keys [name label]}]
                   [:option {:value name} label])
                 options/equidistant-balance-options))]]])
