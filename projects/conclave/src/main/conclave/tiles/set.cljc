@@ -1,6 +1,7 @@
 (ns conclave.tiles.set
   (:require [conclave.tiles.core :as core]
-            [deck.random.interface :as random]))
+            [deck.random.interface :as random]
+            [conclave.tiles.core :as tile]))
 
 (def pok-standard core/default-pok)
 (def base-standard core/default-base-game)
@@ -57,3 +58,10 @@
     (map concat
          (random/sample-generator number-red (random/random-seed) possible-red)
          (random/sample-generator number-blue (random/random-seed) possible-blue))))
+
+(defn collect-totals
+  ([tiles] (collect-totals nil tiles))
+  ([keys tiles]
+   (reduce (partial tile/collect-total keys)
+           {}
+           tiles)))

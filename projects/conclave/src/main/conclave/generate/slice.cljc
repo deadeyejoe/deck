@@ -1,14 +1,23 @@
 (ns conclave.generate.slice
   (:require [conclave.layout.slice :as layout-slice]
             [conclave.tiles.core :as tiles]
+            [conclave.tiles.set :as tile-set]
             [conclave.specs :as specs]
             [clojure.spec.alpha :as s]))
 
 (s/def ::range (s/coll-of nat-int? :kind vector :count 2))
 (s/def ::weights (s/map-of ::specs/quantities number?))
+(s/def ::tiles (s/coll-of ::tiles/instance))
+(s/def ::balance number?)
+(s/def ::score number?)
+(s/def ::summary (s/map-of keyword? number?))
 (s/def ::slice (s/merge ::layout-slice/instance
                         (s/keys :opt-un [::range
-                                         ::weights])))
+                                         ::weights
+                                         ::tiles
+                                         ::balance
+                                         ::score
+                                         ::summary])))
 
 (def favoured-weight (/ 1 2))
 (def unfavoured-weight (/ 3 2))
@@ -57,21 +66,6 @@
                                  :weights (weights key equidistant-balance)))
              (+ index size)))))
 
-(def into-vec (fnil into []))
-
-(defn combine [slice tile]
-  (let [{:keys [optimal-resources
-                optimal-influence
-                specialties
-                tech
-                legendary]} (:total tile)]
-    (-> slice
-        (update :optimal-resources + optimal-resources)
-        (update :optimal-influence + optimal-influence)
-        (update :specialties into-vec specialties)
-        (update :tech + tech)
-        (update :legendary + legendary))))
-
 (defn apply-weight [weight slice-sum]
   (merge-with *
               (select-keys slice-sum (keys weight))
@@ -85,7 +79,7 @@
 
 (defn sum-slice [tile-array {:keys [range] :as slice}]
   (let [tiles (apply subvec tile-array range)
-        {:keys [optimal-resources optimal-influence] :as summary} (reduce combine {} tiles)]
+        {:keys [optimal-resources optimal-influence] :as summary} (tile-set/collect-totals tiles)]
     (merge slice {:tiles tiles
                   :summary summary
                   :balance (- optimal-resources optimal-influence)

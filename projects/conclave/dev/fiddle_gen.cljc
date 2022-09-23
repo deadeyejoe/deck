@@ -37,9 +37,8 @@
                :debug true :slice true}]
   (:galaxy-map (core/generate layout options)))
 
-(->> (:slices directory/default-layout)
-     (slice/player-slices))
-
-(slice/compute-balance-goal (:slices directory/default-layout)
-                            (first (tile-set/samples {:red 18 :blue 34}
-                                                     tile-set/pok-standard)))
+(tile-set/collect-totals (first (tile-set/samples {:red 18 :blue 34}
+                                                  tile-set/pok-standard)))
+(tile-set/collect-totals [:optimal-influence :traits]
+                         (first (tile-set/samples {:red 18 :blue 34}
+                                                  tile-set/pok-standard)))

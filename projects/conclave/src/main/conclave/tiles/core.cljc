@@ -28,7 +28,7 @@
                                    ::planets
                                    ::pok]))
 
-(defn totals [{:keys [planets anomaly] :as _raw-tile}]
+(defn totals [{:keys [planets anomaly wormhole] :as _raw-tile}]
   (let [all-traits (->> planets
                         (keep :trait)
                         (remove nil?)
@@ -47,8 +47,10 @@
       :specialties (keep :specialty planets)
       :tech (count (keep :specialty planets))
       :legendary (count (keep :legendary planets))}
-     (when anomaly {anomaly 1
-                    :anomaly 1}))))
+     (when anomaly {:anomalies #{anomaly}
+                    :anomaly 1})
+     (when wormhole {:wormholes #{wormhole}
+                     :wormhole 1}))))
 
 (defn enrich-planet [{:keys [resources influence _specialty] :as planet}]
   (merge planet
@@ -123,7 +125,7 @@
 (def gravity-rifts (filter gravity-rift? tiles))
 
 (defn legendary? [tile] (and (not (nexus? tile))
-                              (contains? tile :legendary)))
+                             (contains? tile :legendary)))
 (def legendaries (filter legendary? tiles))
 
 (defn has-planets? [tile] (-> tile :planets seq))
@@ -139,13 +141,6 @@
                                                   (not (hyperlane? tile))
                                                   (or (:race tile)
                                                       (not (home? tile)))))
-
-(defn matching-wormholes [tile]
-  (let [wormhole (:wormhole tile)]
-    (case wormhole
-      :alpha wormholes-alpha
-      :beta wormholes-beta
-      nil)))
 
 (defn default? [tile]
   (and (-> tile type-kw #{:blue :red})
@@ -167,12 +162,7 @@
   (when tile
     (or (:image tile) (str "tile/ST_" (-> tile :key name) ".png"))))
 
-(defn stakeable? [tile]
-  (and (not (home? tile))
-       (not (mecatol? tile))
-       (not (hyperlane? tile))))
-
-(defn lane->edge [coordinate rotation [source target :as lane]]
+(defn lane->edge [coordinate rotation [source target :as _lane]]
   (let [num->rotated-vector (fn [n] (hex/num->directions (mod (+ n rotation) 6)))
         source-coordinate (vect/add coordinate (num->rotated-vector source))
         target-coordinate (vect/add coordinate (num->rotated-vector target))]
@@ -185,27 +175,29 @@
   (lane->edge [0 0 0] 5 [1 4])
   (lane->edge [0 0 0] 6 [1 4]))
 
-(defn hyperlane-tile [{:keys [key coordinate rotation] :as proto-tile}]
+(defn hyperlane-tile [{:keys [key coordinate rotation] :as _proto-tile}]
   (let [{:keys [hyperlanes] :as tile} (key->tile key)]
     (assoc tile
            :coordinate coordinate
            :rotation rotation
            :edges (map (partial lane->edge coordinate rotation) hyperlanes))))
 
-(defn tiles-ordered [tiles quantity]
-  (->> tiles
-       (filter default?)
-       (map #(get-in % [:total quantity]))
-       (sort >)))
+(defn matching-wormholes [tile]
+  (let [wormhole (:wormhole tile)]
+    (case wormhole
+      :alpha wormholes-alpha
+      :beta wormholes-beta
+      nil)))
 
-(def type->quantity->ordering
-  {:red {:planets  (tiles-ordered reds :planets)
-         :resources (tiles-ordered reds :resources)
-         :optimal-resources (tiles-ordered reds :optimal-resources)
-         :influence (tiles-ordered reds :influence)
-         :optimal-influence (tiles-ordered reds :optimal-influence)}
-   :blue {:planets  (tiles-ordered blues :planets)
-          :resources (tiles-ordered blues :resources)
-          :optimal-resources (tiles-ordered blues :optimal-resources)
-          :influence (tiles-ordered blues :influence)
-          :optimal-influence (tiles-ordered blues :optimal-influence)}})
+(defn collect-quantity [collect quantity]
+  (cond
+    (coll? quantity) (into (or collect #{}) quantity)
+    (number? quantity) (+ collect quantity)))
+
+(defn collect-total
+  ([collect tile] (collect-total nil collect tile))
+  ([keys collect {:keys [total] :as _tile}]
+   (reduce-kv (fn [collect quantity-kw quantity]
+                (update collect quantity-kw collect-quantity quantity))
+              collect
+              (if keys (select-keys total keys) total))))
