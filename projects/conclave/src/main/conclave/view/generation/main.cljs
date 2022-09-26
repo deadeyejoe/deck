@@ -99,7 +99,7 @@
                 options/equidistant-balance-options))]]])
 
 (defn button []
-  [:div {:title "Generate a map with the current options"
+  [:div {:title "Generate a map with the current options (Ctrl + Enter)"
          :class ["text-2xl"]}
    [common/primary-button {:dispatch [handlers/generate-map]} "Generate"]])
 

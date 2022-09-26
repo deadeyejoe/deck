@@ -15,7 +15,7 @@
                          akiroz.re-frame/storage {:mvn/version "0.1.4"}
                          alandipert/storage-atom {:mvn/version "2.0.1"}
                          day8.re-frame/undo {:mvn/version "0.3.3"}
-                         re-pressed/re-pressed {:mvn/version "0.3.1"}
+                         re-pressed/re-pressed {:mvn/version "0.3.2"}
                          inflections/inflections {:mvn/version "0.13.2"}
                          funcool/cuerdas {:mvn/version "2.2.1"}
                          com.cognitect/transit-cljs {:mvn/version "0.8.269"}}}

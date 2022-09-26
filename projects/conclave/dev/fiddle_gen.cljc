@@ -16,7 +16,7 @@
 (let [layout (directory/code->layout "8p")
       options {:pok true
                :debug true
-:seed "ABCDEFG"
+:seed "ed22b694-e199-4d5d-8a0d-d99589cefa16"
                :include-wormholes true
                :include-legendaries true
             ;;    :map-balance :extreme-resource

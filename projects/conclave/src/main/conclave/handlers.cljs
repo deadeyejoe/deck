@@ -3,12 +3,13 @@
             [conclave.db :as db]
             [conclave.generate.core :as generate]
             [conclave.interceptors :as ix]
+            [conclave.layout.directory :as directory]
             [conclave.storage :as storage]
             [conclave.worker.client :as worker]
-            [re-frame.core :as rf]
-            [conclave.layout.directory :as directory]))
+            [re-pressed.core :as rp]
+            [re-frame.core :as rf]))
 
-(declare start-tutorial load-external-map load-internal-map)
+(declare start-tutorial load-external-map load-internal-map generate-map)
 
 (def initialize ::initialize)
 (rf/reg-event-fx
@@ -119,6 +120,7 @@
  generate-map
  (fn [{:keys [worker-mode] :as db} [_en mode-override]]
    (let [mode (or mode-override worker-mode)]
+     (tap> ::generae!)
      (cond
        (= :sync mode)      (sync-generate db)
        (db/processing? db) db

@@ -12,7 +12,8 @@
             [conclave.view.tutorial.subs :as tutorial-subs]
             [conclave.worker.client :as worker-client]
             [reagent.dom :as rd]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [re-pressed.core :as rp]))
 
 (defn map-overlay []
   (when @(rf/subscribe [subs/processing?])
@@ -67,13 +68,22 @@
 (defn init-location-watch []
   (.addEventListener js/window "popstate" #(rf/dispatch [handlers/location-changed])))
 
+
+(def shortcuts {:event-keys [[[handlers/generate-map] ;;fire this
+                              [{:keyCode 13 ;;when ctrl+enter is pressed
+                                :ctrlKey true}]]]})
+
 (defn init-dev []
   (worker-client/set-script-location "assets/app/js/worker.js")
   (rf/dispatch-sync [handlers/initialize])
+  (rf/dispatch-sync [::rp/add-keyboard-event-listener "keydown"])
+  (rf/dispatch-sync [::rp/set-keydown-rules shortcuts])
   (init-location-watch)
   (render))
 
 (defn init []
   (rf/dispatch-sync [handlers/initialize])
+  (rf/dispatch-sync [::rp/add-keyboard-event-listener "keydown"])
+  (rf/dispatch-sync [::rp/set-keydown-rules shortcuts])
   (init-location-watch)
   (render))
