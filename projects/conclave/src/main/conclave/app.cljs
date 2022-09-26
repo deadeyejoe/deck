@@ -4,6 +4,7 @@
             [conclave.handlers :as handlers]
             [conclave.subs :as subs]
             [conclave.view.generation.main :as generation]
+            [conclave.view.generation.summary :as generation-summary]
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]
             [conclave.view.tutorial.main :as tutorial]
@@ -32,7 +33,7 @@
    [generation/button]])
 
 (defn generation-sidebar []
-  (let [open? (signal/<set? generation/open-signal)]
+  (let [open? (signal/<set? generation-summary/open-signal)]
     [:div {:class ["absolute" "z-menu" "flex" "flex-col" "justify-center" "items-center"
                    "h-full" (if open? "w-1/6" "w-0") "left-0" "transition-[width]"]}
      [generation/component]]))

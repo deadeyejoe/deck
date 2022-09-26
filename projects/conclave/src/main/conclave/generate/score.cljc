@@ -57,11 +57,12 @@
            (per-player-goals options slice-array tileset-summary))))
 
 (defn too-many? [quantity-kw max-number {:keys [summary] :as _slice}]
-  (< max-number (get summary quantity-kw 0)))
+  (max 0
+       (- (get summary quantity-kw 0) max-number)))
 
 (defn duplicate? [count-quantity distinct-quantity {:keys [summary] :as _slice}]
-  (< (count (get summary distinct-quantity))
-     (get summary count-quantity 0)))
+  (- (get summary count-quantity 0)
+     (count (get summary distinct-quantity))))
 
 (def duplicate-anomalies? (partial duplicate? :anomaly :anomalies))
 (def duplicate-techs? (partial duplicate? :tech :specialties))
@@ -99,8 +100,7 @@
            (equidistant-constraint-score goals equidistant)
            (map (fn [slice]
                   (->> (calculation-fn slice)
-                       (filter identity)
-                       (count)))
+                       (apply +)))
                 player-slices))))
 
 (defn balance-score [{:keys [balance-goal] :as _goals} slices-with-summary]

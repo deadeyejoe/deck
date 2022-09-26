@@ -1,14 +1,11 @@
 (ns conclave.view.generation.main
-  (:require [conclave.components.signal :as signal]
-            [conclave.generate.options :as options]
+  (:require [conclave.generate.options :as options]
             [conclave.handlers :as handlers]
             [conclave.layout.directory :as directory]
             [conclave.subs :as subs]
-            [conclave.view.heroicons :as hicons]
             [conclave.view.common :as common]
+            [conclave.view.generation.summary :as summary]
             [re-frame.core :as rf]))
-
-(def open-signal ::open)
 
 (defn layout-select []
   (let [pok? @(rf/subscribe [subs/generation-option :pok])]
@@ -16,7 +13,7 @@
                           :dispatch-fn #(rf/dispatch [handlers/set-generation-option :selected-layout %])}]
           (map (fn [{:keys [code name] :as _layout}]
                  [:option {:value code} name])
-               (if pok? 
+               (if pok?
                  directory/layouts
                  directory/base-layouts)))))
 
@@ -106,17 +103,6 @@
          :class ["text-2xl"]}
    [common/primary-button {:dispatch [handlers/generate-map]} "Generate"]])
 
-(defn pane-control []
-  (let [open? (signal/<set? open-signal)]
-    [:div {:title (if open?
-                    "Collapse map generation options"
-                    "Expand map generation options")
-           :class ["absolute" "-right-12" "top-1/2" "bottom-1/2"]}
-     [common/primary-button
-      {:dispatch-fn #(signal/>toggle! open-signal)}
-      [:span {:class ["transition-transform" "duration-500" (when open? "rotate-180")]}
-       hicons/chevron-double-right]]]))
-
 (defn component []
   [:div {:class ["w-full " "h-full" "flex-col" "justify-center" "items-center" "overflow-scroll"
                  "border-r-2" "border-blue-800" "bg-gray-900"]}
@@ -129,4 +115,4 @@
    [section {:class ["h-1/12"]}
     [:div {:class ["w-5/6"]}
      [button]]]
-   [pane-control]])
+   [summary/component]])

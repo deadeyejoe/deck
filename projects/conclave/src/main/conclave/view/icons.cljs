@@ -58,6 +58,10 @@
   [:img (image-props "general/frontier" size)])
 (def frontier  [frontier* "20px"])
 
+(defn pok* [size]
+  [:img (image-props "general/pok-white" size)])
+(def pok  [pok* "20px"])
+
 (defn race [code]
   [:img (image-props (str "race/" (name code)))])
 
