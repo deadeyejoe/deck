@@ -1,5 +1,5 @@
 (ns conclave.generate.optimize
-  (:require [conclave.generate.constraints :as constraints]
+  (:require [conclave.generate.score :as score]
             [conclave.generate.slice :as slice]
             [conclave.tiles.core :as tiles]
             [conclave.utils.vector :as vector-util]
@@ -45,7 +45,7 @@
         tile-array (init-tile-array slice-array options tileset)
         owner-mask (owner-mask slice-array)
         constraint-mask (slice/constraint-mask slice-array options)
-        balance-goals (constraints/compute-balance-goal options slice-array tileset)]
+        balance-goals (score/compute-balance-goal options slice-array tileset)]
     (assoc context :slices (merge {:slice-array slice-array
                                    :tile-array tile-array
                                    :owner-mask owner-mask
@@ -54,10 +54,9 @@
                                    :balance-goals balance-goals}
                                   balance-goals))))
 
-(defn compute-scores [{:keys [balance-goals] :as slice-context}]
+(defn compute-scores [score-schema {:keys [balance-goals] :as slice-context}]
   (let [slices-with-summary (slice/add-summary-to-slices slice-context)]
-    [(constraints/variance-score balance-goals slices-with-summary)
-     (constraints/balance-score balance-goals slices-with-summary)]))
+    (score/compute-scores score-schema balance-goals slices-with-summary)))
 
 (defn apply-swap? [{:keys [constraint-mask tile-array] :as _slice-context}
                    [from-index to-index :as _swap]]
@@ -69,50 +68,45 @@
 (defn apply-swap! [slice-context swap]
   (update slice-context :tile-array vector-util/swap-indices swap))
 
-(defn towards-bounds [low high before after]
-  (or
-   (< before after low)
-   (or (<= low before high)
-       (<= low after high))
-   (< high after before)))
+(defn optimize-step [score-schema [current-score current-context] swap]
+  (if (apply-swap? current-context swap)
+    (let [next-context (apply-swap! current-context swap)
+          next-score (compute-scores score-schema next-context)]
+      (if (score/improved-score? score-schema current-score next-score)
+        [next-score next-context]
+        [current-score current-context]))
+    [current-score current-context]))
 
-(defn improved-score? [[score-before balance-before] [score-after balance-after]]
-  (and (<= score-after score-before)
-       (towards-bounds 8 16 balance-before balance-after)))
-
-(defn optimize-step [[current-score slice-context] swap]
-  (if (apply-swap? slice-context swap)
-    (let [new-context (apply-swap! slice-context swap)
-          next-score (compute-scores new-context)]
-      (if (improved-score? current-score next-score)
-        [next-score new-context]
-        [current-score slice-context]))
-    [current-score slice-context]))
-
-(defn optimize [{{:keys [swaps] :as slice-context} :slices
+(defn optimize [{{:keys [swaps goals] :as slice-context} :slices
                  {:keys [seed max-swaps]} :options
-                 :as context}]
+                 :as context} score-schema]
   (assoc context :slices
          (loop [[next-swap & rest-swaps] (cond->> (random/seed-shuffle seed swaps)
                                            max-swaps (take max-swaps))
-                [_current-score current-context :as current] [(compute-scores slice-context) slice-context]]
+                [_current-score current-context :as current] [(compute-scores score-schema slice-context) slice-context]]
            (if (nil? next-swap)
              current-context
-             (recur rest-swaps (optimize-step current next-swap))))))
+             (recur rest-swaps (optimize-step score-schema current next-swap))))))
 
 (defn debug-summary [label]
   {:when #{:debug}
-   :exec (fn [context]
-           (tap> [label (->> (map (juxt :score :balance :summary)
-                                  (compute-scores context)))])
+   :exec (fn [{slice-context :slices
+               :as context}]
+           (tap> [label (->> (compute-scores {:constraint :free
+                                              :balance :free
+                                              :variance :free} slice-context))])
            context)})
+
+(def free-constraint {:constraint :free})
+(def locked-constraint {:constraint :locked :variance :free :balance :free})
 
 (def steps
   [{:exec init-slice-context}
    (debug-summary ::before-optimization)
-   {:exec optimize}
+   {:exec (fn [context] (optimize context free-constraint))}
    (debug-summary ::after-pass-1)
-   {:exec optimize}
+   {:exec (fn [context] (optimize context locked-constraint))}
    (debug-summary ::after-pass-2)
-   {:exec optimize}
+   {:exec (fn [context] (optimize context locked-constraint))}
+{:exec (fn [context] (optimize context locked-constraint))}
    (debug-summary ::after-pass-3)])

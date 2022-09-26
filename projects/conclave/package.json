@@ -13,7 +13,7 @@
     "dev": "run-p -l *:watch",
     "release": "run-s *:release",
     "deploy": "aws s3 sync --profile personal release/ s3://galactic-conclave",
-    "deploy:test": "aws s3 sync --profile personal release/ s3://test.mistake-not.net/conclave"
+    "deploy:test": "aws s3 sync --profile personal release/ s3://test.mistake-not.net"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.4",

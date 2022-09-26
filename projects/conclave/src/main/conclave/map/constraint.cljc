@@ -15,16 +15,18 @@
      :max-distance (apply max mutual-distances)
      :variation (score-util/variation mutual-distances)}))
 
+(def inverse-ring-score {1 4
+                         2 3
+                         3 2
+                         4 1})
+
 (def constraints {:anomalies       {:tiles tile/anomalies
                                     :type :min-distance
                                     :min-distance-allowed 2
                                     :factor -10}
                   :wormhole-ring   {:tiles tile/wormholes
                                     :type :ring
-                                    :ring->score {1 4
-                                                  2 3
-                                                  3 2
-                                                  4 1}
+                                    :ring->score inverse-ring-score
                                     :factor 2}
                   :wormhole-alpha  {:tiles tile/wormholes-alpha
                                     :type :proportional
@@ -42,8 +44,20 @@
                                 ;; :lower-threshold 2
                                 ;; :upper-threshold 3
                                 :factor -1}
+                  :legendary-ring   {:tiles tile/legendaries
+                                     :type :ring
+                                     :ring->score {1 2
+                                                   2 2
+                                                   3 1
+                                                   4 1}
+                                     :factor 1}
+                  ;; :legendaries     {:tiles tile/legendaries
+                  ;;                   :type :proportional
+                  ;;                   :factor 2}
                   :legendaries     {:tiles tile/legendaries
-                                    :type :proportional}
+                                    :type :min-distance
+                                    :min-distance-allowed 3
+                                    :factor -10}
                   :supernovae      {:tiles tile/supernovae
                                     :type :proportional}})
 

@@ -1,37 +1,46 @@
 (ns fiddle-gen
-  (:require [conclave.generate.balance :as balance]
-            [conclave.generate.constraints :as constraints]
-            [conclave.generate.arrangement :as arrangement]
+  (:require [conclave.generate.arrangement :as arrangement]
             [conclave.generate.core :as core]
             [conclave.generate.executor :as executor]
+            [conclave.generate.optimize :as optimize]
+[conclave.generate.score :as score]
             [conclave.generate.slice :as slice]
             [conclave.generate.tileset :as tileset]
-            [conclave.tiles.core :as tiles]
-            [conclave.tiles.set :as tile-set]
+            [conclave.handlers :as handlers]
             [conclave.layout.directory :as directory]
-            [deck.random.interface :as random]))
+            [conclave.tiles.set :as tile-set]
+            [re-frame.core :as rf]
+            [conclave.player :as player]
+            [medley.core :as medley]))
 
-(let [layout directory/default-layout
+(let [layout (directory/code->layout "8p")
       options {:pok true
-               :selected-layout "8p"
+               :debug true
+:seed "ABCDEFG"
                :include-wormholes true
                :include-legendaries true
-               :map-balance :balanced
-               :planets-in-equidistants false
-               :legendaries-in-equidistants false
-               :equidistant-balance :balanced
-               :max-swaps 1000}
+            ;;    :map-balance :extreme-resource
+            ;;    :planets-in-equidistants true
+            ;;    :legendaries-in-equidistants true
+            ;;    :equidistant-balance :favour-resource
+               :max-swaps 2000}
       context (core/init-context layout options)
       optimized (executor/execute context (concat tileset/steps
-                                                  #_slice/steps
-                                                  #_arrangement/steps))]
-  [#_(slice/compute-balance-goal (:slices layout) (:tileset optimized))
-   (count (:tileset optimized))
-   (->> optimized
-        :slices
-        (slice/sum-slices)
-        (map (juxt :score :balance :summary)))
-   (count (:tiles (:map optimized)))])
+                                                  optimize/steps
+                                                  arrangement/steps))]
+  (rf/dispatch [handlers/map-generated {:map (:galaxy-map optimized) :layout-code (:code layout)}])
+  (reset! core/last-context optimized)
+  (keys optimized))
+
+(let [{:keys [balance-goals slice-array tile-array swaps] :as slice-context} (:slices @core/last-context)
+      tile-index-lookup (->> tile-array
+                             (map :key)
+                             (map-indexed (comp vec
+                                                reverse
+                                                vector))
+                             (into {}))
+      slices-before (slice/add-summary-to-slices slice-context)]
+  [slice-array])
 
 (let [layout directory/default-layout
       options {:pok true :include-wormholes true :max-swaps 50
@@ -44,6 +53,14 @@
                          (first (tile-set/samples {:red 18 :blue 34}
                                                   tile-set/pok-standard)))
 
-(let [tileset                    (first (tile-set/samples {:red 18 :blue 34}
-                                                          tile-set/pok-standard))])
-(constraints/balance-cardinality 14 :favour-resource)
+(let [tileset (first (tile-set/samples {:red 18 :blue 34}
+                                       tile-set/pok-standard))]
+  [(->> (map #(get-in % [:total :optimal-resources]) tileset)
+        (sort >)
+        (frequencies))
+   (score/balance-cardinality 14 :favour-resource tileset)
+   (->> (map #(get-in % [:total :optimal-influence]) tileset)
+        (sort >)
+        (frequencies))
+   (score/balance-cardinality 14 :favour-influence tileset)
+   (score/balance-cardinality 14 :balanced tileset)])

@@ -2,14 +2,15 @@
   (:require [conclave.layout.specs :as layout-specs]
             [conclave.generate.arrangement :as arrangement]
             [conclave.generate.balance]
-            [conclave.generate.constraints]
-            [conclave.generate.slice]
             [conclave.generate.executor :as executor]
-            [conclave.generate.options :as options]
             [conclave.generate.optimize :as optimize]
+            [conclave.generate.options :as options]
+            [conclave.generate.score]
+            [conclave.generate.slice]
             [conclave.generate.tileset :as tileset]
             [conclave.map.core :as map]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [superstring.core :as str]))
 
 (s/def ::layout ::layout-specs/instance)
 (s/def ::galaxy-map ::map/galaxy)
@@ -31,12 +32,16 @@
           optimize/steps
           arrangement/steps))
 
-(defn init-context [layout options]
+(defn init-context [layout {:keys [seed] :as options}]
   {:layout layout
-   :options (merge {:pok true
-                    :seed (str (random-uuid))}
-                   options)})
+   :options (merge {:pok true}
+                   options
+                   {:seed (if (str/some? seed)
+                            seed
+                            (str (random-uuid)))})})
 
 (defn generate [layout options]
-  (executor/execute (init-context layout options)
-                    (init-steps)))
+  (let [generated (executor/execute (init-context layout options)
+                                    (init-steps))]
+    (reset! last-context generated)
+    generated))

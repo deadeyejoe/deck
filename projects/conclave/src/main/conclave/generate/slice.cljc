@@ -24,23 +24,23 @@
 
 (def invert-balance
   {:balanced :balanced
-   :resource :influence
-   :influence :resource})
+   :favour-resource :favour-influence
+   :favour-influence :favour-resource})
 
 (defn weights [key equidistant-balance]
   (let [balance (if (= :equidistant key)
                   equidistant-balance
                   (invert-balance equidistant-balance))]
     {:optimal-resources (case balance
-                          :resource favoured-weight
-                          :influence unfavoured-weight
+                          :favour-resource favoured-weight
+                          :favour-influence unfavoured-weight
                           1)
      :optimal-influence (case balance
-                          :resource unfavoured-weight
-                          :influence favoured-weight
+                          :favour-resource unfavoured-weight
+                          :favour-influence favoured-weight
                           1)
-     :legendary 2
-     :tech 2}))
+     :legendary 1
+     :tech 1}))
 
 (defn constraint-mask [slice-array
                        {:keys [legendaries-in-equidistants planets-in-equidistants] :as _options}]
@@ -71,17 +71,19 @@
               (select-keys slice-sum (keys weight))
               weight))
 
-(defn slice->score [{:keys [size weights] :as _slice} summary]
-  (/ (->> (apply-weight weights summary)
-          (vals)
-          (apply +))
-     size))
+(defn slice->score [{:keys [weights] :as _slice} summary]
+  (->> (apply-weight weights summary)
+       (vals)
+       (apply +)))
 
 (defn add-summary-to-slice [tile-array {:keys [range] :as slice}]
   (let [tiles (apply subvec tile-array range)
         {:keys [optimal-resources optimal-influence] :as summary} (tile-set/collect-totals tiles)]
     (merge slice {:tiles tiles
                   :summary summary
+                  :optimal-resources optimal-resources
+                  :optimal-influence optimal-influence
+                  :total (+ optimal-resources optimal-influence)
                   :balance (- optimal-resources optimal-influence)
                   :score (slice->score slice summary)})))
 

@@ -4,8 +4,10 @@
             [taoensso.tufte :as tufte :refer-macros [defnp profiled]]))
 
 (defnp new-generate [{:keys [options layout] :as request}]
-  {:map (:galaxy-map (generate/generate layout options))
-   :layout-code (:code layout)})
+  (let [{:keys [galaxy-map options] :as generated} (generate/generate layout options)]
+    {:options options
+     :map galaxy-map
+     :layout-code (:code layout)}))
 
 (defn profile-request [f]
   (let [[result pstats] (profiled {} (f))]
