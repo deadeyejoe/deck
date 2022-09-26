@@ -21,7 +21,7 @@
                :include-legendaries true
             ;;    :map-balance :extreme-resource
             ;;    :planets-in-equidistants true
-            ;;    :legendaries-in-equidistants true
+               :legendaries-in-equidistants true
             ;;    :equidistant-balance :favour-resource
                :max-swaps 2000}
       context (core/init-context layout options)

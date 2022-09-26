@@ -68,25 +68,41 @@
 (defn apply-swap! [slice-context swap]
   (update slice-context :tile-array vector-util/swap-indices swap))
 
-(defn optimize-step [score-schema [current-score current-context] swap]
+(defn optimize-step [{:keys [score-schema]
+                      current-context :slice-context
+                      current-score :score
+                      :as opt-context} swap]
   (if (apply-swap? current-context swap)
     (let [next-context (apply-swap! current-context swap)
           next-score (compute-scores score-schema next-context)]
       (if (score/improved-score? score-schema current-score next-score)
-        [next-score next-context]
-        [current-score current-context]))
-    [current-score current-context]))
+        (-> opt-context
+            (assoc :score next-score
+                   :slice-context next-context)
+            (update :swaps-passed inc))
+        (update opt-context :swaps-failed inc)))
+    (update opt-context :swaps-constrained inc)))
 
-(defn optimize [{{:keys [swaps goals] :as slice-context} :slices
-                 {:keys [seed max-swaps]} :options
+(defn ->optimize-context [score-schema slice-context]
+  {:slice-context slice-context
+   :score-schema score-schema
+   :score (compute-scores score-schema slice-context)
+   :swaps-passed 0
+   :swaps-failed 0
+   :swaps-constrained 0})
+
+(defn optimize [{{:keys [swaps] :as slice-context} :slices
+                 {:keys [seed max-swaps debug]} :options
                  :as context} score-schema]
   (assoc context :slices
          (loop [[next-swap & rest-swaps] (cond->> (random/seed-shuffle seed swaps)
                                            max-swaps (take max-swaps))
-                [_current-score current-context :as current] [(compute-scores score-schema slice-context) slice-context]]
+                current-context (->optimize-context score-schema slice-context)]
            (if (nil? next-swap)
-             current-context
-             (recur rest-swaps (optimize-step score-schema current next-swap))))))
+             (do (when debug
+                   (tap> [::optimize-finished (dissoc current-context :slice-context)]))
+                 (:slice-context current-context))
+             (recur rest-swaps (optimize-step current-context next-swap))))))
 
 (defn debug-summary [label]
   {:when #{:debug}
@@ -108,5 +124,4 @@
    {:exec (fn [context] (optimize context locked-constraint))}
    (debug-summary ::after-pass-2)
    {:exec (fn [context] (optimize context locked-constraint))}
-{:exec (fn [context] (optimize context locked-constraint))}
    (debug-summary ::after-pass-3)])
