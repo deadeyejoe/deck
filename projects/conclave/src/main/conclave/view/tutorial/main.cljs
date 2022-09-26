@@ -21,15 +21,17 @@
    (map (partial vector :li) content)])
 
 (defn preamble []
-  [paragraph "Feature overview:"
+  [paragraph "Welcome to Conclave!"
    [unordered-list
-    [:span "Select a layout and click 'Generate' to generate a random map, generation may take up to a minute. Note that each map " [:strong "always"] " contains three of each wormhole"]
-    [:span "Use the toggle to switch between " [:em "optimal"] " and " [:em "base"] " resource/influence values (see below)"]
+    "Click 'Generate' or press Ctrl+Enter to generate a random map, generation may take up to a minute."
+"Configure different map layouts, and options by expanding the pane at the left of the page."
+[:span "Use the toggle on the right to switch between " [:em "optimal"] " and " [:em "base"] " resource/influence values (see below)"]
     "Hover over player rows to highlight their slice on the map"
     "Use the buttons on the right of the map pane to toggle informational overlays on the map"
     "Hover tiles on the map to see more information"
     "The generator stores each map you view in local storage. Use the chevron buttons to navigate through them"
-    "Maps can be shared by copying the full URL"]])
+    "Maps can be shared by copying the full URL"
+    "Maps can be imported from/exported to TTS strings"]])
 
 (defn res-inf []
   [:<>
@@ -54,14 +56,7 @@
      A player's "
     [:em "slice"]
     " is the set of tiles they can reach before any other player. Hover over a 
-     player on the summary to highlight their slice on the map."]
-   [paragraph "Some player rows may be highlighted in "
-    [:span {:class ["text-red-700"]} "red"]
-    ". This means their slice violates one or more goals of the balancing algorithm. 
-     Hover over a row to see a summary of these problems (if any). The goals are:"
-    [unordered-list "Optimal resources at least 2.5, optimal influence at least 4"
-     "Total of optimal resource and influence between 9 and 13"
-     "No more than two distinct tech specialties"]]])
+     player on the summary to highlight their slice on the map."]])
 
 (defn map-summary []
   [:<>
