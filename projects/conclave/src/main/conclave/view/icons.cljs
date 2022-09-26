@@ -3,9 +3,11 @@
 (defn image-props
   ([filename] (image-props filename "20px"))
   ([filename size]
+   (image-props filename size size))
+  ([filename height width]
    {:src (str "images/" filename ".png")
-    :height size
-    :width size}))
+    :height height
+    :width width}))
 
 (defn cultural [size] [:img (image-props "general/trait-cultural" size)])
 (defn hazardous [size] [:img (image-props "general/trait-hazardous" size)])
@@ -46,6 +48,10 @@
   [:img (image-props "general/legendary-complete" size)])
 (def legendary [legendary* "25px"])
 
+(defn legendary-white* [size]
+  [:img (image-props "general/legendary-white" size)])
+(def legendary-white [legendary-white* "25px"])
+
 (defn resource* [size]
   [:img (image-props "general/resource-bg" size)])
 (def resource  [resource* "20px"])
@@ -53,6 +59,9 @@
 (defn influence* [size]
   [:img (image-props "general/influence-bg" size)])
 (def influence [influence* "20px"])
+
+(defn res-inf [height width]
+  [:img (image-props "general/res-inf" height width)])
 
 (defn frontier* [size]
   [:img (image-props "general/frontier" size)])

@@ -8,6 +8,7 @@
             [conclave.view.heroicons :as hicons]
             [conclave.view.icons :as icons]
             [conclave.view.common :as common]
+            [goog.string :as gstr]
             [re-frame.core :as rf]))
 
 
@@ -54,7 +55,9 @@
                    :title (if wormhole?
                             "Always include all wormhole tiles"
                             "Randomly include wormhole tiles")}
-     icons/wormhole-alpha]))
+
+     [:span (gstr/unescapeEntities "&alpha;")]
+     [:span {:class "-ml-1"}(gstr/unescapeEntities "&beta;")]]))
 
 (defn legendary []
   (let [legendary? @(rf/subscribe [subs/generation-option :include-legendaries])]
@@ -62,7 +65,7 @@
                    :title (if legendary?
                             "Always include all legendary tiles"
                             "Randomly include legendary tiles")}
-     icons/legendary]))
+     icons/legendary-white]))
 
 (defn map-balance []
   (let [map-balance @(rf/subscribe [subs/generation-option :map-balance])
@@ -72,7 +75,7 @@
      (case map-balance
        :extreme-resource [:<> icons/resource "+"]
        :favour-resource icons/resource
-       :balanced hicons/scale-solid
+       :balanced [icons/res-inf "20px" "24px"]
        :favour-influence icons/influence
        :extreme-influence [:<> icons/resource "+"])]))
 
@@ -90,7 +93,7 @@
                    :title (if equidistant-legendaries?
                             "Legendaries are always in equidistant tiles"
                             "Legendaries may be in player slices")}
-     icons/legendary]))
+     icons/legendary-white]))
 
 (defn equidistant-balance []
   (let [equidistant-balance @(rf/subscribe [subs/generation-option :equidistant-balance])
@@ -100,7 +103,7 @@
      (case equidistant-balance
        :extreme-resource [:<> icons/resource "+"]
        :favour-resource icons/resource
-       :balanced hicons/scale-solid
+       :balanced [icons/res-inf "20px" "24px"]
        :favour-influence icons/influence
        :extreme-influence [:<> icons/resource "+"])]))
 
@@ -110,15 +113,15 @@
     [:div {:title (if open?
                     "Collapse map generation options"
                     "Expand map generation options")
-           :class ["flex" "hover:border" "hover:border-gray-300" "rounded-lg" "p-1"]
-           :on-click #(signal/>toggle! open-signal)}
+           :class ["flex" "hover:border" "hover:border-gray-300" "rounded-lg" "p-1"]}
      [:span {:class ["transition-transform" "duration-500" "delay-200" (when open? "rotate-180")]}
       hicons/chevron-double-right]]))
 
 (defn component []
   [:div {:class ["absolute" "-right-12" "top-1" "h-1/2" "w-12"
                  "rounded-r-xl" "border-blue-800" "border-y-2" "border-r-2"
-                 "bg-blue-900"]}
+                 "bg-blue-900" "hover:bg-gradient-to-tr" "hover:from-blue-900" "hover:to-blue-800" "cursor-pointer"]
+         :on-click #(signal/>toggle! open-signal)}
    [common/v-box {:class ["h-full" "m-1"]}
     [section
      [pok]
