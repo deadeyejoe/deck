@@ -57,9 +57,13 @@
                 (medley/find-first balance-predicate)))))
 
 (def steps
-  [{:exec init-tileset}
-   {:when [:include-wormholes]
+  [{:name ::init-tileset
+    :exec init-tileset}
+   {:name ::add-wormholes
+    :when [:include-wormholes]
     :exec #(update % :tileset add-wormholes)}
-   {:when #{:pok :include-legendaries}
+   {:name ::add-legendaries
+    :when #{:pok :include-legendaries}
     :exec #(update % :tileset add-legendaries)}
-   {:exec fill-remaining}])
+   {:name ::fill-remaining
+    :exec fill-remaining}])

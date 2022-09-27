@@ -2,8 +2,7 @@
   (:require [conclave.tiles.set :as tile-set]
             [conclave.utils.score :as stats]
             [clojure.spec.alpha :as s]
-            [medley.core :as medley]
-            [conclave.player :as player]))
+            [medley.core :as medley]))
 
 (s/def ::score-type #{:balance :constraint :variance})
 (s/def ::status #{:free :locked :minimized})

@@ -51,14 +51,19 @@
              (recur rest-swaps (optimize-step current next-swap))))))
 
 (def steps
-  [{:exec generate-map}
-   {:exec init-arrangement-context}
-   {:when #{:debug}
+  [{:name ::generate-map
+    :exec generate-map}
+   {:name ::prepare-arrangement
+    :exec init-arrangement-context}
+   {:name ::log-constraint-score-before
+    :when #{:debug}
     :exec (fn [c]
             (tap> [:constraint-score-before (-> c :galaxy-map constraint/compute-score)])
             c)}
-   {:exec optimize}
-   {:when #{:debug}
+   {:name ::optimize
+    :exec optimize}
+   {:name ::log-constraint-score-after
+    :when #{:debug}
     :exec (fn [c]
             (tap> [:constraint-score-after (-> c :galaxy-map constraint/compute-score)])
             c)}])

@@ -105,7 +105,8 @@
              (recur rest-swaps (optimize-step current-context next-swap))))))
 
 (defn debug-summary [label]
-  {:when #{:debug}
+  {:name label
+   :when #{:debug}
    :exec (fn [{slice-context :slices
                :as context}]
            (tap> [label (->> (compute-scores {:constraint :free
@@ -117,11 +118,15 @@
 (def locked-constraint {:constraint :locked :variance :free :balance :free})
 
 (def steps
-  [{:exec init-slice-context}
+  [{:name ::init-slice-context
+    :exec init-slice-context}
    (debug-summary ::before-optimization)
-   {:exec (fn [context] (optimize context free-constraint))}
+   {:name ::first-pass
+    :exec (fn [context] (optimize context free-constraint))}
    (debug-summary ::after-pass-1)
-   {:exec (fn [context] (optimize context locked-constraint))}
+   {:name ::second-pass
+    :exec (fn [context] (optimize context locked-constraint))}
    (debug-summary ::after-pass-2)
-   {:exec (fn [context] (optimize context locked-constraint))}
+   {:name ::third-pass
+    :exec (fn [context] (optimize context locked-constraint))}
    (debug-summary ::after-pass-3)])
