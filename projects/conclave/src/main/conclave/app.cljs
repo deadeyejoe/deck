@@ -5,6 +5,7 @@
             [conclave.subs :as subs]
             [conclave.view.generation.main :as generation]
             [conclave.view.generation.summary :as generation-summary]
+            [conclave.view.generation.signals :as generation-signal]
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]
             [conclave.view.tutorial.main :as tutorial]
@@ -34,10 +35,16 @@
    [generation/button]])
 
 (defn generation-sidebar []
-  (let [open? (signal/<set? generation-summary/open-signal)]
+  (let [open? (signal/<set? generation-signal/open)
+        help? (signal/<set? generation-signal/help)
+        width (cond
+                (and open? help?) "w-1/3"
+                open? "w-1/6"
+                :else "w-0")]
     [:div {:class ["absolute" "z-menu" "flex" "flex-col" "justify-center" "items-center"
-                   "h-full" (if open? "w-1/6" "w-0") "left-0" "transition-[width]"]}
-     [generation/component]]))
+                   "h-full" width "left-0" "transition-[width]" "duration-500"]}
+     [generation/component]
+     [generation-summary/component]]))
 
 (defn ui []
   [:div {:class ["h-screen" "w-screen" "flex" "flex-col" "lg:flex-row" "justify-center" "items-center" "bg-gray-900" "text-gray-200"

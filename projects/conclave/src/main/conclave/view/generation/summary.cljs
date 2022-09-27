@@ -1,10 +1,9 @@
 (ns conclave.view.generation.summary
   (:require [conclave.components.signal :as signal]
             [conclave.generate.options :as options]
-            [conclave.handlers :as handlers]
-            [conclave.layout.directory :as directory]
             [conclave.subs :as subs]
             [conclave.view.generation.subs :as generate-subs]
+            [conclave.view.generation.signals :as signals]
             [conclave.view.heroicons :as hicons]
             [conclave.view.icons :as icons]
             [conclave.view.common :as common]
@@ -57,7 +56,7 @@
                             "Randomly include wormhole tiles")}
 
      [:span (gstr/unescapeEntities "&alpha;")]
-     [:span {:class "-ml-1"}(gstr/unescapeEntities "&beta;")]]))
+     [:span {:class "-ml-1"} (gstr/unescapeEntities "&beta;")]]))
 
 (defn legendary []
   (let [legendary? @(rf/subscribe [subs/generation-option :include-legendaries])]
@@ -107,9 +106,12 @@
        :favour-influence icons/influence
        :extreme-influence [:<> icons/resource "+"])]))
 
-(def open-signal ::open)
+(defn toggle-open-state []
+  (signal/>toggle! signals/open)
+  (signal/>unset! signals/help))
+
 (defn pane-control []
-  (let [open? (signal/<set? open-signal)]
+  (let [open? (signal/<set? signals/open)]
     [:div {:title (if open?
                     "Collapse map generation options"
                     "Expand map generation options")
@@ -121,7 +123,7 @@
   [:div {:class ["absolute" "-right-12" "top-1" "h-1/2" "w-12"
                  "rounded-r-xl" "border-blue-800" "border-y-2" "border-r-2"
                  "bg-blue-900" "hover:bg-gradient-to-tr" "hover:from-blue-900" "hover:to-blue-800" "cursor-pointer"]
-         :on-click #(signal/>toggle! open-signal)}
+         :on-click toggle-open-state}
    [common/v-box {:class ["h-full" "m-1"]}
     [section
      [pok]
