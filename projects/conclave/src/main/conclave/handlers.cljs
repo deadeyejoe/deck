@@ -120,7 +120,6 @@
  generate-map
  (fn [{:keys [worker-mode] :as db} [_en mode-override]]
    (let [mode (or mode-override worker-mode)]
-     (tap> ::generae!)
      (cond
        (= :sync mode)      (sync-generate db)
        (db/processing? db) db

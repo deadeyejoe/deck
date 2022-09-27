@@ -76,7 +76,7 @@
        :favour-resource icons/resource
        :balanced [icons/res-inf "20px" "24px"]
        :favour-influence icons/influence
-       :extreme-influence [:<> icons/resource "+"])]))
+       :extreme-influence [:<> icons/influence "+"])]))
 
 (defn equidistant-planets []
   (let [equidistant-planets? @(rf/subscribe [subs/generation-option :planets-in-equidistants])]
@@ -100,11 +100,9 @@
     [summary-icon {:class ["flex" "font-bold"]
                    :title (str "Equidistant tiles tend to:" balance-label)}
      (case equidistant-balance
-       :extreme-resource [:<> icons/resource "+"]
        :favour-resource icons/resource
        :balanced [icons/res-inf "20px" "24px"]
-       :favour-influence icons/influence
-       :extreme-influence [:<> icons/resource "+"])]))
+       :favour-influence icons/influence)]))
 
 (defn toggle-open-state []
   (signal/>toggle! signals/open)

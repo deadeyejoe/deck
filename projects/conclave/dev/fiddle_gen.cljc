@@ -13,24 +13,35 @@
             [conclave.player :as player]
             [medley.core :as medley]))
 
-(let [layout (directory/code->layout "8p")
+(let [layout (directory/code->layout "6p")
       options {:pok true
                :debug true
-:seed "ed22b694-e199-4d5d-8a0d-d99589cefa16"
-               :include-wormholes true
-               :include-legendaries true
-            ;;    :map-balance :extreme-resource
+              ;;  :include-wormholes true
+              ;;  :include-legendaries true
+               :map-balance :extreme-resource
             ;;    :planets-in-equidistants true
                :legendaries-in-equidistants true
             ;;    :equidistant-balance :favour-resource
                :max-swaps 2000}
       context (core/init-context layout options)
-      optimized (executor/execute context (concat tileset/steps
-                                                  optimize/steps
-                                                  arrangement/steps))]
-  (rf/dispatch [handlers/map-generated {:map (:galaxy-map optimized) :layout-code (:code layout)}])
+      steps (take 3 tileset/steps)
+      ;; steps (concat tileset/steps optimize/steps arrangement/steps)
+      optimized (executor/execute context steps)]
+  #_(rf/dispatch [handlers/map-generated {:map (:galaxy-map optimized) :layout-code (:code layout)}])
   (reset! core/last-context optimized)
   (keys optimized))
+
+(let [{{:keys [available red blue]} :tileset
+       {:keys [type-counts name]} :layout} @core/last-context]
+  [name
+   type-counts
+   (merge-with - type-counts {:red (count red) :blue (count blue)})
+   (->> (map :type available)
+        (frequencies))
+   (tile-set/bounds-for-quantity type-counts :optimal-resources available)
+   (tile-set/bounds-for-quantity type-counts :optimal-influence available)])
+
+(rf/dispatch [handlers/generate-map])
 
 (let [{:keys [balance-goals slice-array tile-array swaps] :as slice-context} (:slices @core/last-context)
       tile-index-lookup (->> tile-array

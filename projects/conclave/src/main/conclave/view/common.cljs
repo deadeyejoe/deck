@@ -110,19 +110,22 @@
 
 (defn o-box [props & content]
   (into [:div (merge-with into
-                          {:class ["flex" "h-full" "w-full" "justify-center" "items-center"]}
+                          {:class ["flex" "h-full" "w-full" "justify-center" "items-center"]
+                           :key (random-uuid)}
                           props)]
         content))
 
 (defn h-box [props & content]
   (into [:div (merge-with into
-                          {:class ["flex" "w-full" "items-center"]}
+                          {:class ["flex" "w-full" "items-center"]
+                           :key (random-uuid)}
                           props)]
         content))
 
 (defn v-box [props & content]
   (into [:div (merge-with into
-                          {:class ["flex" "flex-col" "h-full" "items-center"]}
+                          {:class ["flex" "flex-col" "h-full" "items-center"]
+                           :key (random-uuid)}
                           props)]
         content))
 
@@ -145,7 +148,7 @@
 
 (defn switch [{:keys [on-label off-label sub disabled] :as props}]
   (let [on? @(rf/subscribe sub)]
-    [o-box {:class ["text-gray-300"]}
+    [o-box {:class ["text-gray-300" "truncate"]}
      (when off-label
        [:span {:class ["mr-3" "transition-opacity" (when on? "opacity-30")]}
         off-label])

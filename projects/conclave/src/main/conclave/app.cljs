@@ -42,7 +42,7 @@
                 open? "w-1/6"
                 :else "w-0")]
     [:div {:class ["absolute" "z-menu" "flex" "flex-col" "justify-center" "items-center"
-                   "h-full" width "left-0" "transition-[width]" "duration-500"]}
+                   "h-full" width "left-0" "transition-[width]" "duration-200"]}
      [generation/component]
      [generation-summary/component]]))
 
