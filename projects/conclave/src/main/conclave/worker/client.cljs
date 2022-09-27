@@ -20,7 +20,8 @@
     (try
       (core/post-message worker request)
 
-      (catch js/Object e
+      (catch js/Error e
+        (.log js/console "Encountered an error" e)
         (put! result-chan {:state :error, :error e})))
 
     result-chan))
@@ -29,18 +30,22 @@
              {:keys [on-result on-progress on-error]
               :or   {on-progress (constantly nil)
                      on-error (constantly nil)}}]
-  (let [worker (core/create @script-location)
-        result-chan (do-with-worker! worker arguments)]
-    (go-loop [{:keys [state] :as result} (<! result-chan)]
-      (case state
-        :success    (do  (tap> result)
-                         (on-result result)
-                         (.terminate worker)
-                         result)
-        :processing (do
-                      (tap> result)
-                      (on-progress result)
-                      (recur (<! result-chan)))
-        :error      (do (tap> result)
-                        (on-error result)
-                        result)))))
+  (try
+    (let [worker (core/create @script-location)
+          result-chan (do-with-worker! worker arguments)]
+      (go-loop [{:keys [state] :as result} (<! result-chan)]
+        (case state
+          :success    (do  (tap> result)
+                           (on-result result)
+                           (.terminate worker)
+                           result)
+          :processing (do
+                        (tap> result)
+                        (on-progress result)
+                        (recur (<! result-chan)))
+          :error      (do (tap> result)
+                          (on-error result)
+                          result))))
+    (catch js/Error e
+      (.log js/console "Error spawning a worker!" e)
+      (on-error {:state :error :error e}))))

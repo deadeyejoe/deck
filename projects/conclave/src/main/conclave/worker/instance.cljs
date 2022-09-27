@@ -17,7 +17,7 @@
   (try
     (core/post-message data)
 
-    (catch js/Object e
+    (catch js/Error e
       (when-let [c js/console] (.error c e))
       (core/post-message {:state :error, :message (.toString e)}))))
 
@@ -29,7 +29,7 @@
         (go (respond! (assoc (<! result) :state :success)))
         (respond! (assoc result :state :success))))
 
-    (catch js/Object e
+    (catch js/Error e
       (when-let [c js/console] (.error c e))
       (core/post-message {:state :error, :message (.toString e)}))))
 
