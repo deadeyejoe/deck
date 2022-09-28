@@ -1,8 +1,9 @@
 (ns conclave.generate.tileset
-  (:require [conclave.tiles.core :as tiles]
-            [conclave.generate.balance :as balance]
-            [deck.random.interface :as random]
-            [medley.core :as medley]))
+  (:require [conclave.generate.balance :as balance]
+            [conclave.generate.loop :as loop]
+            [conclave.tiles.core :as tiles]
+            [conclave.tiles.set :as tile-set]
+            [deck.random.interface :as random]))
 
 (defn available-tiles [{:keys [fixed-tiles] :as layout} default-set]
   (remove (comp (->> fixed-tiles
@@ -12,26 +13,26 @@
                 :key)
           default-set))
 
-(defn init-tileset [{{:keys [pok]} :options
+(defn init-tiles [{{:keys [pok]} :options
                      :keys [layout] :as context}]
-  (assoc context :tileset {:available (available-tiles layout
+  (assoc context :tiles {:available (available-tiles layout
                                                        (if pok
                                                          tiles/default-set
                                                          tiles/default-base-game))
                            :red []
                            :blue []}))
 
-(defn add-wormholes [{:keys [available] :as tileset}]
+(defn add-wormholes [{:keys [available] :as tiles}]
   (let [{wormholes true others false} (group-by tiles/wormhole? available)
         {:keys [red blue]} (group-by :type wormholes)]
-    (-> tileset
+    (-> tiles
         (assoc :available others)
         (update :red into red)
         (update :blue into blue))))
 
-(defn add-legendaries [{:keys [available] :as tileset}]
+(defn add-legendaries [{:keys [available] :as tiles}]
   (let [{legendaries true others false} (group-by tiles/legendary? available)]
-    (-> tileset
+    (-> tiles
         (assoc :available others)
         (update :blue into legendaries))))
 
@@ -43,22 +44,57 @@
                             seed
                             available)))
 
-(defn fill-remaining [{{:keys [available red blue]} :tileset
+(defn ^:lazy sample-tilesets [seed
+                              {target-red :red target-blue :blue :as _type-counts}
+                              {:keys [available red blue] :as _tiles}]
+  (let [{available-red :red available-blue :blue} (group-by :type available)]
+    (map concat
+         (sample-remaining seed red available-red target-red)
+         (sample-remaining seed blue available-blue target-blue))))
+
+(defn ->sample-context [map-balance bounds-for-available]
+  {:map-balance map-balance
+   :bounds-for-available bounds-for-available
+   :total 0})
+
+(defn ->next-context [{:keys [map-balance bounds-for-available] :as sample-context} next-tileset]
+  (let [actual-res-inf (tile-set/sum-optimal-res-inf next-tileset)]
+    (-> sample-context
+        (assoc
+         :quantities actual-res-inf
+         :score (balance/calculate-score map-balance bounds-for-available actual-res-inf)
+         :tileset next-tileset)
+        (update :total inc))))
+
+(defn compare-score [{current-score :score :as current-context}
+                     {next-score :score :as next-context}]
+  (if current-score
+    (if (pos? (compare current-score next-score)) ;;current-context score is greater than next-context score
+      current-context
+      next-context)
+    next-context))
+
+(defn halt? [{:keys [map-balance score] :as _sample-context}]
+  (balance/halt-sampling? map-balance score))
+
+(defn fill-remaining [{{:keys [available] :as tiles} :tiles
                        {:keys [type-counts]} :layout
-                       {:keys [map-balance seed]} :options
+                       {:keys [map-balance seed max-samples debug] :or {max-samples 200}} :options
                        :as context}]
-  (let [{available-red :red available-blue :blue} (group-by :type available)
-        {target-red :red target-blue :blue} type-counts
-        balance-predicate (balance/tile-set-pred map-balance type-counts available)]
-    (assoc context :tileset
-           (->> (map concat
-                     (sample-remaining seed red available-red target-red)
-                     (sample-remaining seed blue available-blue target-blue))
-                (medley/find-first balance-predicate)))))
+  (let [bounds-for-available (tile-set/bounds type-counts available [:optimal-resources :optimal-influence])
+        samples (->> (sample-tilesets seed type-counts tiles)
+                     (take max-samples))
+        {:keys [tileset quantities ::loop/total] :as loop-result} (loop/optimize {:initial (->sample-context map-balance bounds-for-available)
+                                                          :combine ->next-context
+                                                          :choose compare-score
+                                                          :halt? halt?}
+                                                         samples)]
+    (when debug (tap> [::fill-remaining quantities total loop-result]))
+    (assoc context :tileset tileset)))
 
 (def steps
-  [{:name ::init-tileset
-    :exec init-tileset}
+  [{:name ::init-tiles
+    :exec init-tiles}
    {:name ::add-wormholes
     :when [:include-wormholes]
     :exec #(update % :tileset add-wormholes)}

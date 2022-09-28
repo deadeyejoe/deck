@@ -3,7 +3,7 @@
             [conclave.generate.core :as core]
             [conclave.generate.executor :as executor]
             [conclave.generate.optimize :as optimize]
-[conclave.generate.score :as score]
+            [conclave.generate.score :as score]
             [conclave.generate.slice :as slice]
             [conclave.generate.tileset :as tileset]
             [conclave.handlers :as handlers]
@@ -11,35 +11,35 @@
             [conclave.tiles.set :as tile-set]
             [re-frame.core :as rf]
             [conclave.player :as player]
-            [medley.core :as medley]))
+            [medley.core :as medley]
+            [conclave.generate.balance :as balance]
+            [deck.random.interface :as random]))
 
-(let [layout (directory/code->layout "6p")
+(let [sim (fn [[lower upper] quantity]
+           (min (- upper quantity)
+                (- quantity lower)))]
+  (->> (range 30 45)
+       (map (juxt identity (partial sim [35.5 41.5])))))
+
+(compare [[19.5 -13.5] 0]
+         [[18.5 -12.5] 0])
+
+(let [layout (directory/code->layout "3p")
       options {:pok true
                :debug true
-              ;;  :include-wormholes true
-              ;;  :include-legendaries true
-               :map-balance :extreme-resource
+               :include-wormholes true
+:include-legendaries true
+:map-balance :balanced
             ;;    :planets-in-equidistants true
-               :legendaries-in-equidistants true
+              ;;  :legendaries-in-equidistants true
             ;;    :equidistant-balance :favour-resource
                :max-swaps 2000}
       context (core/init-context layout options)
-      steps (take 3 tileset/steps)
-      ;; steps (concat tileset/steps optimize/steps arrangement/steps)
+      steps tileset/steps
       optimized (executor/execute context steps)]
   #_(rf/dispatch [handlers/map-generated {:map (:galaxy-map optimized) :layout-code (:code layout)}])
   (reset! core/last-context optimized)
   (keys optimized))
-
-(let [{{:keys [available red blue]} :tileset
-       {:keys [type-counts name]} :layout} @core/last-context]
-  [name
-   type-counts
-   (merge-with - type-counts {:red (count red) :blue (count blue)})
-   (->> (map :type available)
-        (frequencies))
-   (tile-set/bounds-for-quantity type-counts :optimal-resources available)
-   (tile-set/bounds-for-quantity type-counts :optimal-influence available)])
 
 (rf/dispatch [handlers/generate-map])
 

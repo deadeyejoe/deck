@@ -41,7 +41,7 @@
                                                                  quantity-kw
                                                                  base-tileset)))
           {}
-          tile-set/quantity-kws))
+          tile-set/default-quantity-kws))
 
 (defn layout-summary [{{:keys [red blue] :as type-counts} :type-counts
                        :as layout}
@@ -55,7 +55,7 @@
             (assoc-in summary [quantity-kw :value]
                       (tile-set/sum-quantity quantity-kw included-tiles)))
           layout-summary
-          tile-set/quantity-kws))
+          tile-set/default-quantity-kws))
 
 (defn map-summary [layout {:keys [tiles] :as _galaxy-map}]
   (let [included-tiles (vals (apply dissoc tiles (layout/static-coordinates layout)))

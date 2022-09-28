@@ -1,39 +1,60 @@
-(ns conclave.generate.balance
-  (:require [conclave.tiles.set :as tile-set]))
+(ns conclave.generate.balance)
 
-(defn within? [epsilon x y]
-  (<= (Math/abs (- x y))
-      epsilon))
+(defn range-score
+  "Returns a positive value if the value is inside the range, and a negative value if outside of it."
+  [[lower upper] value]
+  (min (- upper value)
+       (- value lower)))
 
-(defn balanced-tile-set-pred [type-counts available-tiles]
-  (let [{res-epsilon :epsilon} (tile-set/bounds-for-quantity type-counts :optimal-resources available-tiles)
-        {inf-epsilon :epsilon} (tile-set/bounds-for-quantity type-counts :optimal-influence available-tiles)
-        effective-epsilon (max res-epsilon inf-epsilon)]
-    (fn [{:keys [optimal-resources optimal-influence]}]
-      (within? effective-epsilon optimal-resources optimal-influence))))
+(defn extreme-resource-score [bounds-for-available {:keys [optimal-resources] :as _actual-quantities}]
+  (let [[lower-resource _upper-resource :as _extreme-range] (get-in bounds-for-available [:optimal-resources :extreme-range])]
+    (- optimal-resources lower-resource)))
 
-(defn favour-tile-set-pred [quantity-kw type-counts available-tiles]
-  (let [{:keys [midpoint epsilon increment]} (tile-set/bounds-for-quantity type-counts quantity-kw available-tiles)
-        lower (+ midpoint epsilon)
-        upper (+ lower increment)]
-    (fn [tile-set]
-      (< lower
-         (tile-set/sum-quantity quantity-kw tile-set)
-         upper))))
+(defn favour-resource-score [bounds-for-available {:keys [optimal-resources optimal-influence] :as _actual-quantities}]
+  (let [favour-range (get-in bounds-for-available [:optimal-resources :favour-range])
+        inf-midpoint (get-in bounds-for-available [:optimal-influence :midpoint])]
+    [(range-score favour-range optimal-resources)
+     (- inf-midpoint optimal-influence)]))
 
-(defn extreme-tile-set-pred [quantity-kw type-counts available-tiles]
-  (let [{:keys [midpoint epsilon increment]} (tile-set/bounds-for-quantity type-counts quantity-kw available-tiles)
-        lower (+ midpoint epsilon increment)]
-    (fn [tile-set]
-      (<= lower
-          (tile-set/sum-quantity quantity-kw tile-set)))))
+(defn balanced-score [bounds-for-available {:keys [optimal-resources optimal-influence] :as _actual-quantities}]
+  (let [res-balance-range (get-in bounds-for-available [:optimal-resources :balance-range])
+        inf-balance-range (get-in bounds-for-available [:optimal-influence :balance-range])]
+    [(range-score res-balance-range optimal-resources)
+     (range-score inf-balance-range optimal-influence)]))
 
-(defn tile-set-pred [option type-counts available-tiles]
+(defn favour-influence-score [bounds-for-available {:keys [optimal-resources optimal-influence] :as _actual-quantities}]
+  (let [favour-range (get-in bounds-for-available [:optimal-influence :favour-range])
+        res-midpoint (get-in bounds-for-available [:optimal-resources :midpoint])]
+    [(range-score favour-range optimal-influence)
+     (- res-midpoint optimal-resources)]))
+
+(defn extreme-influence-score [bounds-for-available {:keys [optimal-influence] :as _actual-quantities}]
+  (let [[lower-influence _upper-influence :as _extreme-range] (get-in bounds-for-available [:optimal-influence :extreme-range])]
+    (- optimal-influence lower-influence)))
+
+(defn calculate-score [option bounds-for-available actual-quantities]
   ((case option
-     :extreme-resource (partial extreme-tile-set-pred :optimal-resources)
-     :favour-resource (partial favour-tile-set-pred :optimal-resources)
-     :balanced balanced-tile-set-pred
-     :favour-influence (partial favour-tile-set-pred :optimal-influence)
-     :extreme-influence (partial extreme-tile-set-pred :optimal-influence)
-     balanced-tile-set-pred)
-   type-counts available-tiles))
+     :extreme-resource extreme-resource-score
+     :favour-resource favour-resource-score
+     :balanced balanced-score
+     :favour-influence favour-influence-score
+     :extreme-influence extreme-influence-score
+     balanced-score)
+   bounds-for-available actual-quantities))
+
+(defn balanced-score-halt? [[res-range-score inf-range-score]]
+  (and (not (neg? res-range-score))
+       (not (neg? inf-range-score))))
+(defn favour-score-halt? [[range-score unfavoured-diff]]
+  (and (not (neg? range-score))
+       (not (neg? unfavoured-diff))))
+(def extreme-score-halt? (complement neg?))
+
+(defn halt-sampling? [option score]
+  ((case option
+     :extreme-resource extreme-score-halt?
+     :favour-resource favour-score-halt?
+     :balanced balanced-score-halt?
+     :favour-influence favour-score-halt?
+     :extreme-influence extreme-score-halt?
+     balanced-score-halt?) score))

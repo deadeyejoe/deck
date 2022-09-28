@@ -78,7 +78,9 @@
 
 (def shortcuts {:event-keys [[[handlers/generate-map] ;;fire this
                               [{:keyCode 13 ;;when ctrl+enter is pressed
-                                :ctrlKey true}]]]})
+                                :ctrlKey true}]]]
+                ;; will always record if enter is pressed
+                :always-listen-keys [{:keyCode 13}]})
 
 (defn init-dev []
   (worker-client/set-script-location "assets/app/js/worker.js")

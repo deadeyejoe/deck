@@ -9,6 +9,7 @@
             [conclave.generate.slice]
             [conclave.generate.tileset :as tileset]
             [conclave.map.core :as map]
+            [deck.random.interface :as random]
             [clojure.spec.alpha :as s]
             [superstring.core :as str]))
 
@@ -38,7 +39,7 @@
                    options
                    {:seed (if (str/some? seed)
                             seed
-                            (str (random-uuid)))})})
+                            (random/random-seed))})})
 
 (defn generate [layout options]
   (let [generated (executor/execute (init-context layout options)
