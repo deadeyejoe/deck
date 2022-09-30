@@ -82,9 +82,9 @@
     :exec init-tiles}
    {:name ::add-wormholes
     :when [:include-wormholes]
-    :exec #(update % :tileset add-wormholes)}
+    :exec #(update % :tiles add-wormholes)}
    {:name ::add-legendaries
     :when #{:pok :include-legendaries}
-    :exec #(update % :tileset add-legendaries)}
+    :exec #(update % :tiles add-legendaries)}
    {:name ::fill-remaining
     :exec fill-remaining}])
