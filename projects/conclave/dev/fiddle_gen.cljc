@@ -15,31 +15,24 @@
             [conclave.generate.balance :as balance]
             [deck.random.interface :as random]))
 
-(let [sim (fn [[lower upper] quantity]
-           (min (- upper quantity)
-                (- quantity lower)))]
-  (->> (range 30 45)
-       (map (juxt identity (partial sim [35.5 41.5])))))
-
-(compare [[19.5 -13.5] 0]
-         [[18.5 -12.5] 0])
-
-(let [layout (directory/code->layout "3p")
+(let [layout (directory/code->layout "6p")
       options {:pok true
                :debug true
                :include-wormholes true
-:include-legendaries true
-:map-balance :balanced
+               :include-legendaries true
+               :map-balance :extreme-influence
             ;;    :planets-in-equidistants true
               ;;  :legendaries-in-equidistants true
-            ;;    :equidistant-balance :favour-resource
+               :equidistant-balance :favour-resource
                :max-swaps 2000}
       context (core/init-context layout options)
-      steps tileset/steps
+      steps (concat tileset/steps
+                    optimize/steps
+                    arrangement/steps)
       optimized (executor/execute context steps)]
-  #_(rf/dispatch [handlers/map-generated {:map (:galaxy-map optimized) :layout-code (:code layout)}])
+  (rf/dispatch [handlers/map-generated {:map (:galaxy-map optimized) :layout-code (:code layout)}])
   (reset! core/last-context optimized)
-  (keys optimized))
+  (tile-set/collect-totals (get-in optimized [:slices :tile-array])))
 
 (rf/dispatch [handlers/generate-map])
 

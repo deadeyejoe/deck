@@ -20,8 +20,6 @@
     (exec context)
     context))
 
-
-
 (defn executions [context steps]
   (reductions step
               context

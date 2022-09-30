@@ -1,10 +1,13 @@
 (ns conclave.generate.optimize
-  (:require [conclave.generate.score :as score]
+  (:require [clojure.math.combinatorics :as combi]
+            [conclave.generate.balance :as balance]
+            [conclave.generate.score :as score]
             [conclave.generate.slice :as slice]
             [conclave.tiles.core :as tiles]
             [conclave.utils.vector :as vector-util]
             [deck.random.interface :as random]
-            [clojure.math.combinatorics :as combi]))
+            [conclave.tiles.set :as tile-set]
+            [conclave.generate.loop :as loop]))
 
 (defn move-to-front
   "Be careful when chaining this: Is the second pred a subset of the first?"
@@ -45,14 +48,53 @@
         tile-array (init-tile-array slice-array options tileset)
         owner-mask (owner-mask slice-array)
         constraint-mask (slice/constraint-mask slice-array options)
-        balance-goals (score/compute-balance-goal options slice-array tileset)]
-    (assoc context :slices (merge {:slice-array slice-array
-                                   :tile-array tile-array
-                                   :owner-mask owner-mask
-                                   :constraint-mask constraint-mask
-                                   :swaps (swaps owner-mask)
-                                   :balance-goals balance-goals}
-                                  balance-goals))))
+        tileset-summary (tile-set/collect-totals tileset)
+        balance-goals (balance/slice-balance-goals options slice-array tileset-summary)]
+    (assoc context :slices {:slice-array slice-array
+                            :tile-array tile-array
+                            :owner-mask owner-mask
+                            :constraint-mask constraint-mask
+                            :swaps (swaps owner-mask)
+                            :tileset-summary tileset-summary
+                            :balance-goals balance-goals})))
+
+(defn equidistant-existing-and-available [{:keys [legendaries-in-equidistants planets-in-equidistants] :as _options} tileset]
+  (let [available (if planets-in-equidistants
+                    (filter tiles/has-planets? tileset)
+                    tileset)]
+    (if legendaries-in-equidistants
+      {:existing (filter tiles/legendary? available)
+       :available (remove tiles/legendary? available)}
+      {:existing []
+       :available available})))
+
+(defn pick-equidistant-tiles [{{:keys [slice-array balance-goals]} :slices
+                               {:keys [seed max-samples debug] :as options} :options
+                               :keys [tileset]
+                               :as _context}]
+  (let [{:keys [size] :as _equidistant-slice} (first slice-array)
+        {:keys [existing available]} (equidistant-existing-and-available options tileset)
+        {:keys [tiles] :as loop-result}
+        (loop/optimize {:initial {:goal (:equidistant-goals balance-goals)}
+                        :combine (fn [{:keys [goal] :as loop-ctx} sampled]
+                                   (let [sample-res-inf (tile-set/sum-optimal-res-inf sampled)
+                                         score (balance/threshold-score goal sample-res-inf)]
+                                     (assoc loop-ctx
+                                            :score score
+                                            :tiles sampled)))
+                        :choose loop/pick-higher-score
+                        :halt? (comp balance/threshold-passed? :score)}
+                       (take max-samples (tile-set/sample-remaining seed existing available size)))]
+    (when debug (tap> [::pick-equidistants loop-result]))
+    tiles))
+
+(defn prepare-tile-array [{{:keys [seed]} :options
+                           :keys [tileset]
+                           :as context}]
+  (let [equidistant-tiles (pick-equidistant-tiles context)
+        player-tiles (random/seed-shuffle seed (remove (set equidistant-tiles) tileset))]
+    (assoc-in context [:slices :tile-array]
+              (into (vec equidistant-tiles) player-tiles))))
 
 (defn compute-scores [score-schema {:keys [balance-goals] :as slice-context}]
   (let [slices-with-summary (slice/add-summary-to-slices slice-context)]
@@ -104,22 +146,23 @@
                  (:slice-context current-context))
              (recur rest-swaps (optimize-step current-context next-swap))))))
 
+(def free-constraint {:equidistant :locked :constraint :free})
+(def locked-constraint {:equidistant :locked :constraint :locked :variance :free :balance :free})
+
 (defn debug-summary [label]
   {:name label
    :when #{:debug}
    :exec (fn [{slice-context :slices
                :as context}]
-           (tap> [label (->> (compute-scores {:constraint :free
-                                              :balance :free
-                                              :variance :free} slice-context))])
+           (tap> [label (->> (compute-scores locked-constraint slice-context))])
            context)})
 
-(def free-constraint {:constraint :free})
-(def locked-constraint {:constraint :locked :variance :free :balance :free})
 
 (def steps
   [{:name ::init-slice-context
     :exec init-slice-context}
+   {:name ::prepare-tile-array
+    :exec prepare-tile-array}
    (debug-summary ::before-optimization)
    {:name ::first-pass
     :exec (fn [context] (optimize context free-constraint))}

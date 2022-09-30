@@ -1,5 +1,13 @@
 (ns conclave.generate.loop)
 
+(defn pick-higher-score [{current-score :score :as current-context}
+                         {next-score :score :as next-context}]
+  (if current-score
+    (if (pos? (compare current-score next-score)) ;;current-context score is greater than next-context score
+      current-context
+      next-context)
+    next-context))
+
 (defn optimize [{:keys [initial combine choose halt?] :as _loop-context} items]
   (reduce (fn [current-context next-item]
             (let [next-context (combine current-context next-item)

@@ -5,6 +5,7 @@
             [conclave.generate.executor :as executor]
             [conclave.generate.optimize :as optimize]
             [conclave.generate.options :as options]
+            [conclave.generate.loop]
             [conclave.generate.score]
             [conclave.generate.slice]
             [conclave.generate.tileset :as tileset]
@@ -35,7 +36,8 @@
 
 (defn init-context [layout {:keys [seed] :as options}]
   {:layout layout
-   :options (merge {:pok true}
+   :options (merge {:pok true
+                    :max-samples 200}
                    options
                    {:seed (if (str/some? seed)
                             seed

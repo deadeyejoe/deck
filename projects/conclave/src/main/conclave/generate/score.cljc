@@ -2,58 +2,12 @@
   (:require [conclave.tiles.set :as tile-set]
             [conclave.utils.score :as stats]
             [clojure.spec.alpha :as s]
-            [medley.core :as medley]))
+            [medley.core :as medley]
+            [conclave.generate.balance :as balance]))
 
 (s/def ::score-type #{:balance :constraint :variance})
 (s/def ::status #{:free :locked :minimized})
 (s/def ::schema (s/map-of ::score-type ::status))
-
-(defn balance-cardinality [size equidistant-balance tileset]
-  (if (= equidistant-balance :balanced)
-    {}
-    (let [quantity-kw (if (= equidistant-balance :favour-influence)
-                        :optimal-influence
-                        :optimal-resources)]
-      (->> tileset
-           (map #(get-in % [:total quantity-kw]))
-           (sort >)
-           (take size)
-           (frequencies)))))
-
-(defn equidistant-goals [{:keys [planets-in-equidistants equidistant-balance] :as _options}
-                         [{:keys [size] :as _equidistant} & _player-slices :as _slice-array]
-                         tileset]
-  {:planets-in-equidistants planets-in-equidistants
-   :equidistant-balance equidistant-balance
-   :balance-cardinality (balance-cardinality size equidistant-balance tileset)})
-
-(defn balance-goals [[_equidistant & player-slices :as slice-array] tileset-summary]
-  (let [total-tiles (apply + (map :size slice-array))
-        player-tile-count (apply + (map :size player-slices))
-        player-count (count player-slices)
-        per-slice (fn [n]
-                    (/ (* n player-tile-count)
-                       total-tiles player-count))
-        res-per-slice (per-slice (:optimal-resources tileset-summary))
-        inf-per-slice (per-slice (:optimal-influence tileset-summary))]
-    {:balance-goal (- res-per-slice inf-per-slice)
-     :resources-per-slice res-per-slice
-     :influence-per-slice inf-per-slice}))
-
-(defn per-player-goals [{:keys [legendaries-in-equidistants] :as _options}
-                        [_equidistant & player-slices :as _slice-array] tileset-summary]
-  (let [player-count (count player-slices)
-        per-player (fn [n] (Math/floor (/ n player-count)))]
-    {:legendaries-per-player (if legendaries-in-equidistants 0 1)
-     :techs-per-player (max 1 (per-player (:tech tileset-summary)))
-     :anomalies-per-player (max 1 (per-player (:anomaly tileset-summary)))
-     :wormholes-per-player (max 1 (per-player (:wormhole tileset-summary)))}))
-
-(defn compute-balance-goal [options slice-array tileset]
-  (let [tileset-summary (tile-set/collect-totals tileset)]
-    (merge (equidistant-goals options slice-array tileset)
-           (balance-goals slice-array tileset-summary)
-           (per-player-goals options slice-array tileset-summary))))
 
 (defn too-many? [quantity-kw max-number {:keys [summary] :as _slice}]
   (max 0
@@ -73,18 +27,13 @@
 (def too-many-techs? (partial too-many? :tech))
 (def too-many-wormholes? (partial too-many? :wormhole))
 
-(defn equidistant-constraint-score [{:keys [planets-in-equidistants]}
-                                    {{:keys [wormholes has-planets]} :summary
-                                     :keys [size] :as _equidistant-slice}]
-  (+  (if (< (count wormholes) 2) 1 0) ;;one of each wormhole
-      (if planets-in-equidistants
-        (- size has-planets) ;; the fewer planet tiles the higher the score
-        0)))
+(defn equidistant-constraint-score [_balance-goals {{:keys [wormholes]} :summary :as _equidistant-slice}]
+  (if (< (count wormholes) 2) 1 0))
 
 (defn constraint-calculation-fn [{:keys [anomalies-per-player
                                          legendaries-per-player
                                          techs-per-player
-                                         wormholes-per-player] :as _goals}]
+                                         wormholes-per-player] :as _player-goals}]
   (juxt duplicate-anomalies?
         duplicate-techs?
         duplicate-wormholes?
@@ -93,19 +42,26 @@
         (partial too-many-techs? techs-per-player)
         (partial too-many-wormholes? wormholes-per-player)))
 
-(defn constraint-score [goals [equidistant & player-slices :as _slices-with-summary]]
-  (let [calculation-fn (constraint-calculation-fn goals)]
+(defn constraint-score [{:keys [player-goals] :as balance-goals} 
+                        [equidistant & player-slices :as _slices-with-summary]]
+  (let [calculation-fn (constraint-calculation-fn player-goals)]
     (apply +
-           (equidistant-constraint-score goals equidistant)
+           (equidistant-constraint-score balance-goals equidistant)
            (map (fn [slice]
                   (->> (calculation-fn slice)
                        (apply +)))
                 player-slices))))
 
-(defn balance-score [{:keys [balance-goal] :as _goals} slices-with-summary]
+(defn equidistant-score [{:keys [equidistant-goals] :as _balance-goals}
+                         [equidistant & _player-slices :as _slices-with-summary]]
+  (if (balance/threshold-passed? (balance/threshold-score equidistant-goals
+                                                          (:summary equidistant)))
+    1 0))
+
+(defn balance-score [balance-goals slices-with-summary]
   (apply + (->> (rest slices-with-summary) ;;first slice is equidistant
                 (map :balance)
-                (map (comp #(Math/abs %) (partial - balance-goal)))
+                (map (comp #(Math/abs %) (partial - (get-in balance-goals [:player-goals :balance]))))
                 (map #(Math/pow % 2)))))
 
 (defn variance-score [_goals slices-with-summary]
@@ -115,6 +71,7 @@
   (case score-type
     :balance balance-score
     :constraint constraint-score
+    :equidistant equidistant-score
     :variance variance-score))
 
 (defn compute-scores [score-schema goals slices-with-summary]
@@ -148,6 +105,7 @@
     (case score-type
       :balance  balance-score-improved?
       :constraint constraint-score-improved?
+      :equidistant (partial score-locked? :equidistant)
       :variance variance-score-improved?)))
 
 (defn improved-score? [score-schema score-before score-after]

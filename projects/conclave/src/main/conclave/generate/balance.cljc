@@ -1,4 +1,5 @@
-(ns conclave.generate.balance)
+(ns conclave.generate.balance
+  (:require [medley.core :as medley]))
 
 (defn range-score
   "Returns a positive value if the value is inside the range, and a negative value if outside of it."
@@ -58,3 +59,71 @@
      :favour-influence favour-score-halt?
      :extreme-influence extreme-score-halt?
      balanced-score-halt?) score))
+
+(defn slice-stats [[equidistant & players :as _slice-array]]
+  (let [player-slice-size (apply max (map :size players))
+        relative-eq-size (/ (:size equidistant) player-slice-size)]
+    {:player-count (count players)
+     :player-slice-size player-slice-size
+     :relative-eq-size relative-eq-size
+     :total-relative-slices (+ (count players) relative-eq-size)}))
+
+(defn res-inf-per-relative-slice [total-relative-slices res-inf-total]
+  (medley/map-vals #(/ % total-relative-slices) res-inf-total))
+
+(def weight-favoured 1.5)
+(def weight-unfavoured (/ 2 3))
+
+(defn res-inf-for-equidistant [{:keys [equidistant-balance] :as _options}
+                               relative-equidistant-size
+                               {:keys [optimal-resources optimal-influence] :as res-inf-per-relative-slice}]
+
+  (medley/map-vals (partial * relative-equidistant-size)
+                   (case equidistant-balance
+                     :favour-resource {:optimal-resources (* optimal-resources weight-favoured)
+                                       :optimal-influence (* optimal-influence weight-unfavoured)}
+                     :favour-influence {:optimal-resources (* optimal-resources weight-unfavoured)
+                                        :optimal-influence (* optimal-influence weight-favoured)}
+
+                     res-inf-per-relative-slice)))
+
+(defn res-inf-per-player [number-of-players tileset-totals equidistant-total]
+  (medley/map-vals #(/ % number-of-players) (merge-with - tileset-totals equidistant-total)))
+
+(defn player-goals [{:keys [legendaries-in-equidistants] :as _options}
+                    player-count
+                    {resource-per-player :optimal-resources
+                     influence-per-player :optimal-influence :as _res-inf-per-player}
+                    tileset-summary]
+  (let [per-player (fn [n] (Math/floor (/ n player-count)))]
+    {:balance (- resource-per-player influence-per-player)
+     :resource-per-player resource-per-player
+     :influence-per-player influence-per-player
+     :legendaries-per-player (if legendaries-in-equidistants 0 1)
+     :techs-per-player (max 2 (per-player (:tech tileset-summary)))
+     :anomalies-per-player (max 1 (per-player (:anomaly tileset-summary)))
+     :wormholes-per-player (max 1 (per-player (:wormhole tileset-summary)))}))
+
+(defn slice-balance-goals [{:keys [equidistant-balance] :as options}
+                           slice-array
+                           tileset-summary]
+  (let [{:keys [player-count
+                relative-eq-size
+                total-relative-slices]
+         :as _slice-stats} (slice-stats slice-array)
+        res-inf-total (select-keys tileset-summary [:optimal-resources :optimal-influence])
+        res-inf-per-relative-slice (res-inf-per-relative-slice total-relative-slices res-inf-total)
+        res-inf-for-equidistant (res-inf-for-equidistant options relative-eq-size res-inf-per-relative-slice)
+        res-inf-per-player (res-inf-per-player player-count res-inf-total res-inf-for-equidistant)
+        player-goals (player-goals options player-count res-inf-per-player tileset-summary)]
+    {:slice-stats slice-stats
+     :equidistant-goals res-inf-for-equidistant
+     :player-goals player-goals}))
+
+(defn threshold-score [target-map candidate-map]
+  (-> (merge-with - (select-keys candidate-map (keys target-map)) target-map)
+      vals
+      vec))
+
+(defn threshold-passed? [threshold-score]
+  (not-any? neg? threshold-score))

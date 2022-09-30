@@ -14,13 +14,13 @@
           default-set))
 
 (defn init-tiles [{{:keys [pok]} :options
-                     :keys [layout] :as context}]
+                   :keys [layout] :as context}]
   (assoc context :tiles {:available (available-tiles layout
-                                                       (if pok
-                                                         tiles/default-set
-                                                         tiles/default-base-game))
-                           :red []
-                           :blue []}))
+                                                     (if pok
+                                                       tiles/default-set
+                                                       tiles/default-base-game))
+                         :red []
+                         :blue []}))
 
 (defn add-wormholes [{:keys [available] :as tiles}]
   (let [{wormholes true others false} (group-by tiles/wormhole? available)
@@ -36,21 +36,13 @@
         (assoc :available others)
         (update :blue into legendaries))))
 
-(defn ^:lazy sample-remaining [seed existing available target-number]
-  (map
-   (partial into existing)
-   (random/sample-generator (- target-number
-                               (count existing))
-                            seed
-                            available)))
-
 (defn ^:lazy sample-tilesets [seed
                               {target-red :red target-blue :blue :as _type-counts}
                               {:keys [available red blue] :as _tiles}]
   (let [{available-red :red available-blue :blue} (group-by :type available)]
     (map concat
-         (sample-remaining seed red available-red target-red)
-         (sample-remaining seed blue available-blue target-blue))))
+         (tile-set/sample-remaining seed red available-red target-red)
+         (tile-set/sample-remaining seed blue available-blue target-blue))))
 
 (defn ->sample-context [map-balance bounds-for-available]
   {:map-balance map-balance
@@ -66,29 +58,22 @@
          :tileset next-tileset)
         (update :total inc))))
 
-(defn compare-score [{current-score :score :as current-context}
-                     {next-score :score :as next-context}]
-  (if current-score
-    (if (pos? (compare current-score next-score)) ;;current-context score is greater than next-context score
-      current-context
-      next-context)
-    next-context))
-
 (defn halt? [{:keys [map-balance score] :as _sample-context}]
   (balance/halt-sampling? map-balance score))
 
 (defn fill-remaining [{{:keys [available] :as tiles} :tiles
                        {:keys [type-counts]} :layout
-                       {:keys [map-balance seed max-samples debug] :or {max-samples 200}} :options
+                       {:keys [map-balance seed max-samples debug]} :options
                        :as context}]
   (let [bounds-for-available (tile-set/bounds type-counts available [:optimal-resources :optimal-influence])
         samples (->> (sample-tilesets seed type-counts tiles)
                      (take max-samples))
-        {:keys [tileset quantities ::loop/total] :as loop-result} (loop/optimize {:initial (->sample-context map-balance bounds-for-available)
-                                                          :combine ->next-context
-                                                          :choose compare-score
-                                                          :halt? halt?}
-                                                         samples)]
+        {:keys [tileset quantities ::loop/total] :as loop-result}
+        (loop/optimize {:initial (->sample-context map-balance bounds-for-available)
+                        :combine ->next-context
+                        :choose loop/pick-higher-score
+                        :halt? halt?}
+                       samples)]
     (when debug (tap> [::fill-remaining quantities total loop-result]))
     (assoc context :tileset tileset)))
 

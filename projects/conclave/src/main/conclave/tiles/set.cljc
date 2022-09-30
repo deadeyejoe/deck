@@ -41,7 +41,7 @@
         (enriched-bounds)
         (assoc :quantity quantity-kw))))
 
-(defn bounds 
+(defn bounds
   ([type-counts tile-set]
    (bounds type-counts tile-set default-quantity-kws))
   ([type-counts tile-set quantity-kws]
@@ -65,6 +65,14 @@
     (map concat
          (random/sample-generator number-red (random/random-seed) possible-red)
          (random/sample-generator number-blue (random/random-seed) possible-blue))))
+
+(defn ^:lazy sample-remaining [seed existing available target-number]
+  (map
+   (partial into existing)
+   (random/sample-generator (- target-number
+                               (count existing))
+                            seed
+                            available)))
 
 (defn collect-totals
   ([tiles] (collect-totals nil tiles))
