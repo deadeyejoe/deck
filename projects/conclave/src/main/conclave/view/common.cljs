@@ -129,7 +129,7 @@
                           props)]
         content))
 
-(defn ->dispatch-fn [{:keys [dispatch dispatch-fn disabled] :as props}]
+(defn ->dispatch-fn [{:keys [dispatch dispatch-fn disabled] :as _props}]
   (if disabled
     (constantly true)
     (or dispatch-fn #(rf/dispatch dispatch))))

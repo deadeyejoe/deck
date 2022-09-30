@@ -104,7 +104,7 @@
      :anomalies-per-player (max 1 (per-player (:anomaly tileset-summary)))
      :wormholes-per-player (max 1 (per-player (:wormhole tileset-summary)))}))
 
-(defn slice-balance-goals [{:keys [equidistant-balance] :as options}
+(defn slice-balance-goals [options
                            slice-array
                            tileset-summary]
   (let [{:keys [player-count

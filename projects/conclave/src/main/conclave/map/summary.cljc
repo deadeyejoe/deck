@@ -2,8 +2,7 @@
   (:require [conclave.map.core :as core]
             [conclave.layout.core :as layout]
             [conclave.tiles.core :as tiles]
-            [conclave.tiles.set :as tile-set]
-            [medley.core :as medley]))
+            [conclave.tiles.set :as tile-set]))
 
 (defn collect-nilable [result value]
   (if value
@@ -30,12 +29,12 @@
         (update :specialties (comp vec sort))
         (update :wormholes (comp vec sort set)))))
 
-(defn infer-base-tileset [{:keys [pok] :as layout} included-tiles]
+(defn infer-base-tileset [{:keys [pok] :as _layout} included-tiles]
   (if (or pok (some tiles/pok? included-tiles))
     tile-set/pok-standard
     tile-set/base-standard))
 
-(defn bounds [{:keys [type-counts] :as layout} base-tileset]
+(defn bounds [{:keys [type-counts] :as _layout} base-tileset]
   (reduce (fn [acc quantity-kw]
             (assoc acc quantity-kw (tile-set/bounds-for-quantity type-counts
                                                                  quantity-kw

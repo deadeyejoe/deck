@@ -1,5 +1,6 @@
 (ns conclave.worker.instance
   (:require [cljs.core.async :refer [<!]]
+            cljs.core.async.impl.protocols
             [conclave.worker.core :as core])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 

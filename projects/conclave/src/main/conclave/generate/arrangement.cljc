@@ -16,7 +16,7 @@
               (reduce (partial apply map/set-coordinate)
                       (map/new layout)))))
 
-(defn generate-swaps [{:keys [slice-array] :as slices}]
+(defn generate-swaps [{:keys [slice-array] :as _slices}]
   (->> slice-array
        (map :coordinates)
        (mapcat #(combi/combinations % 2))))
@@ -35,7 +35,7 @@
       [next-score new-map]
       [current-score current-map])))
 
-(defn optimize [{{:keys [swaps] :as arrangement-context} :arrangement
+(defn optimize [{{:keys [swaps] :as _arrangement-context} :arrangement
                  {:keys [seed max-swaps]} :options
                  :keys [galaxy-map]
                  :as context}]

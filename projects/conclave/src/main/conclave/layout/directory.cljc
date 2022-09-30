@@ -9,13 +9,13 @@
             [clojure.set :as set]
             [medley.core :as medley]))
 
-(defn ->fixed-tile [{:keys [coordinate key] :as proto-tile}]
+(defn ->fixed-tile [{:keys [coordinate key] :as _proto-tile}]
   [coordinate (tiles/key->tile key)])
 
 (defn ->hyperlane-tile [{:keys [coordinate] :as proto-tile}]
   [coordinate (tiles/hyperlane-tile proto-tile)])
 
-(defn ->home-tile [{:keys [coordinate key] :as proto-tile}]
+(defn ->home-tile [{:keys [coordinate key] :as _proto-tile}]
   [coordinate (tiles/blank-home-tile key)])
 
 (defn process-proto-tiles [layout]
@@ -31,7 +31,7 @@
 (def memoized-coordinates
   (memoize hex/map-coordinates))
 
-(defn compute-tts-fingerprint [{:keys [radius blank-coordinates home-tiles] :as layout}]
+(defn compute-tts-fingerprint [{:keys [radius blank-coordinates home-tiles] :as _layout}]
   (let [coordinate-spiral (drop 1 (memoized-coordinates radius))
         blank-coordinates (into (set blank-coordinates) (keys home-tiles))]
     (->> coordinate-spiral

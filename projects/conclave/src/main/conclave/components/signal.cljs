@@ -18,7 +18,6 @@
 (defn maybe-tap [db v] (when (debug? db) (tap> v)))
 
 (comment
-  (tap> (::instances @re-frame.db/app-db))
   (toggle-debug))
 
 (defn coerce-ids [ids]

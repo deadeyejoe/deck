@@ -1,6 +1,5 @@
 (ns conclave.generate.score
-  (:require [conclave.tiles.set :as tile-set]
-            [conclave.utils.score :as stats]
+  (:require [conclave.utils.score :as stats]
             [clojure.spec.alpha :as s]
             [medley.core :as medley]
             [conclave.generate.balance :as balance]))

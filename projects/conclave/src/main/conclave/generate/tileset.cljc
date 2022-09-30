@@ -2,10 +2,9 @@
   (:require [conclave.generate.balance :as balance]
             [conclave.generate.loop :as loop]
             [conclave.tiles.core :as tiles]
-            [conclave.tiles.set :as tile-set]
-            [deck.random.interface :as random]))
+            [conclave.tiles.set :as tile-set]))
 
-(defn available-tiles [{:keys [fixed-tiles] :as layout} default-set]
+(defn available-tiles [{:keys [fixed-tiles] :as _layout} default-set]
   (remove (comp (->> fixed-tiles
                      (vals)
                      (map :key)

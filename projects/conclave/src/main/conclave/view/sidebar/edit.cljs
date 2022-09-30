@@ -2,12 +2,8 @@
   (:require [conclave.handlers :as handlers]
             [conclave.view.common :as common]
             [conclave.player :as player]
-            [conclave.view.icons :as icon]
             [conclave.subs :as subs]
-            [medley.core :as medley]
-            [reagent.core :as r]
-            [re-frame.core :as rf]
-            ["react-select$default" :as Select]))
+            [re-frame.core :as rf]))
 
 (def race-options (->> player/races
                        vals

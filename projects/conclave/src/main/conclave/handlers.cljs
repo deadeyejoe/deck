@@ -6,7 +6,6 @@
             [conclave.layout.directory :as directory]
             [conclave.storage :as storage]
             [conclave.worker.client :as worker]
-            [re-pressed.core :as rp]
             [re-frame.core :as rf]))
 
 (declare start-tutorial load-external-map load-internal-map generate-map)

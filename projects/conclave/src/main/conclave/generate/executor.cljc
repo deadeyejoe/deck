@@ -14,8 +14,10 @@
   (perform-step? #{:a :b} {:a true}))
 
 (defn step [{:keys [options] :as context} {:keys [exec name] :as step}]
-  #?(:cljs (when (:debug options) 
-             (.log js/console (str "Performing step: " name))))
+  (when (:debug options)
+    #?(:cljs (.log js/console (str "Performing step: " name))
+       :clj (println (str "Performing step: " name))))
+
   (if (perform-step? (:when step) options)
     (exec context)
     context))

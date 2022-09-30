@@ -1,6 +1,5 @@
 (ns conclave.storage
-  (:require [conclave.map.specs :as map.specs]
-            [conclave.map.serialization :as serialization]
+  (:require [conclave.map.serialization :as serialization]
             [alandipert.storage-atom :as sa]
             [clojure.spec.alpha :as s]))
 

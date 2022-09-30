@@ -1,7 +1,5 @@
 (ns conclave.view.tutorial.handlers
   (:require [conclave.handlers :as handlers]
-            [conclave.subs :as subs]
-            [conclave.db :as db]
             [clojure.spec.alpha :as s]
             [re-frame.core :as rf]))
 
@@ -42,7 +40,7 @@
 (def start ::start)
 (rf/reg-event-db
  start
- (fn [{:keys [map] :as db} _ev]
+ (fn [db _ev]
    (assoc db :tutorial {})))
 
 (def highlight-element ::highlight-element)

@@ -1,11 +1,8 @@
 (ns conclave.view.sidebar.controls
   (:require [conclave.handlers :as handlers]
-            [conclave.layout.directory :as directory]
             [conclave.subs :as subs]
             [conclave.view.common :as common]
             [conclave.view.heroicons :as hicons]
-            [conclave.view.tutorial.common :refer [tutorial-component]]
-            [conclave.view.tutorial.handlers :as tut-handlers]
             [re-frame.core :as rf]))
 
 (defn navigation []
