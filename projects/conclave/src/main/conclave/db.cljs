@@ -14,14 +14,14 @@
 (def overlay-modes [:none
                     :tile-number
                     :coordinates
-                    :res-inf
-                    :wormhole
-                    :tech
-                    :legendary
                     :distance-score
-                    :tile-score
-                    :tile-share
-                    :highest-stake])
+                    :frontier
+                    :legendary
+                    :res-inf
+                    :ring
+                    :tech
+                    :trait
+                    :wormhole])
 (s/def ::overlay-mode (set overlay-modes))
 
 (def highlight-modes [:single
@@ -31,9 +31,6 @@
 (s/def ::highlight-set (s/coll-of ::specs/coordinate))
 (s/def ::hovered ::specs/coordinate)
 (s/def ::selected ::specs/coordinate)
-
-(def value-modes [:optimal :normal])
-(s/def ::value-mode (set value-modes))
 
 (s/def ::processing boolean?)
 (s/def ::worker-mode #{:async :sync})
@@ -46,7 +43,6 @@
 (s/def ::storage-total nat-int?)
 
 (s/def ::db (s/keys :req-un [::overlay-mode
-                             ::value-mode
                              ::highlight-mode
                              ::worker-mode
                              ::player-edit
@@ -64,12 +60,12 @@
   {:player-edit false
    :worker-mode :async
    :overlay-mode :none
-   :value-mode :optimal
    :highlight-mode :single})
 
 (defn initialize [options]
   (merge
-   {:options (or (not-empty options) (options/init-db))}
+   {:options (or (not-empty options)
+                 (assoc (options/init-db) :optimal-values true))}
    default-flags))
 
 (defn set-map [db new-map]

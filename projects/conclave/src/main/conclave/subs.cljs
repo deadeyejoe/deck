@@ -44,18 +44,6 @@
  storage-total
  (fn [db] (:storage-total db)))
 
-(def value-mode ::value-mode)
-(rf/reg-sub
- value-mode
- (fn [db] (:value-mode db)))
-
-(def optimal-values ::optimal-values)
-(rf/reg-sub
- optimal-values
- :<- [value-mode]
- (fn [value-mode [_q]]
-   (= :optimal value-mode)))
-
 (rf/reg-sub
  :score/variance
  (fn [db] (utils/format-number (:score/variance db))))
@@ -222,3 +210,9 @@
  generation-option
  (fn [db [_q option-name]]
    (db/generation-option db option-name)))
+
+(def optimal-values ::optimal-values)
+(rf/reg-sub
+ optimal-values
+ :<- [generation-option :optimal-values]
+ (fn [value _qv] value))

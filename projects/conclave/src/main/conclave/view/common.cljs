@@ -93,18 +93,18 @@
 (defn resource
   ([summary] (resource summary {}))
   ([{:keys [optimal-resources resources] :as _summary} props]
-   (let [resource-mode @(rf/subscribe [subs/value-mode])]
+   (let [show-optimal? @(rf/subscribe [subs/optimal-values])]
      [value-container (merge-with into {:class ["text-amber-400"]} props)
-      (if (= :optimal resource-mode)
+      (if show-optimal?
         (str optimal-resources)
         (str resources))])))
 
 (defn influence
   ([summary] (influence summary {}))
   ([{:keys [optimal-influence influence] :as _summary} props]
-   (let [resource-mode @(rf/subscribe [subs/value-mode])]
+   (let [show-optimal? @(rf/subscribe [subs/optimal-values])]
      [value-container (merge-with into {:class ["text-cyan-400"]} props)
-      (if (= :optimal resource-mode)
+      (if show-optimal?
         (str optimal-influence)
         (str influence))])))
 

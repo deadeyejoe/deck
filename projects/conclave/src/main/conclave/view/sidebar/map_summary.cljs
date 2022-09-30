@@ -1,9 +1,6 @@
 (ns conclave.view.sidebar.map-summary
   (:require [conclave.view.icons :as icons]
-            [conclave.view.common :as common]
-            [conclave.tiles.core :as tile]
             [conclave.subs :as subs]
-            [medley.core :as medley]
             [re-frame.core :as rf]))
 
 (defn o-box [props & content]
@@ -79,7 +76,7 @@
     "Number of systems with tech specialties"]])
 
 (defn bounds [map-summary]
-  (let [optimal? (= :optimal @(rf/subscribe [subs/value-mode]))]
+  (let [optimal? @(rf/subscribe [subs/optimal-values])]
     [:<>
      [h-box {:class ["pr-3"]}
       [label "Planets:"]

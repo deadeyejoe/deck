@@ -14,8 +14,8 @@
    [common/o-box {:class ["border" "rounded-lg" "border-gray-800" "p-2" "text-gray-300" "h-16"]}
     [common/switch {:on-label "Optimal Values"
                     :off-label "Base Values"
-                    :sub [subs/optimal-values]
-                    :dispatch [handlers/set-value-mode]}]]])
+                    :sub [subs/generation-option :optimal-values]
+                    :dispatch [handlers/toggle-generation-option :optimal-values]}]]])
 
 (defn content []
   (let [coordinate (or @(rf/subscribe [subs/hovered])

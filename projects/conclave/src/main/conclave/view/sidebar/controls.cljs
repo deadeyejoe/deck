@@ -23,13 +23,6 @@
    [:div {:title "Jump 10 Maps Forward"}
     [common/real-button {:dispatch [handlers/navigate-map :next 10]} hicons/chevron-double-right]]])
 
-(defn layout-select []
-  (into [common/select {:sub-query [subs/generation-option :selected-layout]
-                        :build-dispatch (partial vector handlers/set-generation-option :selected-layout)}]
-        (map (fn [{:keys [code name] :as _layout}]
-               [:option {:value code} name])
-             directory/layouts)))
-
 (defn component []
   [common/o-box {:class ["p-1" "mt-2"]}
    [common/o-box {:class ["p-2" "border" "border-gray-800" "rounded-lg"]}
