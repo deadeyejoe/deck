@@ -5,6 +5,7 @@
              [conclave.subs :as subs]
              [conclave.view.icons :as icons]
              [conclave.view.heroicons :as hicons]
+             [conclave.view.sidebar.screenshot :as screenshot]
              [conclave.view.tutorial.handlers :as tut-handlers]
              [conclave.utils.web :as web-util]
              [re-frame.core :as rf]))
@@ -133,10 +134,17 @@
                                      (signal/>flash! [uid :success] true 2000)))}]])
        (if (signal/<set? [uid :success]) hicons/check-circle hicons/download-solid)])))
 
+(defn screenshot-button []
+  [:div {:class (concat (button-classes false :small)
+                        ["text-xs relative"])
+         :on-click screenshot/capture!
+         :title "Take a screenshot of the map"}
+   hicons/camera-solid])
+
 (defn component []
   [:<>
    [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-start" "items-end"
-                  "w-full" "h-1/6" "pt-2"]}
+                  "w-full" "h-1/12" "pt-2"]}
     [:div {:class (concat (button-classes false :small))
            :title "View help"
            :on-click #(rf/dispatch [tut-handlers/start])}
@@ -150,9 +158,11 @@
     [traits]
     [wormhole]
     [frontier]]
-   [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-end" "items-end" 
-                  "w-full" "h-1/6" "pb-2"]}
+   [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-end" "items-end"
+                  "w-full" "h-1/4" "pb-2"]}
     [share-button]
+    [:div {:class ["h-1"]}]
+[screenshot-button]
     [:div {:class ["h-3"]}]
     [tts-export-button]
     [:div {:class ["h-1"]}]

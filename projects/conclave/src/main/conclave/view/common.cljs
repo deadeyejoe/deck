@@ -1,6 +1,7 @@
 (ns conclave.view.common
   (:require [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
+            [conclave.utils.hex :as hex]
             [re-frame.core :as rf]))
 
 (defn bevel-clip-path [n]
@@ -72,6 +73,10 @@
                 3 "rotate-180"
                 4 "rotate-240"
                 5 "rotate-300"})
+
+(defn side->hex-dimension [size]
+  {:height (str (hex/height size) "px")
+   :width (str (hex/width size) "px")})
 
 (defn tile->hex-image [{:keys [rotation] :as tile}]
   [:img {:src (str "images/" (tile/image tile))

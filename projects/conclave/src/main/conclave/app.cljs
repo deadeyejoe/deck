@@ -2,12 +2,14 @@
   (:require [conclave.components.signal :as signal]
             [conclave.generate.core]
             [conclave.handlers :as handlers]
+            [conclave.play :as play]
             [conclave.subs :as subs]
             [conclave.view.generation.main :as generation]
             [conclave.view.generation.summary :as generation-summary]
             [conclave.view.generation.signals :as generation-signal]
             [conclave.view.map.main :as map]
             [conclave.view.sidebar.main :as sidebar]
+            [conclave.view.sidebar.screenshot :as screenshot]
             [conclave.view.tutorial.main :as tutorial]
             [conclave.view.tutorial.handlers :as tutorial-handlers]
             [conclave.view.tutorial.subs :as tutorial-subs]
@@ -47,20 +49,22 @@
      [generation-summary/component]]))
 
 (defn ui []
-  [:div {:class ["h-screen" "w-screen" "flex" "flex-col" "lg:flex-row" "justify-center" "items-center" "bg-gray-900" "text-gray-200"
-                 "font-sans"]}
-   [app-overlay]
-   [:div {:class ["flex" "flex-col" "justify-center" "items-center"
-                  "w-full" "lg:w-2/3" "h-2/3" "lg:h-full"]}
-    [generation-button]
-    [generation-sidebar]
-    [map/component]
-    [map-overlay]
-    [tutorial/component]]
-   [:div {:class ["flex" "flex-col" "justify-center"
-                  "w-full" "lg:w-1/3" "h-1/3" "lg:h-full"]
-          :on-mouse-enter #(rf/dispatch [handlers/clear-hover])}
-    [sidebar/component]]])
+  [:div {:class ["h-screen" "w-screen" "overflow-hidden" "relative"]}
+   [screenshot/hidden-component]
+   [:div {:class ["h-full" "w-full" "flex" "flex-col" "lg:flex-row" "justify-center" "items-center" "bg-gray-900" "text-gray-200"
+                  "font-sans"]}
+    [app-overlay]
+    [:div {:class ["flex" "flex-col" "justify-center" "items-center"
+                   "w-full" "lg:w-2/3" "h-2/3" "lg:h-full"]}
+     [generation-button]
+     [generation-sidebar]
+     [map/component]
+     [map-overlay]
+     [tutorial/component]]
+    [:div {:class ["flex" "flex-col" "justify-center"
+                   "w-full" "lg:w-1/3" "h-1/3" "lg:h-full"]
+           :on-mouse-enter #(rf/dispatch [handlers/clear-hover])}
+     [sidebar/component]]]])
 
 (defn render []
   (rd/render [ui]

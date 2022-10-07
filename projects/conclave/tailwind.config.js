@@ -31,6 +31,7 @@ module.exports = {
         "-60": "-60deg"
       },
       zIndex: {
+        "basement": -1,
         "base": 0,
         "border": 1,
         "highlight" : 2,

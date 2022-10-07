@@ -14,10 +14,6 @@
 ;; Size is length of side, or center to corner
 (def hex-path "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)")
 
-(defn side->hex-dimension [size]
-  {:height (str (hex/height size) "px")
-   :width (str (hex/width size) "px")})
-
 (defn hex-overlay [{:keys [side] :as _size-options} coordinate]
   (let [content (overlay/component coordinate)]
     [:div {:class (conj ["absolute" "z-overlay" "top-1/2" "left-1/2"
@@ -25,7 +21,7 @@
                          "flex" "justify-center" "items-center"
                          "transition-opacity"]
                         (if content "opacity-90" "opacity-0"))
-           :style (merge (side->hex-dimension (* 0.7 side))
+           :style (merge (common/side->hex-dimension (* 0.7 side))
                          {:clip-path hex-path})}
      content]))
 
@@ -43,7 +39,7 @@
             :on-mouse-enter #(do (rf/dispatch [handlers/set-hover coordinate])
                                  (.stopPropagation %))
             :on-click #(rf/dispatch [handlers/select-tile coordinate])
-            :style (merge (side->hex-dimension side)
+            :style (merge (common/side->hex-dimension side)
                           {:margin-left (str x-offset "px")
                            :margin-top (str y-offset "px")
                            :clip-path hex-path})}

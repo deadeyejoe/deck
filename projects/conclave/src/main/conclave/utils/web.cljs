@@ -1,4 +1,5 @@
-(ns conclave.utils.web)
+(ns conclave.utils.web
+  (:require [oops.core :refer [oset!]]))
 
 (defn location []
   (.-href js/window.location))
@@ -19,3 +20,9 @@
        (fn [[^js/ResizeObserverEntry entry]]
          (callback {:height (-> entry .-contentRect .-height)
                     :width (-> entry .-contentRect .-width)}))))
+
+(defn download-url [filename dataUrl]
+  (-> (.createElement js/document "a")
+      (oset! :download filename)
+      (oset! :href dataUrl)
+      (.click)))
