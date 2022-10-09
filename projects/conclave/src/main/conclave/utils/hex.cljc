@@ -17,6 +17,10 @@
 (defn width->side [width]
   (/ width 2))
 
+(defn side->dimension [side]
+  {:height (height side)
+   :width (width side)})
+
 (defn q-basis [size]
   [(* (/ 3 2) size)
    (* (/ sqr3 2) size)])

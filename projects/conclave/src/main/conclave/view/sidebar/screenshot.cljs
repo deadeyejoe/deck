@@ -17,17 +17,26 @@
   (let [[x-offset y-offset] (hex/coordinate->offset scale coordinate)]
     (str "translate(" x-offset "px, " y-offset "px)")))
 
+(defn ->hexagon [coordinate]
+  [:svg (merge {:key (apply str "hex" coordinate)
+                :viewBox "0 0 300 300"
+                :class ["fill-blue-900" "shrink-0" "absolute"]
+                :style {:transform (translate-string scale coordinate)}}
+               (common/side->hex-dimension scale 1.2))
+   [:polygon {:points "300,150 225,280 75,280 0,150 75,20 225,20"}]])
+
 (defn ->hex-img [coordinate]
   (let [{:keys [rotation] :as tile} @(rf/subscribe [subs/tile coordinate])]
-    [:img {:src (str "images/" (tile/image tile))
+    [:img {:key (apply str "img" coordinate)
+           :src (str "images/" (tile/image tile))
            :width (* scale 2)
            :class [(common/rotations rotation) "absolute"]
            :style {:clip-path common/clipped-hex-path
                    :transform (translate-string scale coordinate)}}]))
 
 (defn hidden-component-mounted [element]
-  (-> (.toPng dom-to-image element)
-      (.then (partial web/download-url "screenshot-is-go.png"))
+  (-> (.toJpeg dom-to-image element)
+      (.then (partial web/download-url "screenshot-is-go.jpg"))
       (.then #(signal/>unset! capture-signal))))
 
 (defn compute-dimensions [galaxy-map]
@@ -38,19 +47,22 @@
     {:height (+ scaled-height 40)
      :width (+ scaled-height 40)}))
 
-(defonce element (atom nil))
-(defn hidden-component []
-  (when (signal/<set? capture-signal)
-    (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
-      (into [:div {:id "screenshot-component"
+(defn component []
+  (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
+    (reduce into
+            [:div {:id "screenshot-component"
                    :class ["flex" "justify-center" "items-center" "bg-gray-900"
                            "absolute" "z-basement"]
                    :style (medley/map-vals #(str % "px")
                                            (compute-dimensions galaxy-map))
-                   :ref hidden-component-mounted}
-             [->hex-img [0 0 0]]]
-            (map (fn [coordinate] [->hex-img coordinate]))
-            (map/coordinates galaxy-map)))))
+                   :ref hidden-component-mounted}]
+            [(map (partial vector ->hexagon) (map/coordinates galaxy-map))
+             (map (partial vector ->hex-img) (map/coordinates galaxy-map))])))
+
+(defonce element (atom nil))
+(defn hidden-component []
+  (when (signal/<set? capture-signal)
+    [component]))
 
 (defn capture! []
   (signal/>set! capture-signal))

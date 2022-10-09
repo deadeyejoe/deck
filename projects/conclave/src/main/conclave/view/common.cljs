@@ -2,6 +2,7 @@
   (:require [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
+            [medley.core :as medley]
             [re-frame.core :as rf]))
 
 (defn bevel-clip-path [n]
@@ -74,9 +75,11 @@
                 4 "rotate-240"
                 5 "rotate-300"})
 
-(defn side->hex-dimension [size]
-  {:height (str (hex/height size) "px")
-   :width (str (hex/width size) "px")})
+(defn side->hex-dimension
+  ([side] (side->hex-dimension side 1))
+  ([side scale]
+   (medley/map-vals #(str (* scale %) "px")
+                    (hex/side->dimension side))))
 
 (defn tile->hex-image [{:keys [rotation] :as tile}]
   [:img {:src (str "images/" (tile/image tile))

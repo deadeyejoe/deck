@@ -21,13 +21,13 @@
                          "flex" "justify-center" "items-center"
                          "transition-opacity"]
                         (if content "opacity-90" "opacity-0"))
-           :style (merge (common/side->hex-dimension (* 0.7 side))
+           :style (merge (common/side->hex-dimension side 0.7)
                          {:clip-path hex-path})}
      content]))
 
 (defn hex-tile
   ([coordinate] (hex-tile {:side 60} coordinate))
-  ([{:keys [side epsilon] :or {epsilon 0.995} :as size-options} coordinate]
+  ([{:keys [side epsilon] :or {epsilon 0.99} :as size-options} coordinate]
    (let [[x-offset y-offset] (hex/coordinate->offset (* epsilon side) coordinate)
          highlighted? @(rf/subscribe [subs/tile-highlighted? coordinate])
          selected? @(rf/subscribe [subs/tile-selected? coordinate])]
