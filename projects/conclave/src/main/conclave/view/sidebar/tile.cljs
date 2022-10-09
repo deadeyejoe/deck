@@ -36,9 +36,9 @@
      [:div {:class (into standard-classes ["w-16"])
             :title "Coordinate"}
       [:div x] [:div y] [:div z]]
-[:div {:class (into standard-classes ["w-6" "rounded-full" "border-2" "border-gray-400" "bg-gray-600"])
-       :title "ring"}
- (hex/ring coordinate)]
+     [:div {:class (into standard-classes ["w-6" "rounded-full" "border-2" "border-gray-400" "bg-gray-600"])
+            :title "ring"}
+      (hex/ring coordinate)]
      [:div {:class (into standard-classes ["w-6"])
             :style {:clip-path common/clipped-hex-path}
             :title "Tile Number"}
@@ -50,19 +50,16 @@
             :title "Distance from selected"}
       (or distance-from-selected "-")]]))
 
-(defn component [coordinate]
-  (let [tile @(rf/subscribe [subs/tile coordinate])]
-    [:div {:class ["flex" "h-full" "w-full" "justify-center" "items-center" "p-1" "mb-2"]}
-     (into [:div {:class ["flex" "h-full" "w-full" "relative"
-                          "border" "border-gray-800" "rounded-lg" "p-2"]}
-            (when coordinate
-              [:div {:class ["absolute" "bottom-0" "right-0"
-                             "p-1" "m-2" "w-44" "h-10"
-                             "flex" "justify-center" "items-center"
-                             "bg-gray-800" "rounded-md" "text-black"]}
-               (tile-legend coordinate tile)])]
-           (when coordinate
-             [[:div {:class ["w-1/2" "h-full" "flex" "items-center"]}
-               [common/tile->hex-image tile]]
-              [:div {:class ["w-1/2" "h-full" "flex"]}
-               [planets-summary tile]]]))]))
+(defn component [coordinate tile]
+  [:div {:class ["flex" "h-full" "w-full" "justify-center" "items-center" "p-1" "mb-2"]}
+   [:div {:class ["flex" "h-full" "w-full" "relative"
+                  "border" "border-gray-800" "rounded-lg" "p-2"]}
+    [:div {:class ["absolute" "bottom-0" "right-0"
+                   "p-1" "m-2" "w-44" "h-10"
+                   "flex" "justify-center" "items-center"
+                   "bg-gray-800" "rounded-md" "text-black"]}
+     (tile-legend coordinate tile)]
+    [:div {:class ["w-1/2" "h-full" "flex" "items-center"]}
+     [common/tile->hex-image tile]]
+    [:div {:class ["w-1/2" "h-full" "flex"]}
+     [planets-summary tile]]]])

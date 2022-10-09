@@ -19,7 +19,8 @@
 
 (defn content []
   (let [coordinate (or @(rf/subscribe [subs/hovered])
-                       @(rf/subscribe [subs/selected-tile]))]
+                       @(rf/subscribe [subs/selected-tile]))
+        tile @(rf/subscribe [subs/tile coordinate])]
     [:div {:class ["h-full" "w-full"
                    "flex" "flex-col" "justify-between"
                    "text-xl"
@@ -31,8 +32,8 @@
      [:div {:class ["h-1/2" "w-full" "flex" "flex-col"]}
       [player-summary/component]]
      [:div {:class ["h-1/3" "w-full" "flex" "mb-2"]}
-      (if coordinate
-        [tile/component coordinate]
+      (if tile
+        [tile/component coordinate tile]
         [map-summary/component])]
      [:div {:class ["absolute" "flex" "flex-row" "lg:flex-col" "justify-center"
                     "lg:h-full" "w-full" "lg:w-14" "lg:-left-20"]}
