@@ -7,8 +7,7 @@
             [conclave.view.map.main :as map-view]
             [re-frame.core :as rf]
             [oops.core :refer [oset!]]
-            ["dom-to-image" :as dti]
-            ["file-saver" :as file-saver]))
+            ["dom-to-image" :as dti]))
 
 (def scale 140)
 (def hex-path "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)")
@@ -129,9 +128,6 @@
     (set! (.-href link) dataUrl)
     (.click link)))
 
-(defn save-blob [filename blob]
-  (.saveAs file-saver blob filename))
-
 (defn show-svg []
   (let [serializer (new js/XMLSerializer)
         data-url  (->> (.serializeToString serializer @svg-element)
@@ -147,7 +143,7 @@
                          (js/btoa)
                          (str "data:image/svg+xml;base64,"))]
     (dl-url "svg-maybe" serialized))
-  (-> (.toBlob dti @element {:width "1920" :height "1080"})
-      (.then (partial save-blob "svg-is-go.png")))
+  
   (-> (.toPng dti @element)
-      (.then (partial dl-url "png-is-go.png"))))
+      (.then (partial dl-url "png-is-go.png")))
+  )
