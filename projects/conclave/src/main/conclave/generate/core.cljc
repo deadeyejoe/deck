@@ -29,22 +29,25 @@
 
 (defonce last-context (atom nil))
 
-(defn init-steps []
+(defn generation-steps []
   (concat tileset/steps
           optimize/steps
           arrangement/steps))
 
-(defn init-context [layout {:keys [seed] :as options}]
-  {:layout layout
-   :options (merge {:pok true
-                    :max-samples 200}
-                   options
-                   {:seed (if (str/some? seed)
-                            seed
-                            (random/random-seed))})})
+(defn conform-options [{:keys [seed] :as options}]
+  (merge {:pok true
+          :max-samples 200}
+         options
+         {:seed (if (str/some? seed)
+                  seed
+                  (random/random-seed))}))
 
 (defn generate [layout options]
-  (let [generated (executor/execute (init-context layout options)
-                                    (init-steps))]
-    (reset! last-context generated)
-    generated))
+  (let [effective-options (conform-options options)]
+    #?(:cljs (.log js/console "Generating map with options: " (clj->js effective-options))
+       :clj (println "Generating map with options: " effective-options))
+    (let [generated (executor/execute {:layout layout
+                                       :options options}
+                                      (generation-steps))]
+      (reset! last-context generated)
+      generated)))

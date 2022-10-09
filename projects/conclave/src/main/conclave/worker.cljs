@@ -4,7 +4,6 @@
             [taoensso.tufte :as tufte :refer-macros [defnp profiled]]))
 
 (defnp new-generate [{:keys [options layout] :as _request}]
-  (.log js/console (str "Worker Started with options " options))
   (let [{:keys [galaxy-map options] :as _generated} (generate/generate layout options)]
     {:options options
      :map galaxy-map
