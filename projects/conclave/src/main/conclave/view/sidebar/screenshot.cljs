@@ -34,10 +34,11 @@
            :style {:clip-path common/clipped-hex-path
                    :transform (translate-string scale coordinate)}}]))
 
-(defn hidden-component-mounted [element]
-  (-> (.toJpeg dom-to-image element)
-      (.then (partial web/download-url "screenshot-is-go.jpg"))
-      (.then #(signal/>unset! capture-signal))))
+(defn hidden-component-mounted [map-index element]
+  (let [filename (str "conclave-" map-index ".jpg")]
+    (-> (.toJpeg dom-to-image element)
+        (.then (partial web/download-url filename))
+        (.then #(signal/>unset! capture-signal)))))
 
 (defn compute-dimensions [galaxy-map]
   (let [radius (map/radius galaxy-map)
@@ -48,14 +49,15 @@
      :width (+ scaled-height 40)}))
 
 (defn component []
-  (let [galaxy-map @(rf/subscribe [subs/galaxy-map])]
+  (let [galaxy-map @(rf/subscribe [subs/galaxy-map])
+        map-index @(rf/subscribe [subs/storage-index])]
     (reduce into
             [:div {:id "screenshot-component"
                    :class ["flex" "justify-center" "items-center" "bg-gray-900"
                            "absolute" "z-basement"]
                    :style (medley/map-vals #(str % "px")
                                            (compute-dimensions galaxy-map))
-                   :ref hidden-component-mounted}]
+                   :ref (partial hidden-component-mounted map-index)}]
             [(map (partial vector ->hexagon) (map/coordinates galaxy-map))
              (map (partial vector ->hex-img) (map/coordinates galaxy-map))])))
 
