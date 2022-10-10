@@ -1,5 +1,6 @@
 ;; shadow-cljs configuration
 {:dev-http {8000 "public"}
+ :deps {:aliases [:cljs]}
  :builds
  {:app
   {:target :browser
@@ -11,14 +12,12 @@
              :worker {:init-fn conclave.worker/main
                       :depends-on #{:shared}
                       :web-worker true}}
-;;    :devtools {:preloads [day8.re-frame-10x.preload]}
-;;    :dev {:compiler-options
-;;          {:closure-defines
-;;           {"re_frame.trace.trace_enabled_QMARK_" true
-;;            "goog.DEBUG" false}}}
    :release {:output-dir "release"
              :asset-path "/"
-             :modules {:main {:init-fn conclave.app/init}}}}
+             :modules {:main {:init-fn conclave.app/init}}
+             ;; Needed to add this based on this issue https://github.com/thheller/shadow-cljs/issues/611
+             ;; Seems to happen if spec gets split across multiple modules
+             :compiler-options {:cross-chunk-method-motion false}}}
   :test
   {:target :node-test
    :output-to "target/node-test"
