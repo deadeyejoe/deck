@@ -94,7 +94,7 @@
     [map-summary]
     [about]]
    [:div {:class ["absolute" "bottom-3" "right-6" "flex" "justify-center" "items-center"]}
-    [common/real-button "Exit" [tutorial-handles/cancel]]]])
+    [common/real-button {:dispatch [tutorial-handles/cancel]} "Exit"]]])
 
 (defn component []
   (when @(rf/subscribe [tutorial-subs/active?])
