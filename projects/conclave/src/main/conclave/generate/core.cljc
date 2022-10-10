@@ -47,7 +47,7 @@
     #?(:cljs (.log js/console "Generating map with options: " (clj->js effective-options))
        :clj (println "Generating map with options: " effective-options))
     (let [generated (executor/execute {:layout layout
-                                       :options options}
+                                       :options effective-options}
                                       (generation-steps))]
       (reset! last-context generated)
       generated)))
