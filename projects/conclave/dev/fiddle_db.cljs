@@ -5,3 +5,5 @@
 (get @rfdb/app-db :layout)
 (get @rfdb/app-db :map)
 (get @rfdb/app-db :options)
+
+(get-in @rfdb/app-db [:map :players])

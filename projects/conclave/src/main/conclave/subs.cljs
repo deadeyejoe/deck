@@ -1,6 +1,5 @@
 (ns conclave.subs
   (:require [conclave.db :as db]
-            [conclave.layout.core :as layout]
             [conclave.map.core :as map]
             [conclave.map.summary :as map-summary]
             [conclave.tiles.view :as tiles-view]
@@ -9,7 +8,8 @@
             [conclave.utils.vector :as vect]
             [conclave.utils.utils :as utils]
             [clojure.string :as str]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [conclave.player.race :as race]))
 
 (def galaxy-map ::galaxy-map)
 (rf/reg-sub
@@ -155,38 +155,67 @@
  (fn [highlight-set [_q coordinate]]
    (contains? highlight-set coordinate)))
 
-(def player-edit ::player-edit)
+(def players ::players)
 (rf/reg-sub
- player-edit
- (fn [db _qv]
-   (:player-edit db)))
+ players
+ :<- [galaxy-map]
+ (fn [galaxy-map _qv]
+   (map/players galaxy-map)))
 
 (def player-keys ::player-keys)
 (rf/reg-sub
  player-keys
- :<- [layout]
- (fn [layout _qv]
-   (layout/player-keys layout)))
+ :<- [players]
+ (fn [players _qv]
+   (map :key players)))
 
 (def player-name ::player-name)
 (rf/reg-sub
  player-name
- (fn [db [_q player-key]]
+ :<- [galaxy-map]
+ (fn [galaxy-map [_q player-key]]
    (if (= player-key :equidistant)
      "Equidistants"
-     (not-empty (get-in db [:players player-key :name])))))
+     (map/player-name galaxy-map player-key))))
+
+(def player-race-index ::player-race-index)
+(rf/reg-sub
+ player-race-index
+ :<- [galaxy-map]
+ (fn [galaxy-map[_q player-key]]
+   (map/player-race galaxy-map player-key)))
 
 (def player-race ::player-race)
 (rf/reg-sub
  player-race
- (fn [db [_q player-key]]
-   (get-in db [:players player-key :race])))
+ (fn [[_q player-key]]
+   (rf/subscribe [player-race-index player-key]))
+ (fn [race-index _qv]
+   (race/index->race race-index)))
+
+(defn <-subscribe-to-race [[_q player-key]]
+  (rf/subscribe [player-race player-key]))
+
+(def player-race-name ::player-race-name)
+(rf/reg-sub
+ player-race-name
+ <-subscribe-to-race
+ (fn [race _qv]
+   (:name race)))
+
+(def player-race-key ::player-race-key)
+(rf/reg-sub
+ player-race-key
+ <-subscribe-to-race
+ (fn [race _qv]
+   (:key race)))
 
 (def selected-races ::selected-races)
 (rf/reg-sub
  selected-races
- (fn [db [_q]]
-   (db/selected-races db)))
+ :<- [players]
+ (fn [players [_q]]
+   (set (keep :race players))))
 
 (def player-summary ::player-summary)
 (rf/reg-sub

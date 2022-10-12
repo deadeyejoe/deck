@@ -105,14 +105,17 @@
   (->> galaxy-map
        (players)
        (some player/customized?)))
-(defn player-name [galaxy-map key]
-  (get-in galaxy-map [:players key :name]))
-(defn player-race [galaxy-map key]
-  (get-in galaxy-map [:players key :race]))
-(defn set-player-name [galaxy-map key name]
-  (assoc-in galaxy-map [:players key :name] name))
-(defn set-player-race [galaxy-map key race-index]
-  (assoc-in galaxy-map [:players key :race] race-index))
+
+(defn player-name [galaxy-map player-key]
+  (get-in galaxy-map [:players player-key :name] player-key))
+(defn player-race [galaxy-map player-key]
+  (get-in galaxy-map [:players player-key :race]))
+
+(defn set-player-name [galaxy-map player-key name]
+  (assoc-in galaxy-map [:players player-key :name] name))
+(defn set-player-race [galaxy-map player-key race-index]
+  (assoc-in galaxy-map [:players player-key :race] race-index))
+
 (defn swap-players [galaxy-map player-key-1 player-key-2]
   (let [p1 (get-in galaxy-map [:players player-key-1])
         p2 (get-in galaxy-map [:players player-key-2])]
