@@ -1,5 +1,6 @@
 (ns conclave.map.core
   (:require [conclave.layout.core :as layout]
+            [conclave.player.core :as player]
             [conclave.tiles.core :as tile]
             [conclave.specs :as shared-specs]
             [conclave.utils.hex :as hex]
@@ -9,9 +10,11 @@
 
 (s/def ::tiles (s/map-of ::shared-specs/coordinate ::tile/instance))
 (s/def ::tiles-reverse (s/map-of ::tile/key ::shared-specs/coordinate))
+(s/def ::players (s/map-of ::player/key ::player/instance))
 
 (s/def ::galaxy (s/keys :req-un [::tiles
-                                 ::tiles-reverse]))
+                                 ::tiles-reverse]
+                        :opt-un [::players]))
 
 (defn set-coordinate [galaxy-map coordinate tile]
   (-> galaxy-map
@@ -77,3 +80,20 @@
     (-> galaxy-map
         (set-coordinate c1 t2)
         (set-coordinate c2 t1))))
+
+(defn player-name [galaxy-map key]
+  (get-in galaxy-map [:players key :name]))
+(defn player-race [galaxy-map key]
+  (get-in galaxy-map [:players key :race]))
+(defn set-player-name [galaxy-map key name]
+  (assoc-in galaxy-map [:players key :name] name))
+(defn set-player-race [galaxy-map key race-index]
+  (assoc-in galaxy-map [:players key :race] race-index))
+(defn swap-players [galaxy-map player-key-1 player-key-2]
+  (let [p1 (get-in galaxy-map [:players player-key-1])
+        p2 (get-in galaxy-map [:players player-key-2])]
+    (if (and p1 p2)
+      (->> galaxy-map
+           (assoc-in [:players player-key-1] p2)
+           (assoc-in [:players player-key-2] p1))
+      galaxy-map)))
