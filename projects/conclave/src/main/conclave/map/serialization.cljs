@@ -1,12 +1,13 @@
 (ns conclave.map.serialization
-  (:require [conclave.layout.directory :as directory]
+  (:require [conclave.layout.core :as layout]
+            [conclave.layout.directory :as directory]
+            [conclave.map.core :as map]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
             [cognitect.transit :as t]
             [goog.crypt.base64 :as b64]
             [medley.core :as medley]
-            [superstring.core :as str]
-            [conclave.map.core :as map]))
+            [superstring.core :as str]))
 
 ;; Serialize ===========================================
 
@@ -38,6 +39,7 @@
 
 (def empty-place "X")
 (def empty-place? #{empty-place})
+(def not-empty-place? (complement empty-place?))
 
 (defn serialize-tile [{:keys [key rotation] :as tile}]
   (cond
@@ -52,10 +54,23 @@
        (interpose " ")
        (apply str)))
 
+(defn serialize-player [{:keys [name race] :as _player}]
+  (str (b64/encodeString (or name empty-place))
+       " "
+       (or race empty-place)))
+
+(defn serialize-players [galaxy-map]
+  (->> (map/players galaxy-map)
+       (map serialize-player)
+       (interpose " ")
+       (apply str)))
+
 (defn serialize [galaxy-map]
   (let [writer (t/writer :json)
-        compact-map {:version 1
-                     :tiles (serialize-tiles galaxy-map)}]
+        compact-map (cond-> {:v 1
+                             :t (serialize-tiles galaxy-map)}
+                      (map/players-customized? galaxy-map)
+                      (assoc :p (serialize-players galaxy-map)))]
     (->> (t/write writer compact-map)
          (b64/encodeString))))
 
@@ -92,11 +107,11 @@
          (medley/remove-vals #{"0"})
          (medley/map-kv-vals resolve-key))))
 
+;; Conclave Deserialize
+
 (defn deserialize-tts [tts-string layout]
   (map/import-coordinate-map (map/new layout)
                              (deserialize-tts-tiles tts-string)))
-
-;; Conclave Deserialize
 
 (defn infer-layout-conclave [string]
   (->> (str/split string #" ")
@@ -122,11 +137,40 @@
          (b64/decodeString)
          (t/read reader))))
 
+(defn deserialize-player [key [encoded-name race]]
+  (let [decoded-name (b64/decodeString encoded-name)]
+    (cond-> {:key key}
+      (not-empty-place? decoded-name) (assoc :name decoded-name)
+      (not-empty-place? race) (assoc :race (parse-long race)))))
+
+(defn deserialize-players [layout players-string]
+  (let [player-keys (layout/player-keys layout)]
+    (->> (str/split players-string #" ")
+         (partition 2)
+         (map deserialize-player player-keys)
+         (medley/index-by :key))))
+
 (defn deserialize [string]
-  (let [tile-string (-> string
-                        (decode)
-                        :tiles)
+  (let [decoded (decode string)
+        tile-string (or (get decoded :tiles)
+                        (get decoded :t))
+        players-string (get decoded :p)
         layout (infer-layout-conclave tile-string)]
     {:layout layout
-     :map (map/import-coordinate-map (map/new layout)
-                                     (deserialize-tiles tile-string))}))
+     :map (cond-> (map/new layout)
+            :always (map/import-coordinate-map (deserialize-tiles tile-string))
+            (str/some? players-string) (map/import-player-map (deserialize-players layout players-string)))}))
+
+(comment
+  (let [players {:p1 {:key :p1
+                      :name "Joe"
+                      :race 4}
+                 :p2 {:key :p2
+                      :race 6}
+                 :p3 {:key :p3
+                      :name "Mark"}
+                 :p4 {:key :p4}}
+        layout (directory/code->layout "4p")
+        serialized (serialize-players {:players players})
+        deserialized (deserialize-players layout serialized)]
+    [(= players deserialized)]))

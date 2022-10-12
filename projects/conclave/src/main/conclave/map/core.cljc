@@ -9,12 +9,15 @@
 
 
 (s/def ::tiles (s/map-of ::shared-specs/coordinate ::tile/instance))
+(s/def ::distances (s/map-of ::shared-specs/coordinate
+                             (s/map-of ::shared-specs/coordinate number?)))
 (s/def ::tiles-reverse (s/map-of ::tile/key ::shared-specs/coordinate))
 (s/def ::players (s/map-of ::player/key ::player/instance))
 
 (s/def ::galaxy (s/keys :req-un [::tiles
                                  ::tiles-reverse]
-                        :opt-un [::players]))
+                        :opt-un [::players
+                                 ::distances]))
 
 (defn set-coordinate [galaxy-map coordinate tile]
   (-> galaxy-map
@@ -26,8 +29,14 @@
              galaxy-map
              coordinates))
 
+(defn init-players [layout]
+  (->> (layout/player-keys layout)
+       (map (fn [k] [k {:key k}]))
+       (into {})))
+
 (defn new [{:keys [home-tiles fixed-tiles hyperlane-tiles] :as layout}]
   (-> {:distances (:distances layout)
+       :players (init-players layout)
        :tiles {}
        :tiles-reverse {}}
       (import-coordinate-map home-tiles)
@@ -81,6 +90,21 @@
         (set-coordinate c1 t2)
         (set-coordinate c2 t1))))
 
+(defn players [galaxy-map]
+  (->> (get galaxy-map :players)
+       (sort-by first)
+       (map second)))
+
+(defn import-player-map [galaxy-map player-map]
+  (assoc galaxy-map :players player-map))
+(s/fdef import-player-map
+  :args (s/cat :galaxy-map ::galaxy :player-map ::players)
+  :ret ::galaxy)
+
+(defn players-customized? [galaxy-map]
+  (->> galaxy-map
+       (players)
+       (some player/customized?)))
 (defn player-name [galaxy-map key]
   (get-in galaxy-map [:players key :name]))
 (defn player-race [galaxy-map key]
