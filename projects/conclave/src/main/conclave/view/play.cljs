@@ -1,4 +1,4 @@
-(ns conclave.play
+(ns conclave.view.play
   (:require [conclave.map.core :as map]
             [conclave.subs :as subs]
             [conclave.tiles.core :as tile]
@@ -143,7 +143,6 @@
                          (js/btoa)
                          (str "data:image/svg+xml;base64,"))]
     (dl-url "svg-maybe" serialized))
-  
+
   (-> (.toPng dti @element)
-      (.then (partial dl-url "png-is-go.png")))
-  )
+      (.then (partial dl-url "png-is-go.png"))))

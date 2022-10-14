@@ -1,4 +1,4 @@
-(ns conclave.maker-ui
+(ns conclave.view.maker-ui
   (:require [conclave.handlers :as handlers]
             [conclave.subs :as subs]
             [conclave.tiles.core :as tile]

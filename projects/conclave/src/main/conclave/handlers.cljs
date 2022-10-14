@@ -6,7 +6,8 @@
             [conclave.layout.directory :as directory]
             [conclave.storage :as storage]
             [conclave.worker.client :as worker]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [conclave.map.core :as map]))
 
 (declare start-tutorial load-external-map load-internal-map generate-map)
 
@@ -180,29 +181,49 @@
      (dissoc db :selected)
      (assoc db :selected coordinate))))
 
-(def toggle-player-edit ::toggle-player-edit)
+(def start-player-edit ::start-player-edit)
 (rf/reg-event-db
- toggle-player-edit
- (fn [db [_en]]
-   (update db :player-edit not)))
+ start-player-edit
+ (fn [{:keys [map] :as db} _ev]
+   (-> db
+       (assoc :player-edit true)
+       (assoc :player-backup (map/player-map map)))))
+
+(def cancel-player-edit ::cancel-player-edit)
+(rf/reg-event-db
+ cancel-player-edit
+ (fn [{:keys [player-backup] :as db} _ev]
+   (-> db
+       (assoc :player-edit false)
+       (update :map map/import-player-map player-backup)
+       (dissoc :player-backup))))
+
+(def confirm-player-edit ::confirm-player-edit)
+(rf/reg-event-db
+ confirm-player-edit
+ [ix/write-map-to-location ix/store-map-locally]
+ (fn [db _ev]
+   (-> db
+       (assoc :player-edit false)
+       (dissoc :player-backup))))
 
 (def set-player-name ::set-player-name)
 (rf/reg-event-db
  set-player-name
  (fn [db [_en player-key name]]
-   (db/update-player-name db player-key name)))
+   (update db :map map/set-player-name player-key name)))
 
 (def set-player-race ::set-player-race)
 (rf/reg-event-db
  set-player-race
  (fn [db [_en player-key race]]
-   (db/update-player-race db player-key race)))
+   (update db :map map/set-player-race player-key race)))
 
 (def swap-players ::swap-players)
 (rf/reg-event-db
  swap-players
  (fn [db [_en pk1 pk2]]
-   (db/swap-players db pk1 pk2)))
+   (update db :map map/swap-players pk1 pk2)))
 
 (def set-generation-option ::set-generation-option)
 (rf/reg-event-db

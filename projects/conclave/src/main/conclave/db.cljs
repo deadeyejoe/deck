@@ -4,7 +4,7 @@
             [conclave.layout.specs :as layout.specs]
             [conclave.map.core :as map]
             [conclave.map.specs :as map.specs]
-            [conclave.player :as player]
+            [conclave.player.core :as player]
             [conclave.specs :as specs]
             [clojure.spec.alpha :as s]))
 

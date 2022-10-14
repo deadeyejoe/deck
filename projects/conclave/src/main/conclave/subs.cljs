@@ -217,6 +217,18 @@
  (fn [players [_q]]
    (set (keep :race players))))
 
+(def editing-players ::editing-players)
+(rf/reg-sub
+ editing-players
+ (fn [{:keys [player-edit] :as _db} _qv]
+   player-edit))
+
+(def players-dirty ::players-dirty)
+(rf/reg-sub
+ players-dirty
+ (fn [{:keys [map player-backup] :as _db} _qv]
+   (not= (map/player-map map) player-backup)))
+
 (def player-summary ::player-summary)
 (rf/reg-sub
  player-summary

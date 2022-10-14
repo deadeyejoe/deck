@@ -95,6 +95,8 @@
        (sort-by first)
        (map second)))
 
+(def player-map :players)
+
 (defn import-player-map [galaxy-map player-map]
   (assoc galaxy-map :players player-map))
 (s/fdef import-player-map

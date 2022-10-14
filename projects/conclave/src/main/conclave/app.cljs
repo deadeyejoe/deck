@@ -2,7 +2,7 @@
   (:require [conclave.components.signal :as signal]
             [conclave.generate.core]
             [conclave.handlers :as handlers]
-            [conclave.play :as play]
+            [conclave.view.play :as play]
             [conclave.subs :as subs]
             [conclave.view.generation.main :as generation]
             [conclave.view.generation.summary :as generation-summary]
