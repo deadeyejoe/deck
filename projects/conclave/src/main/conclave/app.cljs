@@ -11,8 +11,6 @@
             [conclave.view.sidebar.main :as sidebar]
             [conclave.view.sidebar.screenshot :as screenshot]
             [conclave.view.tutorial.main :as tutorial]
-            [conclave.view.tutorial.handlers :as tutorial-handlers]
-            [conclave.view.tutorial.subs :as tutorial-subs]
             [conclave.worker.client :as worker-client]
             [reagent.dom :as rd]
             [re-frame.core :as rf]
@@ -26,10 +24,10 @@
 
 (defn app-overlay []
   (when (and (not @(rf/subscribe [subs/processing?]))
-             @(rf/subscribe [tutorial-subs/active?]))
+             @(rf/subscribe [subs/modal-active?]))
     [:div {:class ["absolute" "bg-black" "opacity-70" "top-0" "left-0" "w-full" "h-full" "z-app-overlay"
                    "flex" "justify-center" "items-center" "text-9xl"]
-           :on-click #(rf/dispatch [tutorial-handlers/cancel])}]))
+           :on-click #(rf/dispatch [handlers/hide-modal])}]))
 
 (defn generation-button []
   [:div {:class ["absolute" "z-menu" "bottom-0" "left-0"

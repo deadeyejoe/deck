@@ -147,7 +147,7 @@
                   "w-full" "h-1/12" "pt-2"]}
     [:div {:class (concat (button-classes false :small))
            :title "View help"
-           :on-click #(rf/dispatch [tut-handlers/start])}
+           :on-click #(rf/dispatch [handlers/show-modal :tutorial])}
      hicons/question-circle]]
    [:div {:class ["flex" "flex-row" "lg:flex-col" "justify-around" 
                   "w-full" "h-2/3" "text-3xl"]}
@@ -162,7 +162,7 @@
                   "w-full" "h-1/4" "pb-2"]}
     [share-button]
     [:div {:class ["h-1"]}]
-[screenshot-button]
+    [screenshot-button]
     [:div {:class ["h-3"]}]
     [tts-export-button]
     [:div {:class ["h-1"]}]

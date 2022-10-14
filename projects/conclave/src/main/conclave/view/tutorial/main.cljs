@@ -1,10 +1,9 @@
 (ns conclave.view.tutorial.main
   (:require [conclave.subs :as subs]
-            [conclave.view.tutorial.handlers :as tutorial-handles]
-            [conclave.view.tutorial.subs :as tutorial-subs]
             [conclave.view.tutorial.optimal-demo :as optimal-demo]
             [conclave.view.common :as common]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [conclave.handlers :as handlers]))
 
 (defn title [content]
   [:div {:class ["text-4xl" "mb-8" "text-blue-400"]} content])
@@ -24,8 +23,8 @@
   [paragraph "Welcome to Conclave!"
    [unordered-list
     "Click 'Generate' or press Ctrl+Enter to generate a random map, generation may take up to a minute."
-"Configure different map layouts, and options by expanding the pane at the left of the page."
-[:span "Use the toggle on the right to switch between " [:em "optimal"] " and " [:em "base"] " resource/influence values (see below)"]
+    "Configure different map layouts, and options by expanding the pane at the left of the page."
+    [:span "Use the toggle on the right to switch between " [:em "optimal"] " and " [:em "base"] " resource/influence values (see below)"]
     "Hover over player rows to highlight their slice on the map"
     "Use the buttons on the right of the map pane to toggle informational overlays on the map"
     "Hover tiles on the map to see more information"
@@ -94,10 +93,10 @@
     [map-summary]
     [about]]
    [:div {:class ["absolute" "bottom-3" "right-6" "flex" "justify-center" "items-center"]}
-    [common/real-button {:dispatch [tutorial-handles/cancel]} "Exit"]]])
+    [common/real-button {:dispatch [handlers/hide-modal]} "Exit"]]])
 
 (defn component []
-  (when @(rf/subscribe [tutorial-subs/active?])
+  (when @(rf/subscribe [subs/modal-active? :tutorial])
     [:div {:class ["fixed" "h-3/4" "w-1/2" "z-app-overlay"
                    "rounded" "border-gray-700" "bg-gray-900" "text-white"
                    "flex" "justify-center" "items-center" "p-2" "leading-relaxed"]}

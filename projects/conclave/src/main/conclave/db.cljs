@@ -113,7 +113,7 @@
 (defn delete-player [db player-key]
   (update db :players dissoc player-key))
 
-(defn swap-players [db pk1 pk2]_ev
+(defn swap-players [db pk1 pk2]
   (let [p1 (get-in db [:players pk1])
         p2 (get-in db [:players pk2])]
     (assoc db
@@ -146,7 +146,7 @@
   (assoc db :active-modal modal-key))
 (defn modal? [db modal-key]
   (if (some? modal-key)
-    (some? (:active-modal db))
-    (= modal-key (:active-modal db))))
+    (= modal-key (:active-modal db))
+    (some? (:active-modal db))))
 (defn hide-modal [db]
   (dissoc db :active-modal))
