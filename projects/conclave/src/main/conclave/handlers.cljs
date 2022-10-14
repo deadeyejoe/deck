@@ -247,3 +247,15 @@
    (-> db
        (db/toggle-generation-option :pok)
        (db/ensure-layout-pok))))
+
+(def show-modal ::show-modal)
+(rf/reg-event-db
+ show-modal
+ (fn [db [_en modal-key]]
+   (db/show-modal db modal-key)))
+
+(def hide-modal ::hide-modal)
+(rf/reg-event-db
+ hide-modal
+ (fn [db _ev]
+   (db/hide-modal db)))

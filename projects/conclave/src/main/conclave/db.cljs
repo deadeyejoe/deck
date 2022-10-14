@@ -42,6 +42,8 @@
 (s/def ::storage-index nat-int?)
 (s/def ::storage-total nat-int?)
 
+(s/def ::active-modal keyword?)
+
 (s/def ::db (s/keys :req-un [::overlay-mode
                              ::highlight-mode
                              ::worker-mode
@@ -54,7 +56,8 @@
                              ::selected
                              ::storage-index
                              ::processing
-                             ::storage-total]))
+                             ::storage-total
+                             ::active-modal]))
 
 (def default-flags
   {:player-edit false
@@ -110,7 +113,7 @@
 (defn delete-player [db player-key]
   (update db :players dissoc player-key))
 
-(defn swap-players [db pk1 pk2]
+(defn swap-players [db pk1 pk2]_ev
   (let [p1 (get-in db [:players pk1])
         p2 (get-in db [:players pk2])]
     (assoc db
@@ -138,3 +141,12 @@
       :always (set-generation-option :include-legendaries false)
       :always (set-generation-option :legendaries-in-equidistants false))
     db))
+
+(defn show-modal [db modal-key]
+  (assoc db :active-modal modal-key))
+(defn modal? [db modal-key]
+  (if (some? modal-key)
+    (some? (:active-modal db))
+    (= modal-key (:active-modal db))))
+(defn hide-modal [db]
+  (dissoc db :active-modal))

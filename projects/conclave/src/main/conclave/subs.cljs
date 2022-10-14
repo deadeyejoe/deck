@@ -257,3 +257,9 @@
  optimal-values
  :<- [generation-option :optimal-values]
  (fn [value _qv] value))
+
+(def modal-active? ::modal-active?)
+(rf/reg-sub
+ modal-active?
+ (fn [db [_qn modal-key]]
+   (db/modal? db modal-key)))
