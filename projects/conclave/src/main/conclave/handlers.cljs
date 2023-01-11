@@ -50,11 +50,12 @@
 (rf/reg-event-db
  load-internal-map
  [ix/write-map-to-location]
- (fn [db [_en {:keys [index map layout] :as _internal-map-entry}]]
+ (fn [db [_en [{:keys [map layout] :as _internal-map-entry} index total]]]
    (-> db
        (db/set-map map)
        (db/set-layout layout)
-       (assoc :storage-index index))))
+       (assoc :storage-index index)
+       (assoc :storage-total total))))
 
 (def map-generated ::map-generated)
 (rf/reg-event-db
@@ -75,8 +76,8 @@
          new-index (case direction
                      :next (+ current-index quantity)
                      :previous (- current-index quantity))
-         retrieved-map-entry (storage/retrieve-map local-store new-index)]
-     (when retrieved-map-entry {:fx [[:dispatch [load-internal-map retrieved-map-entry]]]}))))
+         retrieved-map-details (storage/retrieve-map local-store new-index)]
+     (when retrieved-map-details {:fx [[:dispatch [load-internal-map retrieved-map-details]]]}))))
 
 (comment
   (rf/dispatch [navigate-map :next])

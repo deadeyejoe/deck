@@ -52,12 +52,14 @@
          (<= (count maps) n) (last maps)
          :else (get maps n))))
 
+(defn total-maps [{:keys [maps] :as _local-storage}]
+  (count maps))
+
 (defn retrieve-map
   ([local-storage] (retrieve-map local-storage :last))
   ([local-storage n]
    (when-let [{:keys [index map]} (get-map local-storage n)]
-     (assoc (serialization/deserialize map)
-            :index index))))
+     [(serialization/deserialize map) index (total-maps local-storage)])))
 
 (defn store-options
   [local-storage options]
