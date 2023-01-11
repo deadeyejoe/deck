@@ -3,6 +3,7 @@
             [conclave.map.serialization :as serialization]
             [conclave.storage :as storage]
             [clojure.spec.alpha :as s]
+            [expound.alpha :as expound]
             [re-frame.core :as rf]))
 
 (defn set-hash! [loc]
@@ -44,7 +45,9 @@
   "Throws an exception if `db` doesn't match the Spec `a-spec`."
   [a-spec db]
   (when-not (s/valid? a-spec db)
-    (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
+    (let [spec-error (expound/expound-str a-spec db)]
+      (.log js/console spec-error)
+      (throw (ex-info (str "spec check failed: " spec-error) {})))))
 
 ;; now we create an interceptor using `after`
 (def check-spec-interceptor (rf/after (partial check-and-throw ::db/db)))
