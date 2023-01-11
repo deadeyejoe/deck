@@ -5,7 +5,7 @@
 
 (s/def ::key (->> (range 1 8)
                   (map (fn [i]
-                         (keyword (str "p" i))))
+                         (keyword (str "P" i))))
                   (set)))
 (s/def ::name string?)
 (s/def ::race ::race/index)
@@ -16,3 +16,6 @@
 (defn customized? [{:keys [name race] :as _player}]
   (and (str/some? name)
        (number? race)))
+
+(defn key->index [player-key]
+  (-> player-key name (str/substring 1)))

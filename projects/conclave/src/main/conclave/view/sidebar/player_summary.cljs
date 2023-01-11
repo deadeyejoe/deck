@@ -66,7 +66,7 @@
 (defn header-row []
   (into [:div {:class ["flex" "w-full" "h-8" "my-1"]}]
         (summary-row-structure
-         ""
+        ;;  [common/button "Edit Players" [handlers/start-player-edit]]
          [:div {:class ["flex" "w-full" "justify-end" "p-2"]} icons/resource]
          [:div {:class ["flex" "w-full" "justify-end" "p-2"]} icons/influence] "" "" "")))
 

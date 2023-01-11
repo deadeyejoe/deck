@@ -162,14 +162,14 @@
             (str/some? players-string) (map/import-player-map (deserialize-players layout players-string)))}))
 
 (comment
-  (let [players {:p1 {:key :p1
+  (let [players {:P1 {:key :P1
                       :name "Joe"
                       :race 4}
-                 :p2 {:key :p2
+                 :P2 {:key :P2
                       :race 6}
-                 :p3 {:key :p3
+                 :P3 {:key :P3
                       :name "Mark"}
-                 :p4 {:key :p4}}
+                 :P4 {:key :P4}}
         layout (directory/code->layout "4p")
         serialized (serialize-players {:players players})
         deserialized (deserialize-players layout serialized)]

@@ -82,3 +82,7 @@
   [:img (image-props "tile/ST_39_Back" "35px")])
 (def grey-tile
   [:img (merge (image-props "tile/ST_18_Back" "35px") {:class ["grayscale"]})])
+
+(defn race-icon [{:keys [key] :as _race}]
+  (when key
+    [:img (image-props (str "race/" (name key)) "25px")]))

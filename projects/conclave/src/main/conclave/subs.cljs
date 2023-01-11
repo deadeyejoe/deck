@@ -2,6 +2,7 @@
   (:require [conclave.db :as db]
             [conclave.map.core :as map]
             [conclave.map.summary :as map-summary]
+            [conclave.player.race :as race]
             [conclave.tiles.view :as tiles-view]
             [conclave.tiles.core :as tile]
             [conclave.utils.hex :as hex]
@@ -182,7 +183,7 @@
 (rf/reg-sub
  player-race-index
  :<- [galaxy-map]
- (fn [galaxy-map[_q player-key]]
+ (fn [galaxy-map [_q player-key]]
    (map/player-race galaxy-map player-key)))
 
 (def player-race ::player-race)
@@ -210,18 +211,26 @@
  (fn [race _qv]
    (:key race)))
 
-(def selected-races ::selected-races)
+(def selected-race-indices ::selected-race-indices)
 (rf/reg-sub
- selected-races
+ selected-race-indices
  :<- [players]
  (fn [players [_q]]
    (set (keep :race players))))
 
-(def editing-players ::editing-players)
+(def races-with-availability ::races-with-availability)
 (rf/reg-sub
- editing-players
- (fn [{:keys [player-edit] :as _db} _qv]
-   player-edit))
+ races-with-availability
+ (fn [[_q player-key]]
+   [(rf/subscribe [player-race-index player-key])
+    (rf/subscribe [selected-race-indices])])
+ (fn [[player-race-index selected-race-indices] [_q]]
+   (let [not-selected-by-current-player (complement #{player-race-index})
+         selected-by-player selected-race-indices]
+     (map (fn [{:keys [index] :as race}]
+            (assoc race :disabled (boolean (and (not-selected-by-current-player index)
+                                                (selected-by-player index)))))
+          race/directory))))
 
 (def players-dirty ::players-dirty)
 (rf/reg-sub

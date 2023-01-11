@@ -109,7 +109,7 @@
        (some player/customized?)))
 
 (defn player-name [galaxy-map player-key]
-  (get-in galaxy-map [:players player-key :name] player-key))
+  (get-in galaxy-map [:players player-key :name]))
 (defn player-race [galaxy-map player-key]
   (get-in galaxy-map [:players player-key :race]))
 

@@ -186,17 +186,17 @@
  start-player-edit
  (fn [{:keys [map] :as db} _ev]
    (-> db
-       (assoc :player-edit true)
-       (assoc :player-backup (map/player-map map)))))
+       (assoc :player-backup (map/player-map map))
+       (db/show-modal :player-edit))))
 
 (def cancel-player-edit ::cancel-player-edit)
 (rf/reg-event-db
  cancel-player-edit
  (fn [{:keys [player-backup] :as db} _ev]
    (-> db
-       (assoc :player-edit false)
        (update :map map/import-player-map player-backup)
-       (dissoc :player-backup))))
+       (dissoc :player-backup)
+       (db/hide-modal))))
 
 (def confirm-player-edit ::confirm-player-edit)
 (rf/reg-event-db
@@ -205,7 +205,11 @@
  (fn [db _ev]
    (-> db
        (assoc :player-edit false)
-       (dissoc :player-backup))))
+       (dissoc :player-backup)
+       (db/hide-modal))))
+
+(comment (rf/dispatch [confirm-player-edit])
+         )
 
 (def set-player-name ::set-player-name)
 (rf/reg-event-db
@@ -217,7 +221,7 @@
 (rf/reg-event-db
  set-player-race
  (fn [db [_en player-key race]]
-   (update db :map map/set-player-race player-key race)))
+   (update db :map map/set-player-race player-key (parse-long race))))
 
 (def swap-players ::swap-players)
 (rf/reg-event-db

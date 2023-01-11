@@ -8,6 +8,7 @@
             [conclave.view.generation.summary :as generation-summary]
             [conclave.view.generation.signals :as generation-signal]
             [conclave.view.map.main :as map]
+            [conclave.view.player.main :as player]
             [conclave.view.sidebar.main :as sidebar]
             [conclave.view.sidebar.screenshot :as screenshot]
             [conclave.view.tutorial.main :as tutorial]
@@ -58,7 +59,8 @@
      [generation-sidebar]
      [map/component]
      [map-overlay]
-     [tutorial/component]]
+     [tutorial/component]
+     [player/component]]
     [:div {:class ["flex" "flex-col" "justify-center"
                    "w-full" "lg:w-1/3" "h-1/3" "lg:h-full"]
            :on-mouse-enter #(rf/dispatch [handlers/clear-hover])}
