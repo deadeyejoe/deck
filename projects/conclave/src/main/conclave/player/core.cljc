@@ -5,7 +5,7 @@
 
 (s/def ::key (->> (range 1 8)
                   (map (fn [i]
-                         (keyword (str "p" i))))
+                         (keyword (str "P" i))))
                   (set)))
 (s/def ::name string?)
 (s/def ::race ::race/index)
