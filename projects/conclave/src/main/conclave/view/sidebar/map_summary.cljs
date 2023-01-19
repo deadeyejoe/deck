@@ -32,18 +32,20 @@
 (comment
   (map clamp [-1 50 101]))
 
-(defn percentage [props {:keys [lower value upper] :as _bounds}]
+(defn percentage [{:keys [background-props text-props]} {:keys [lower value upper] :as _bounds}]
   (let [percent (clamp (int (* (/ (- value lower)
                                   (- upper lower))
-                               100)))]
+                               100)))
+        minimal? (< percent 10)]
     [h-box {:class ["h-8" "flex"]}
      [:div {:class ["flex" "justify-end" "w-16" "pr-2"]} lower]
-     [:div {:class ["p-1" "border" "border-gray-800" "w-full" "h-full"]}
-      [:div (merge-with into
-                        {:class ["h-full" "flex" "items-center" "justify-end" "pr-2" "transition-all"]
-                         :style {:width (str percent "%")}}
-                        props)
-       value]]
+     [:div {:class (into ["p-1" "border" "border-gray-800" "w-full" "h-full" "flex"])}
+      [:div {:class (into ["h-full" "flex" "items-center" "justify-end" "pr-2" "transition-all" "text-black"]
+                          background-props)
+             :style {:width (str percent "%")}}
+       (when-not minimal? value)]
+      (when minimal?
+        [:div {:class (into ["h-full" "pl-2" "flex" "items-center"] text-props)} value])]
      [:div {:class ["flex" "justify-start" "w-16" "pl-2"]} upper]]))
 
 (defn icon-count [icon value title]
@@ -80,15 +82,15 @@
     [:<>
      [h-box {:class ["pr-3"]}
       [label "Planets:"]
-      [percentage {:class ["bg-gradient-to-r" "from-gray-800" "to-gray-400" "text-black"]}
+      [percentage {:background-props ["bg-gradient-to-r" "from-gray-800" "to-gray-400"] :text-props ["text-gray-400" "opacity-80"]}
        (:planets map-summary)]]
      [h-box {:class ["mt-1" "pr-3"]}
       [label "Resources:"]
-      [percentage {:class ["bg-gradient-to-r" "from-amber-800" "to-amber-400" "text-black"]}
+      [percentage {:background-props ["bg-gradient-to-r" "from-amber-800" "to-amber-400"] :text-props ["text-amber-400" "opacity-80"]}
        ((if optimal? :optimal-resources :resources) map-summary)]]
      [h-box {:class ["mt-1" "pr-3"]}
       [label "Influence:"]
-      [percentage {:class ["bg-gradient-to-r" "from-cyan-800" "to-cyan-400" "text-black"]}
+      [percentage {:background-props ["bg-gradient-to-r" "from-cyan-800" "to-cyan-400"] :text-props ["text-cyan-400" "opacity-80"]}
        ((if optimal? :optimal-influence :influence) map-summary)]]]))
 
 (defn component []
