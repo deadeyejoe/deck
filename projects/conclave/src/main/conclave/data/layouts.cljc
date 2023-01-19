@@ -97,6 +97,31 @@
                               {:coordinate [-3 0 3] :key :p5}
                               {:coordinate [-3 3 0] :key :p6}]})
 
+(def six-player-large {:name "6 Player Large"
+                       :code "6pl"
+                       :radius 4
+                       :type-counts {:blue (* 6 6)
+                                     :red (* 6 3)}
+                       :fixed-tiles [{:coordinate [0 0 0] :key :18}]
+                       :home-tiles [{:coordinate [0 4 -4] :key :p1}
+                                    {:coordinate [4 0 -4] :key :p2}
+                                    {:coordinate [4 -4 0] :key :p3}
+                                    {:coordinate [0 -4 4] :key :p4}
+                                    {:coordinate [-4 0 4] :key :p5}
+                                    {:coordinate [-4 4 0] :key :p6}]})
+
+(def five-player {:name "5 Player"
+                  :code "5p"
+                  :radius 3
+                  :type-counts {:blue (* 5 4)
+                                :red (+ 1 (* 5 2))}
+                  :fixed-tiles [{:coordinate [0 0 0] :key :18}]
+                  :home-tiles [{:coordinate [-1 3 -2] :key :p1}
+                               {:coordinate [3 0 -3] :key :p2}
+                               {:coordinate [3 -3 0] :key :p3}
+                               {:coordinate [0 -3 3] :key :p4}
+                               {:coordinate [-3 1 2] :key :p5}]})
+
 (def five-player-warp {:name "5 Player Warp"
                        :pok true
                        :code "5pw"

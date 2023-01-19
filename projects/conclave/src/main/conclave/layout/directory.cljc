@@ -105,6 +105,8 @@
                                   layout-data/seven-player
                                   layout-data/seven-player-warp
                                   layout-data/six-player
+                                  layout-data/six-player-large
+                                  layout-data/five-player
                                   layout-data/five-player-warp
                                   layout-data/four-player
                                   layout-data/three-player]))
