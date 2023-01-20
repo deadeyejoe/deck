@@ -1,0 +1,17 @@
+{:top-namespace "deck"
+ :interface-ns "interface"
+ :default-profile-name "default"
+ :compact-views #{}
+ :vcs {:auto-add false
+       :name "git"}
+ :tag-patterns {:release "v[0-9]*"
+                :stable "stable-*"}
+ :projects {"authority" {:alias "?1"}
+            "command-line" {:alias "cl"
+                            :test {:create-test-runner [polylith.clj.core.clojure-test-test-runner.interface/create]}}
+            "conclave" {:alias "?3"}
+            "development" {:alias "dev"
+                           :test {:create-test-runner [polylith.clj.core.clojure-test-test-runner.interface/create]}}
+            "imperium" {:alias "imp"
+                        :test {:create-test-runner [polylith.clj.core.clojure-test-test-runner.interface/create]}}
+            "ur" {:alias "?2"}}}

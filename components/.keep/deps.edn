@@ -1,0 +1,5 @@
+{:paths []
+ :deps {}
+ :aliases {:test {:extra-deps {}
+                  :extra-paths []}}}
+
