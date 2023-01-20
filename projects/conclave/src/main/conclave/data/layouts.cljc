@@ -100,6 +100,7 @@
 (def six-player-large {:name "6 Player Large"
                        :code "6pl"
                        :radius 4
+                       :pok true
                        :type-counts {:blue (* 6 6)
                                      :red (* 6 3)}
                        :fixed-tiles [{:coordinate [0 0 0] :key :18}]
@@ -123,7 +124,6 @@
                                {:coordinate [-3 1 2] :key :P5}]})
 
 (def five-player-warp {:name "5 Player Warp"
-                       :pok true
                        :code "5pw"
                        :radius 3
                        :type-counts {:blue (* 5 3)
