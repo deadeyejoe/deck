@@ -1,11 +1,5 @@
 {:deps {org.clojure/clojure {:mvn/version "1.10.1"}
-        org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
-        juxt/crux-core {:mvn/version "21.02-1.15.0-beta"}
-        integrant/integrant {:mvn/version "0.8.0"}
-        io.pedestal/pedestal.service {:mvn/version "0.5.7"}
-        io.pedestal/pedestal.route   {:mvn/version "0.5.7"}
-        io.pedestal/pedestal.jetty   {:mvn/version "0.5.7"}
-        org.slf4j/slf4j-simple       {:mvn/version "1.7.28"}}
+        org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}}
 
  :polylith {:vcs "git"
             :top-namespace "deadeye.joe"
@@ -21,52 +15,11 @@
 
  :aliases  {:joe {:main-opts ["-i" "development/src/dev/joe.clj" "-e" "(in-ns,'dev.joe)" "-r"]}
             :dev {:extra-paths ["development/src"
-                                "bases/cli/resources"
-                                "bases/cli/src"
-                                "bases/twilight_imperium/resources"
-                                "bases/twilight_imperium/src"
-                                "components/action/resources"
-                                "components/action/src"
-                                "components/choice/resources"
-                                "components/choice/src"
-                                "components/consensus/resources"
-                                "components/consensus/src"
-                                "components/crux/resources"
-                                "components/crux/src"
-                                "components/ordering/resources"
-                                "components/ordering/src"
-                                "components/pack/resources"
-                                "components/pack/src"
-                                "components/player/resources"
-                                "components/player/src"
-                                "components/phase/resources"
-                                "components/phase/src"
-                                "components/role/resources"
-                                "components/role/src"
-                                "components/state/resources"
-                                "components/state/src"
-                                "components/table/resources"
-                                "components/table/src"
-                                "components/user/resources"
-                                "components/user/src"
-                                "components/utility/resources"
-                                "components/utility/src"]
-                  :extra-deps {integrant/repl {:mvn/version "0.3.2"}
-                               djblue/portal {:mvn/version "0.12.0"}}}
-
-            :test {:extra-paths ["bases/cli/test"
-                                 "bases/twilight-imperium/test"
-                                 "components/action/test"
-                                 "components/consensus/test"
-                                 "components/crux/test"
-                                 "components/deck/test"
-                                 "components/ordering/test"
-                                 "components/phase/test"
-                                 "components/player/test"
-                                 "components/table/test"
-                                 "components/user/test"
-                                 "components/utility/test"]
-                   :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}}}
+                                "components/interceptor"
+                                "components/random"
+                                "components/re-frame"]
+                  :extra-deps {djblue/portal {:mvn/version "0.12.0"}}}
+            :test {}
 
             :poly {:main-opts ["-m" "polylith.clj.core.poly-cli.core"]
                    :extra-deps {polyfy/polylith
