@@ -3,9 +3,11 @@
             [clojure.spec.alpha :as s]
             [superstring.core :as str]))
 
+(def player-prefix "P")
+
 (s/def ::key (->> (range 1 8)
                   (map (fn [i]
-                         (keyword (str "P" i))))
+                         (keyword (str player-prefix i))))
                   (set)))
 (s/def ::name string?)
 (s/def ::race ::race/index)

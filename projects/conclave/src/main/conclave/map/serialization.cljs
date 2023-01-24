@@ -7,7 +7,8 @@
             [cognitect.transit :as t]
             [goog.crypt.base64 :as b64]
             [medley.core :as medley]
-            [superstring.core :as str]))
+            [superstring.core :as str]
+            [conclave.player.core :as player]))
 
 ;; Serialize ===========================================
 
@@ -78,7 +79,7 @@
 
 (defn resolve-key [coordinate key-str]
   (cond
-    (str/starts-with? key-str "p") (tile/blank-home-tile (keyword key-str))
+    (str/starts-with? key-str player/player-prefix) (tile/blank-home-tile (keyword key-str))
     (= 4 (count key-str)) (let [tile-key (str/substring key-str 0 3)
                                 tile-rotation (js/parseInt (str/substring key-str 3 4))]
                             (tile/hyperlane-tile {:key (keyword tile-key)
@@ -118,7 +119,7 @@
        (drop 1)
        (map (fn [s]
               (if (or (= "X" s)
-                      (str/starts-with? s "p"))
+                      (str/starts-with? s player/player-prefix))
                 "0" "1")))
        (apply str)
        (directory/tts-fingerprint->layout)))
@@ -162,14 +163,14 @@
             (str/some? players-string) (map/import-player-map (deserialize-players layout players-string)))}))
 
 (comment
-  (let [players {:p1 {:key :p1
+  (let [players {:P1 {:key :P1
                       :name "Joe"
                       :race 4}
-                 :p2 {:key :p2
+                 :P2 {:key :P2
                       :race 6}
-                 :p3 {:key :p3
+                 :P3 {:key :P3
                       :name "Mark"}
-                 :p4 {:key :p4}}
+                 :P4 {:key :P4}}
         layout (directory/code->layout "4p")
         serialized (serialize-players {:players players})
         deserialized (deserialize-players layout serialized)]
