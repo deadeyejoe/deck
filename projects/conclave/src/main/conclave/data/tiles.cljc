@@ -377,7 +377,7 @@
                    :trait :industrial}]}
    :61 {:type :blue
         :pok true
-        :planets [{:name "Perimeter"
+        :planets [{:name "Ang"
                    :resources 2
                    :influence 0
                    :trait :industrial
@@ -474,7 +474,7 @@
                    :specialty :warfare}]}
    :73 {:type :blue
         :pok true
-        :planets [{:name "Lisis"
+        :planets [{:name "Cealdri"
                    :resources 0
                    :influence 2
                    :trait :cultural
