@@ -13,3 +13,11 @@
 
 (defn reg-db-spec-check [a-spec]
   (rf/reg-global-interceptor (rf/after (partial check-and-throw a-spec))))
+
+(def now ::now)
+
+(defn now-cofx-handler [coeffect]
+  (assoc coeffect ::now (js/Date.)))
+
+(defn reg-now-cofx []
+  (rf/reg-cofx ::now now-cofx-handler))
