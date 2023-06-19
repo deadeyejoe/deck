@@ -164,3 +164,15 @@
                    :home-tiles [{:coordinate [3 0 -3] :key :P1}
                                 {:coordinate [0 -3 3] :key :P2}
                                 {:coordinate [-3 3 0] :key :P3}]})
+
+(def all
+  [eight-player
+   eight-player-warp
+   seven-player
+   seven-player-warp
+   six-player
+   six-player-large
+   five-player
+   five-player-warp
+   four-player
+   three-player])

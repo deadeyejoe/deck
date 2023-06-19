@@ -100,16 +100,7 @@
       (add-to-layout :distances distance/all-distances)
       (add-to-layout :slices slice/slices)))
 
-(def layouts (mapv enrich-layout [layout-data/eight-player
-                                  layout-data/eight-player-warp
-                                  layout-data/seven-player
-                                  layout-data/seven-player-warp
-                                  layout-data/six-player
-                                  layout-data/six-player-large
-                                  layout-data/five-player
-                                  layout-data/five-player-warp
-                                  layout-data/four-player
-                                  layout-data/three-player]))
+(def layouts (mapv enrich-layout layout-data/all))
 (def base-layouts (remove :pok layouts))
 
 (def code->layout (medley/index-by :code layouts))
