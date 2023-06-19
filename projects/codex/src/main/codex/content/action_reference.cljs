@@ -215,13 +215,41 @@
   {:title "Skills"
    :refer-by [:skill :skills]
    :style {:section true
-           :list :bullet}})
+           :list :bullet}
+   :children ["Each player starts with no skills"
+              "One skill is gained at each even numbered [[level]]"
+              "Skills are unique to each character, other characters skills may be gained from the common skill offer"
+              {:body "Skills have 3 basic types:"
+               :children [{:body "Once per round: flip to indicate the skill has been used. Flip it back at the end of the round"
+                           :children ["Some once per round skills have a cost that can be paid to be flip them back"]}
+                          {:body "Interactive: as for once per round, but persist until the start of your next turn"
+                           :children ["When you use an interactive skill announce it to the other players and place the token in the center"
+                                      "Other players may return the token to you to trigger an effect, flip it face down"
+                                      "If the skill is not returned to you before your turn starts, take it back and flip it face down"]}
+                          "Once per turn: may be used once per turn"]}]})
 
 (def mana
   {:title "Mana"
    :refer-by [:mana]
    :style {:section true
-           :list :bullet}})
+           :list :bullet}
+   :children ["There are 4 basic colours of mana: red, blue, white, green"
+              {:body "There are 2 special colours of mana:"
+               :children [{:title "Gold"
+                           :body "Gold mana may be used as any basic colour, it may only be used during the day"}
+                          {:title "Black"
+                           :body "Black mana may only be used at night to power effects that require it"}]}
+              {:body "Mana comes in two forms"
+               :children [{:title "Pure mana"
+                           :body "Represented by a mana token or die in a player's play area, disappears at the end of the turn if not used"
+                           :children ["Special mana can only be in pure form"]}
+                          {:title "Crystals"
+                           :body "Represented by a mana token in your inventory"
+                           :children ["Crystals can be turned into a pure mana of the same colour at any point during your turn"]}]}
+              {:body "The source represents pure mana present in the world"
+               :children ["Each turn a player may take one die from the source and use it as mana of the matchin colour"
+                          "Any dice taken from the source is rerolled at the end of the turn"
+                          "Mana dice are taken at the moment they are used. Players can't take a die from the source and choose not to use it"]}]})
 
 (def gain
   {:title "Gain effects"
