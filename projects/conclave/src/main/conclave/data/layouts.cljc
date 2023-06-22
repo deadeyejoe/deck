@@ -123,39 +123,6 @@
                                {:coordinate [0 -3 3] :key :P4}
                                {:coordinate [-3 1 2] :key :P5}]})
 
-(def five-player-flat {:name "5 Player Flat"
-                  :code "5pf"
-                  :radius 4
-                  :type-counts {:blue 20
-                                :red 12}
-                  :blank-coordinates [[-2 4 -2] [-1 4 -3] [1 3 -4] [2 2 -4]
-                                      [-4 4 0] [-3 4 -1] [-2 3 -1] [-1 3 -2]
-                                      [1 2 -3] [2 1 -3] [3 1 -4] [4 0 -4]
-                                      [0 3 -3] [0 4 -4]
-                                      [-4 0 4] [-3 -1 4] [-2 -2 4]
-                                      [-1 -3 4] [0 -4 4] [1 -4 3]
-                                      [2 -4 2] [3 -4 1] [4 -4 0]
-                                      ]
-                  :fixed-tiles [{:coordinate [0 0 0] :key :18}]
-                  :home-tiles [{:coordinate [-3 3 0] :key :P1}
-                               {:coordinate [3 0 -3] :key :P2}
-                               {:coordinate [3 -3 0] :key :P3}
-                               {:coordinate [0 -3 3] :key :P4}
-                               {:coordinate [-3 0 3] :key :P5}]})
-
-(def five-player-notch {:name "5 Player Notch"
-                  :code "5pn"
-                  :radius 3
-                  :type-counts {:blue 19
-                                :red 10}
-                  :fixed-tiles [{:coordinate [0 0 0] :key :18}]
-                  :blank-coordinates [[0 3 -3] [0 2 -2]]
-                  :home-tiles [{:coordinate [-1 3 -2] :key :P1}
-                               {:coordinate [1 2 -3] :key :P2}
-                               {:coordinate [3 -2 -1] :key :P3}
-                               {:coordinate [0 -3 3] :key :P4}
-                               {:coordinate [-3 1 2] :key :P5}]})
-
 (def five-player-warp {:name "5 Player Warp"
                        :code "5pw"
                        :radius 3
@@ -173,6 +140,38 @@
                                     {:coordinate [3 -3 0] :key :P3}
                                     {:coordinate [-3 0 3] :key :P4}
                                     {:coordinate [-3 3 0] :key :P5}]})
+
+(def five-player-flat {:name "5 Player Flat (New!)"
+                       :code "5pf"
+                       :radius 4
+                       :type-counts {:blue 20
+                                     :red 12}
+                       :blank-coordinates [[-2 4 -2] [-1 4 -3] [1 3 -4] [2 2 -4]
+                                           [-4 4 0] [-3 4 -1] [-2 3 -1] [-1 3 -2]
+                                           [1 2 -3] [2 1 -3] [3 1 -4] [4 0 -4]
+                                           [0 3 -3] [0 4 -4]
+                                           [-4 0 4] [-3 -1 4] [-2 -2 4]
+                                           [-1 -3 4] [0 -4 4] [1 -4 3]
+                                           [2 -4 2] [3 -4 1] [4 -4 0]]
+                       :fixed-tiles [{:coordinate [0 0 0] :key :18}]
+                       :home-tiles [{:coordinate [-3 3 0] :key :P1}
+                                    {:coordinate [3 0 -3] :key :P2}
+                                    {:coordinate [3 -3 0] :key :P3}
+                                    {:coordinate [0 -3 3] :key :P4}
+                                    {:coordinate [-3 0 3] :key :P5}]})
+
+(def five-player-notch {:name "5 Player Notch (New!)"
+                        :code "5pn"
+                        :radius 3
+                        :type-counts {:blue 19
+                                      :red 10}
+                        :fixed-tiles [{:coordinate [0 0 0] :key :18}]
+                        :blank-coordinates [[0 3 -3] [0 2 -2]]
+                        :home-tiles [{:coordinate [-1 3 -2] :key :P1}
+                                     {:coordinate [1 2 -3] :key :P2}
+                                     {:coordinate [3 -2 -1] :key :P3}
+                                     {:coordinate [0 -3 3] :key :P4}
+                                     {:coordinate [-3 1 2] :key :P5}]})
 
 (def four-player {:name "4 Player"
                   :code "4p"
@@ -206,8 +205,8 @@
    six-player
    six-player-large
    five-player
+   five-player-warp
    five-player-flat
    five-player-notch
-   five-player-warp
    four-player
    three-player])
