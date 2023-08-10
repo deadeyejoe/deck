@@ -28,17 +28,18 @@
     (section? context) (conj "my-2")
     (top-level-section? context) (conj "m-1" "p-1" "border")))
 
-(def default-title-classes ["font-bold" "w-full" "pl-1"])
+(def default-title-classes ["font-bold" "pl-1"])
 
 (def depth->title-size {1 "text-2xl"
                         2 "text-xl"})
 (def depth->title-bg {1 "bg-orange-500"
-                      2 "bg-orange-300"})
+                      2 "bg-orange-300"
+                      3 "bg-orange-100"})
 
 (defn title [{:keys [depth] :as context} _node]
   (cond-> default-title-classes
     :always (conj (get depth->title-size depth "text-base"))
-    (section? context) (conj (get depth->title-bg depth) "mb-1")))
+    (section? context) (conj (get depth->title-bg depth) "mb-1" "w-full")))
 
 (def ordinal-width "w-8")
 (def ordinal-height "h-8")

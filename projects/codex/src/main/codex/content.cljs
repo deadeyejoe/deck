@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [codex.content.action-reference :as actions]
+            [codex.content.combat :as combat]
             [codex.content.sites :as sites]
             [codex.content.summaries :refer [player-turn round-steps]]
             [com.rpl.specter :as sr]
@@ -42,7 +43,8 @@
 (def all-raw {:children (-> []
                             (conj round-steps player-turn)
                             (into actions/all-content)
-                            (conj sites/all))})
+                            (conj sites/all)
+                            (into combat/all))})
 
 (defn indexizer
   "A hack because I can't into specter. 
@@ -124,7 +126,7 @@
 (defn process-content-str [ref-map content-str]
   (->> (str/split content-str #"(\[\[.+?\]\])")
        (sr/transform [TAGS sr/ALL]  (partial tag->ref ref-map))
-       (into [:div])))
+       (into [:span])))
 
 (defn transform-content [content]
   (let [refmap (->ref-map content)]

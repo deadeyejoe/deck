@@ -1,5 +1,7 @@
 (ns codex.content.action-reference)
 
+;; ============================================= DEEDS =============================================
+
 (def basic-actions
   {:title "Basic actions"
    :refer-by [:action-card]
@@ -46,6 +48,7 @@
    :style {:section true
            :list :bullet}
    :children ["Artifacts do not have an associated colour of mana"
+              "If an effect refers to the colour of a card, an artifact is not a valid target unless explicitly stated"
               {:title "Effect costs"
                :children ["Playing an artifact for its basic effect is free"
                           "Playing an artifact for its strong effect requires throwing it away after use"]}
@@ -53,7 +56,7 @@
                :children ["gaining as a reward for some [[sites]]"
                           "purchasing from a conquered red [[city]] for 12 [[influence]]"]}
               {:title "Banner Artifacts"
-               :body "This is a subtype of artifact that augments your [[units]]"
+               :body "are a subtype of artifact that augments your [[units]]"
                :children ["Banner artifacts may be assigned to a unit at any time during your turn, the basic effect applies to the assigned unit"
                           {:body "Once assigned the banner stays assigned to the unit until the end of the round"
                            :children ["You may decide at the end of the round whether to keep the banner assigned to that unit or discard it to add it to your deed deck for the next round"
@@ -62,6 +65,8 @@
                                       "Flipped banners can be refreshed at the end of the round"]}
                           "The strong effect is inaccessible while the banner is assigned to a unit, it can only be triggered by throwing it away from your hand"
                           "If a unit is destroyed or disbanded, the banner is discarded"]}]})
+
+;; ===================================== Card mechanics =====================================
 
 (def playing-cards
   {:title "Playing Cards"
@@ -75,7 +80,7 @@
                           "Any costs must be paid in full"]}
               {:body "All non-wound cards may be played sideways to gain 1 [[movement]], [[influence]], [[attack]] , or [[block]]"
                :children ["Cards played sideways may only provide these 4 effects (e.g. they can't be used for [[healing]] or [[ranged attack]])"]}
-              "[[Wound]] cards may never be played or discarded as part of any effect unless explicitly stated"
+              "[[Wound]] cards may never be played as part of any effect unless explicitly stated"
               "Any unused points (movement, influence, etc.) granted by effects are lost at the end of each (movement/action/combat) phase"]})
 
 (def timing
@@ -88,15 +93,14 @@
               "Some cards have multiple types since they can produce multiple effects, timing restrictions must be obeyed depending on which effect is chosen at play time"
               {:body "The 6 types are"
                :children ["[[Special]] provides a wide variety of effects, may be played at any time during your turn"
-                          "[[Healing]] allows you to throw away wound cards, may not be played during combat, but otherwise follows the restrictions for [[special]]"
+                          "[[Healing]] allows you to throw away wound cards, may not be played during combat, but otherwise follows the rules for special"
                           {:body "[[Move]] provides movement points, may be played at any time"
                            :children ["Generally played during the movement phase, but can be used to trigger non-movement effects at other times"
                                       "Unspent movement points do not carry over from the phase (movement/action) they were gained"]}
                           {:body "[[Influence]] provides influence points, may be played at any time"
                            :children ["Generally played during [[interaction]], but can be used to trigger some effects at other times"
                                       "Unspent influence points do not carry from the phase (movement/action) they were gained"]}
-                          {:body "[[Combat]] provides block/damage/ranged damage/siege ranged damage, only played during combat"
-                           :children [""]}
+                          {:body "[[Combat]] provides block/damage/ranged damage/siege ranged damage, only played during combat"}
                           "[[Action]] provides a variety of effects, must be taken as the action for that turn"]}
               {:title "Note:"
                :body "[[Special]], [[Healing]], [[Move]], and [[Influence]] cards can be played any time after your turn starts and before you announce its end, including before deciding whether to take a regular turn or rest"}]})
@@ -104,16 +108,45 @@
 (def discarding {:title "Discarding & Throwing away"
                  :refer-by [:discard :throw-away]
                  :style {:list :bullet
-                         :section true}})
+                         :section true}
+                 :children ["If an effect tells you to discard a card, place it into your discard pile. You may never discard a [[wound]] card unless explicitly stated"
+                            {:body "If an effect tells you to throw away a card:"
+                             :children ["If it is a wound put it back in the wound pile"
+                                        "Otherwise remove it from the game"]}]})
+
+(def effects
+  {:title "Effects"
+   :refer-by [:gain :gains :gained :composite :effect :effects]
+   :style {:section true
+           :list :bullet}
+   :children ["[[Deed cards]], [[units]], [[skills]] and some [[Tactic cards]] provide a variety of effects that can be used during your turn"
+              "If an effect contradicts the rules, the wording of the effect takes precedence"
+              "If an effect modifies rules or values, the change begins immediately and lasts until the end of the current turn unless stated otherwise"
+              {:title "Composite Effects"
+               :body "Some cards (e.g. concentration) allow you play the effect of another card as part of their effect"
+               :children ["This is all evaluated as playing a single effect. It counts a single source of damage, block etc. (e.g. Maximal effect + Determination does not permit blocking multiple attacks)"
+                          "All limitations of the played effects still apply"
+                          "Each effect maintains its colour, even if no mana or mana of a different colour is being paid to play it"
+                          "Special case: If the Time Bending spell is played using another card (e.g. Magic Talent), the other card is set aside instead"]}
+              {:title "Gain Effects"
+               :children ["Mana tokens gained are placed in your play area, they expire at the end of turn if not used"
+                          "Mana crystals gained are placed in your inventory, if you would gain more than 3 of a colour, gain a token instead"
+                          "Some [[sites]] reward you with random mana crystals, roll a mana die for each crystal gained, if gold, choose the colour, if black gain +1 fame"
+                          {:body "Deed cards gained are placed on the top of your deed deck unless stated otherwise"
+                           :children ["If you gain an [[advanced action]] card or [[spell]] from the corresponding offer, replenish the offer immediately"
+                                      "Deed cards won during combat are gained at the [[end of turn]]"]}
+                          "When you gain a card from the [[unit]] offer (either a unit or advanced action learned at a [[monastery]]), it is not replenished until the [[prepare round]] phase"]}]})
+
 
 (def deed-cards
   {:title "Deed Cards"
    :style {:section true
-           :list :bullet}
+           :list :none}
    :refer-by [:deed-cards]
    :children [playing-cards
               timing
               discarding
+              effects
               {:title "Card types"
                :style {:list :none
                        :section true}
@@ -123,6 +156,8 @@
                           artifact
                           {:title "Wounds"
                            :body "See [[wounds]] for more"}]}]})
+
+;; ===================================== Actions =====================================
 
 (def movement
   {:title "Movement"
@@ -168,7 +203,8 @@
    :style {:section true
            :list :item}
    :refer-by [:interact :interaction :interact-with-locals :influence]
-   :children ["No interaction allowed if on X space of reputation track"
+   :children ["Many [[sites]] allow you to interact with the locals, doing so counts as your action for the turn"
+              "No interaction allowed if on X space of reputation track"
               {:body "Apply bonuses"
                :style {:list :bullet}
                :children ["+/- for position on the reputation track"
@@ -200,13 +236,14 @@
                :children ["Newly recruited units are ready"
                           {:body "If all command tokens are occupied, you may disband a unit to make room for a new one"
                            :children ["Wounded/spent units may be disbanded"
-                                      "The disbanded unit is thrown away"
+                                      "The disbanded unit is [[thrown away]]"
                                       "May not be done if you have unoccupied command tokens"]}]}
               {:body "Ready, unwounded units can be spent to activate one of their effects"
                :children ["Move the units command token on top of it to indicate it is spent"
                           "Spent units may not be spent again until they are refreshed"
                           "Some unit abilities have an additional cost (usually mana), this must be paid in full"
                           "Timing restrictions apply to unit effects (e.g. no healing in combat)"]}
+              "Unwounded units (ready or spent) can be assigned damage during [[combat]]"
               "Units are refreshed at the end of each round. Some card effects allow units to be refreshed."
               "Wounded units may be refreshed, but cannot be spent until they are healed"
               "Units may be equipped with banner [[artifacts]]"]})
@@ -230,37 +267,33 @@
 
 (def mana
   {:title "Mana"
-   :refer-by [:mana]
+   :refer-by [:mana :source :crystal :crystals]
    :style {:section true
            :list :bullet}
    :children ["There are 4 basic colours of mana: red, blue, white, green"
               {:body "There are 2 special colours of mana:"
                :children [{:title "Gold"
-                           :body "Gold mana may be used as any basic colour, it may only be used during the day"}
+                           :body "mana may be used as any basic colour, it may only be used during the day"}
                           {:title "Black"
-                           :body "Black mana may only be used at night to power effects that require it"}]}
+                           :body "mana may only be used at night to power effects that require it (e.g. the strong effect of [[spells]])"}]}
               {:body "Mana comes in two forms"
                :children [{:title "Pure mana"
-                           :body "Represented by a mana token or die in a player's play area, disappears at the end of the turn if not used"
-                           :children ["Special mana can only be in pure form"]}
+                           :body "represented by a mana token or die in a player's play area"
+                           :children ["Black/gold mana can only be in pure form"
+                                      "Disappears at the end of the turn if not used"]}
                           {:title "Crystals"
-                           :body "Represented by a mana token in your inventory"
-                           :children ["Crystals can be turned into a pure mana of the same colour at any point during your turn"]}]}
+                           :body "represented by a mana token in a player's inventory"
+                           :children ["Crystals remain in your inventory until used"
+                                      "Crystals can be turned into a pure mana of the same colour at any point during your turn"
+                                      "You may only have 3 crystals of each colour at any time, crystals [[gained]] in excess of this are gained as tokens"]}]}
               {:body "The source represents pure mana present in the world"
-               :children ["Each turn a player may take one die from the source and use it as mana of the matchin colour"
+               :children ["Each turn a player may take one die from the source and use it as mana of the matching colour"
                           "Any dice taken from the source is rerolled at the end of the turn"
                           "Mana dice are taken at the moment they are used. Players can't take a die from the source and choose not to use it"]}]})
-
-(def gain
-  {:title "Gain effects"
-   :refer-by [:gain :gained]
-   :style {:section true
-           :list :bullet}})
 
 (def all-content [deed-cards
                   movement
                   interacting
                   units
                   skills
-                  mana
-                  gain])
+                  mana])

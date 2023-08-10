@@ -2,6 +2,7 @@
 
 (def prepare-steps
   {:title "Prepare Round"
+   :refer-by [:prepare-round]
    :body "At the beginning of each round after the first:"
    :children [{:title "Flip [[Day/Night board]]"}
               {:title "Reroll mana dice"
@@ -24,7 +25,7 @@
   {:title "Order of Play"
    :style {:list :item
            :section true}
-   :refer-by [:order-of-play]
+   :refer-by [:order-of-play :end-of-round]
    :children [prepare-steps
               {:title "Choose Tactic cards"
                :children ["Players choose in reverse fame order (reverse round order for ties)"
@@ -71,6 +72,7 @@
 
 (def end-of-turn
   {:title "End of player turn"
+   :refer-by [:end-of-turn]
    :style {:section true
            :list :item}
    :children ["Reroll mana dice used (if any) and return to the source"
@@ -78,7 +80,7 @@
                :body "If not on a safe space, backtrack move until safe, take 1 wound per space moved"}
               "Return mana tokens and discard played cards"
               {:title "Use space benefit"
-               :children [{:title "[[Magic Glade]]"
+               :children [{:title "[[Magical Glade]]"
                            :body "Throw away 1 wound from hand or discard pile (does not count as a healing effect)"}
                           {:title "[[Mine]]"
                            :body "gain crystal of matching colour"}]}
@@ -97,7 +99,7 @@
                           {:body "reveal top 2 skills and either:"
                            :style {:list :bullet}
                            :children ["Take 1 and place the other in common area. Take 1 advanced action from the offer"
-                                      "Take a skill token from the common area. Place both tokens you drew in the common area. Take lowest advanced action from the offer"]}]}
+                                      "Take a skill token belonging to another player from the common area. Place both tokens you drew in the common area. Take lowest advanced action from the offer"]}]}
               {:title "Draw new cards"
                :children [{:title "Discard cards"
                            :style {:list :bullet}

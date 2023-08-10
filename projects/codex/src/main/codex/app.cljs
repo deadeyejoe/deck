@@ -11,18 +11,21 @@
 
 (declare render-node)
 
+(defn div-or-span [context]
+  (if (styling/section? context) :div :span))
+
 (defn render-title [{:keys [debug depth section-depth list-depth] :as context} {:keys [title] :as node}]
   (when title
-    [:div {:class (styling/title context node)}
+    [(div-or-span context) {:class (styling/title context node)}
      (cond-> title
        debug (conj (str " " (str/join "|" [depth section-depth list-depth]))))]))
 
 (defn render-body [context {:keys [body] :as node}]
   (when (:flag body) (tap> body))
-  (when body [:div {:class (styling/body context node)} body]))
+  (when body [(div-or-span context) {:class (styling/body context node)} body]))
 
 (defn render-content [context node]
-  [:div {:class ["w-full" "flex" "flex-col"]}
+  [:div {:class ["w-full"  "flex-col"]}
    (render-title context node)
    (render-body context node)])
 
