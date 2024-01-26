@@ -69,11 +69,13 @@
      [:div sub]]))
 
 (def clipped-hex-path "polygon(26% 2%, 74% 2%, 98% 50%, 74% 98%, 26% 98%, 2% 50%)")
-(def rotations {1 "rotate-60"
-                2 "rotate-120"
-                3 "rotate-180"
-                4 "rotate-240"
-                5 "rotate-300"})
+(def rotation-degrees {1 60
+                       2 120
+                       3 180
+                       4 240
+                       5 300})
+(defn rotations [rotation-level]
+  (str "rotate-" (rotation-degrees rotation-level)))
 
 (defn side->hex-dimension
   ([side] (side->hex-dimension side 1))
@@ -162,7 +164,7 @@
         off-label])
      [:span {:class ["relative" "inline-block" "p-0.5" "w-12" "h-6"
                      "border-2" "rounded-full" "border-gray-300"
-                     (if (or off-label on?) "bg-blue-900" "bg-gray-600") 
+                     (if (or off-label on?) "bg-blue-900" "bg-gray-600")
                      (if disabled "cursor-not-allowed" "cursor-pointer")
                      (when disabled "opacity-30")]
              :on-click (->dispatch-fn props)}
