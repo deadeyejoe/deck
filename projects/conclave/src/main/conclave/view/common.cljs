@@ -75,6 +75,10 @@
                        3 180
                        4 240
                        5 300})
+(defn rotation-transform [rotation]
+  (when (pos? rotation)
+    (str "rotate(" (rotation-degrees rotation) "deg)")))
+
 (def rotation-class
   "Tailwind requires the explicit class names - we can't use a function to generate them"
   {1 "rotate-60"

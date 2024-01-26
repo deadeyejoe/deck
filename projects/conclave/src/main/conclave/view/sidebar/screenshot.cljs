@@ -34,8 +34,8 @@
            :style {:clip-path common/clipped-hex-path
                    :transform (str (translate-string scale coordinate) " "
                                    ;; We can't use tailwind to rotate since this inline transform 
-                                   ;; will overwrite the transform it use
-                                   (when rotation (str "rotate(" (common/rotation-degrees rotation) "deg)")))}}]))
+                                   ;; will overwrite the transform it uses
+                                   (when rotation (common/rotation-transform rotation)))}}]))
 
 (defn hidden-component-mounted [map-index element]
   (let [filename (str "conclave-" map-index ".jpg")]
