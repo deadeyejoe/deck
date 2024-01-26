@@ -76,7 +76,9 @@
   [:<>
    [heading "About"]
    [paragraph "Created by " [link "https://github.com/deadeyejoe" "deadeyejoe"] " 2022"]
-   [paragraph "With thanks to " [link "https://github.com/Ymbirtt" "ymbirtt"] " for their contributions"]
+   [paragraph "With thanks to " 
+    [link "https://github.com/Ymbirtt" "ymbirtt"] "and"
+    [link "https://github.com/PietroCarrara" "PietroCarrara"] " for their contributions"]
    [paragraph "Source code can be found "
     [link "https://github.com/deadeyejoe/deck/tree/master/projects/conclave" "here"]
     ". Issues/feature requests can be reported "
