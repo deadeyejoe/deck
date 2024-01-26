@@ -40,13 +40,17 @@
             {}
             coordinate->closest-home-coordinates)))
 
+(defn paths-to-mecatol [{:keys [adjacents] :as layout} home-coordinate]
+  ;; breadth first search of adjacency graph, stop when mecatol is found, return shortest path(s)
+  )
+
 (defn slices [{:keys [distances home-tiles] :as layout}]
   (let [coordinate->home-coordinate->distance (pare-distances distances layout)
         coordinate->closest-home-coordinates (medley/map-vals closest-home-coordinates
                                                               coordinate->home-coordinate->distance)
         slice-key->slice-coordinates (group-slice-coordinates home-tiles coordinate->closest-home-coordinates)]
     (medley/map-kv-vals (fn [key coordinates]
-                          {:key key
+                          {:key key 
                            :coordinates coordinates
                            :size (count coordinates)})
                         slice-key->slice-coordinates)))

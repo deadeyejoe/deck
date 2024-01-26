@@ -1,4 +1,5 @@
 (ns conclave.generate.optimize
+  "Swap tiles between slices to improve balance score. Ignore layout considerations"
   (:require [clojure.math.combinatorics :as combi]
             [conclave.generate.balance :as balance]
             [conclave.generate.score :as score]
@@ -20,6 +21,9 @@
 (defn init-tile-array [[equidistant & _rest :as _slice-array]
                        {:keys [seed legendaries-in-equidistants planets-in-equidistants] :as _options}
                        tileset]
+  ;; We need a shuffled list of tiles that satisfy the tileset options. Equidistant tiles are taken 
+  ;; from the head of the list, so if we need all equidistant tiles to be planets we move all planets 
+  ;; to the front. Similar logic for legendaries
   (let [reordered (cond->> (random/seed-shuffle seed tileset)
                     planets-in-equidistants (move-to-front tiles/has-planets?)
                     legendaries-in-equidistants (move-to-front tiles/legendary?))

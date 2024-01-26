@@ -1,4 +1,5 @@
 (ns conclave.generate.slice
+  "Generate slices for players"
   (:require [conclave.layout.slice :as layout-slice]
             [conclave.tiles.core :as tiles]
             [conclave.tiles.set :as tile-set]

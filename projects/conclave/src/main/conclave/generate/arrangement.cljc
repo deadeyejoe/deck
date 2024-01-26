@@ -1,4 +1,5 @@
 (ns conclave.generate.arrangement
+  "Fiddles tiles around within slices to try and improve relative distance between e.g. techs, anomalies etc."
   (:require [conclave.map.core :as map]
             [conclave.map.constraint :as constraint]
             [deck.random.interface :as random]

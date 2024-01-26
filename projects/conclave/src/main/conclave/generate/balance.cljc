@@ -1,4 +1,5 @@
 (ns conclave.generate.balance
+  "Utilities for calculating inter-slice balance"
   (:require [medley.core :as medley]))
 
 (defn range-score
