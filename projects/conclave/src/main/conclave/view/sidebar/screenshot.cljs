@@ -30,9 +30,10 @@
     [:img {:key (apply str "img" coordinate)
            :src (str "images/" (tile/image tile))
            :width (* scale 2)
-           :class [(common/rotations rotation) "absolute"]
+           :class ["absolute"]
            :style {:clip-path common/clipped-hex-path
-                   :transform (translate-string scale coordinate)}}]))
+                   :transform (str (translate-string scale coordinate) " "
+                                   (when rotation (str "rotate(" (common/rotation-degrees rotation) "deg)")))}}]))
 
 (defn hidden-component-mounted [map-index element]
   (let [filename (str "conclave-" map-index ".jpg")]
