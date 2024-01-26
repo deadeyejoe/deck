@@ -69,13 +69,19 @@
      [:div sub]]))
 
 (def clipped-hex-path "polygon(26% 2%, 74% 2%, 98% 50%, 74% 98%, 26% 98%, 2% 50%)")
+
 (def rotation-degrees {1 60
                        2 120
                        3 180
                        4 240
                        5 300})
-(defn rotations [rotation-level]
-  (str "rotate-" (rotation-degrees rotation-level)))
+(def rotation-class
+  "Tailwind requires the explicit class names - we can't use a function to generate them"
+  {1 "rotate-60"
+   2 "rotate-120"
+   3 "rotate-180"
+   4 "rotate-240"
+   5 "rotate-300"})
 
 (defn side->hex-dimension
   ([side] (side->hex-dimension side 1))
@@ -85,7 +91,7 @@
 
 (defn tile->hex-image [{:keys [rotation] :as tile}]
   [:img {:src (str "images/" (tile/image tile))
-         :class [(rotations rotation)]
+         :class [(rotation-class rotation)]
          :height "97%"
          :width "97%"
          :style {:clip-path clipped-hex-path}}])

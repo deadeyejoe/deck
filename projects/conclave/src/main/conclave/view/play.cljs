@@ -18,7 +18,7 @@
              :x x-offset
              :y y-offset
              :width (* 2 scale)
-             :class [(common/rotations rotation)]
+             :class [(common/rotation-class rotation)]
              :style {:clip-path common/clipped-hex-path}}]
     [:polygon {:points "300,150 225,280 75,280 0,150 75,20 225,20"
                :transform (str "translate(" x-offset "," y-offset ")")}]))
@@ -97,7 +97,7 @@
         [x-offset y-offset] (hex/coordinate->offset scale coordinate)]
     [:img {:src (str "images/" (tile/image tile))
            :width (* scale 2)
-           :class [(common/rotations rotation) "absolute"]
+           :class [(common/rotation-class rotation) "absolute"]
            :style {:clip-path common/clipped-hex-path
                    :transform (translate-string scale coordinate)}}]))
 

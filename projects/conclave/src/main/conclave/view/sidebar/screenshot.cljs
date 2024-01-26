@@ -33,6 +33,8 @@
            :class ["absolute"]
            :style {:clip-path common/clipped-hex-path
                    :transform (str (translate-string scale coordinate) " "
+                                   ;; We can't use tailwind to rotate since this inline transform 
+                                   ;; will overwrite the transform it use
                                    (when rotation (str "rotate(" (common/rotation-degrees rotation) "deg)")))}}]))
 
 (defn hidden-component-mounted [map-index element]
