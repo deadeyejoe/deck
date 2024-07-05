@@ -1,6 +1,6 @@
 (ns conclave.generate.tileset
   (:require [conclave.generate.balance :as balance]
-            [conclave.generate.loop :as loop]
+            [conclave.process.loop :as loop]
             [conclave.tiles.core :as tiles]
             [conclave.tiles.set :as tile-set]))
 

@@ -1,4 +1,4 @@
-(ns conclave.generate.executor)
+(ns conclave.process.executor)
 
 (defn perform-step? [when options]
   (cond
@@ -11,21 +11,21 @@
   (perform-step? [:foo] {:foo true})
   (perform-step? [:a] {:a true})
   (perform-step? [:a :b] {:a true})
-  (perform-step? #{:a :b} {:a true}))
+  (perform-step? #{:a :b} {:a true})
+  (perform-step? {:a true} {:a true :b false})
+  (perform-step? {:a true} {:a false :b true}))
 
-(defn step [{:keys [options] :as context} {:keys [exec name] :as step}]
+(defn do-step [{:keys [options] :as context} {:keys [exec name when] :as _step}]
   (when (:debug options)
     #?(:cljs (.log js/console (str "Performing step: " name))
        :clj (println (str "Performing step: " name))))
 
-  (if (perform-step? (:when step) options)
+  (if (perform-step? when options)
     (exec context)
     context))
 
 (defn executions [context steps]
-  (reductions step
-              context
-              steps))
+  (reductions do-step context steps))
 
 (defn execute [context steps]
-  (last (executions context steps)))
+  (reduce do-step context steps))

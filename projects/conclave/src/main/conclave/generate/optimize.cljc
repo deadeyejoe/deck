@@ -1,14 +1,14 @@
 (ns conclave.generate.optimize
   "Swap tiles between slices to improve balance score. Ignore layout considerations"
-  (:require [clojure.math.combinatorics :as combi]
-            [conclave.generate.balance :as balance]
+  (:require [conclave.generate.balance :as balance]
             [conclave.generate.score :as score]
             [conclave.generate.slice :as slice]
+            [conclave.process.loop :as loop]
             [conclave.tiles.core :as tiles]
+            [conclave.tiles.set :as tile-set]
             [conclave.utils.vector :as vector-util]
             [deck.random.interface :as random]
-            [conclave.tiles.set :as tile-set]
-            [conclave.generate.loop :as loop]))
+            [clojure.math.combinatorics :as combi]))
 
 (defn move-to-front
   "Be careful when chaining this: Is the second pred a subset of the first?"
