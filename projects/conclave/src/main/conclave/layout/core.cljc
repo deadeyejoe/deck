@@ -46,3 +46,7 @@
    Includes active coordinates only"
   [{:keys [adjacents] :as _layout} coordinate]
   (get adjacents coordinate))
+
+(defn fixed-tile? [{:keys [fixed-tiles] :as _layout} tile]
+  ;; Fixed tile is a map from coordinate->tile
+  (some (partial = tile) (vals fixed-tiles)))

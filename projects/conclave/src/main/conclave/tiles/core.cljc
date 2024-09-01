@@ -13,6 +13,10 @@
 (s/def ::resources nat-int?)
 (s/def ::influence nat-int?)
 
+(def tile-types #{:blue :red :green :hyperlane})
+(s/def ::type tile-types)
+
+
 (s/def ::legendary boolean?)
 (s/def ::planet (s/keys :req-un [::name
                                  ::resources
@@ -73,9 +77,30 @@
                           {}
                           tile-data/raw))
 
+(def tile-key :key)
+
 (def type-kw :type)
 
 (def tiles (vals key->tile))
+
+(defn tile? [m] (s/valid? ::instance m))
+
+(defn coerce-to-key
+  "If the argument is a tile, return its key. Otherwise return the argument.
+   
+   A tile is a map with a :key key, this a very minimal definition since I didn't want to be too prescriptive about 
+   what a tile is."
+  [tile-or-key]
+  (or (tile-key tile-or-key) tile-or-key))
+
+(defn coerce-to-tile
+  "If the argument is a key, return the tile with that key. If it is a tile, return the tile, otherwise return nil.
+   
+   A tile is a map with a :key key, this a very minimal definition since I didn't want to be too prescriptive about 
+   what a tile is."
+  [tile-or-key]
+  (or (key->tile tile-or-key)
+      (when (tile-key tile-or-key) tile-or-key)))
 
 (defn blank-home-tile [player-id]
   (merge green-tile {:key player-id}))
@@ -190,6 +215,7 @@
       :beta wormholes-beta
       nil)))
 
+;;Move to tile-list?
 (defn collect-quantity [collect quantity]
   (cond
     (coll? quantity) (into (or collect #{}) quantity)

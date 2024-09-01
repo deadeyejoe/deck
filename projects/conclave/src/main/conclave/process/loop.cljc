@@ -12,6 +12,8 @@
 (s/def ::choose fn?)
 (s/def ::halt? fn?)
 
+(def total-kw ::total)
+
 (defn pick-higher-score 
   [{current-score :score :as current-context}
    {next-score :score :as next-context}]
