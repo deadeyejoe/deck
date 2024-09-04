@@ -111,19 +111,15 @@
         
         palette (-> (palette/->instance all-available-tiles)
                     (palette/select-by (some-fn tile/wormhole?)))
-        [init & samples] (take 20 (palette/sample-tilesets "ABCDEF" type-counts palette))]
+        [init & samples] (take 20 (palette/sample-tilesets "ABCDEFGHIJ" type-counts palette))]
     (-> (loop/optimize {:initial {:tiles init
                                   :score (->> (score/tiles->scores init)
-                                              (goal/evaluate goals))
-                                  :goals goals}
-                        
-                        :combine (fn [{:keys [score goals] :as current} next]
-                                   (let [next-score (->> (score/tiles->scores next)
-                                                         (goal/evaluate goals))]
-                                     (cond-> current
-                                       (neg? (compare score next-score))
-                                       (assoc :tiles next
-                                              :score next-score))))
+                                              (goal/evaluate goals))}
+                        :combine (fn [current next]
+                                   (assoc current 
+                                          :tiles next
+                                          :score (->> (score/tiles->scores next)
+                                                      (goal/evaluate goals))))
                         :halt? (comp (partial goal/satisfied? goals) :score)}
                        samples)
         (update :tiles score/tiles->scores)))

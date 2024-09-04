@@ -1,89 +1,60 @@
 (ns conclave.generate.tileset
-  (:require [conclave.generate.balance :as balance]
+  (:require [conclave.aggregate.palette :as palette]
+            [conclave.balance.bounds :as bounds]
+            [conclave.balance.goal :as goal]
+            [conclave.balance.score :as score]
+            [conclave.layout.core :as layout]
             [conclave.process.loop :as loop]
-            [conclave.tiles.core :as tiles]
-            [conclave.tiles.set :as tile-set]))
+            [conclave.tiles.core :as tiles]))
 
-(defn available-tiles [{:keys [fixed-tiles] :as _layout} default-set]
-  (remove (comp (->> fixed-tiles
-                     (vals)
-                     (map :key)
-                     (set))
-                :key)
-          default-set))
+(defn available-tiles [{:keys [pok] :as _options} layout]
+  (->> (if pok
+         tiles/default-set
+         tiles/default-base-game)
+       (remove (comp (partial layout/fixed-tile? layout)))))
 
-(defn init-tiles [{{:keys [pok]} :options
-                   :keys [layout] :as context}]
-  (assoc context :tiles {:available (available-tiles layout
-                                                     (if pok
-                                                       tiles/default-set
-                                                       tiles/default-base-game))
-                         :red []
-                         :blue []}))
+(defn init [{{:keys [type-counts] :as layout} :layout
+                   {:keys [include-wormholes
+                           include-legendaries
+                           map-balance] :as options} :options
+                   :as context}]
+  (let [available (available-tiles options layout)
+        bounds (bounds/list->bounds type-counts available)
+        goals (goal/tile-set-bounds->balance-goals map-balance bounds)
+        palette (cond-> (palette/->instance available)
+                  include-wormholes (palette/select-by tiles/wormhole?)
+                  include-legendaries (palette/select-by tiles/legendary?))]
+    (assoc context ::context 
+           {:available available
+            :bounds bounds
+            :goals goals
+            :palette palette})))
 
-(defn add-wormholes [{:keys [available] :as tiles}]
-  (let [{wormholes true others false} (group-by tiles/wormhole? available)
-        {:keys [red blue]} (group-by :type wormholes)]
-    (-> tiles
-        (assoc :available others)
-        (update :red into red)
-        (update :blue into blue))))
+(defn do-loop [{{:keys [palette goals]} ::context
+                    {:keys [type-counts]} :layout
+                    {:keys [seed max-samples]} :options 
+                    :as _context}]
+  (let [[init & samples] (->> (palette/sample-tilesets seed type-counts palette)
+                              (take max-samples))]
+    (loop/optimize {:initial {:tiles init
+                              :score (->> (score/tiles->scores init)
+                                          (goal/evaluate goals))}
+                    :combine (fn [current next]
+                               (assoc current 
+                                      :tiles next
+                                      :score (->> (score/tiles->scores next)
+                                                  (goal/evaluate goals))))
+                    :choose loop/pick-higher-score
+                    :halt? (comp (partial goal/satisfied? goals) :score)}
+                   samples)))
 
-(defn add-legendaries [{:keys [available] :as tiles}]
-  (let [{legendaries true others false} (group-by tiles/legendary? available)]
-    (-> tiles
-        (assoc :available others)
-        (update :blue into legendaries))))
-
-(defn ^:lazy sample-tilesets [seed
-                              {target-red :red target-blue :blue :as _type-counts}
-                              {:keys [available red blue] :as _tiles}]
-  (let [{available-red :red available-blue :blue} (group-by :type available)]
-    (map concat
-         (tile-set/sample-remaining seed red available-red target-red)
-         (tile-set/sample-remaining seed blue available-blue target-blue))))
-
-(defn ->sample-context [map-balance bounds-for-available]
-  {:map-balance map-balance
-   :bounds-for-available bounds-for-available
-   :total 0})
-
-(defn ->next-context [{:keys [map-balance bounds-for-available] :as sample-context} next-tileset]
-  (let [actual-res-inf (tile-set/sum-optimal-res-inf next-tileset)]
-    (-> sample-context
-        (assoc
-         :quantities actual-res-inf
-         :score (balance/calculate-score map-balance bounds-for-available actual-res-inf)
-         :tileset next-tileset)
-        (update :total inc))))
-
-(defn halt? [{:keys [map-balance score] :as _sample-context}]
-  (balance/halt-sampling? map-balance score))
-
-(defn fill-remaining [{{:keys [available] :as tiles} :tiles
-                       {:keys [type-counts]} :layout
-                       {:keys [map-balance seed max-samples debug]} :options
-                       :as context}]
-  (let [bounds-for-available (tile-set/bounds type-counts available [:optimal-resources :optimal-influence])
-        samples (->> (sample-tilesets seed type-counts tiles)
-                     (take max-samples))
-        {:keys [tileset quantities ::loop/total] :as loop-result}
-        (loop/optimize {:initial (->sample-context map-balance bounds-for-available)
-                        :combine ->next-context
-                        :choose loop/pick-higher-score
-                        :halt? halt?}
-                       samples)]
-    (when debug (tap> [::fill-remaining quantities total loop-result]))
-    (assoc context :tileset tileset)))
+(defn optimize [{{:keys [debug]} :options :as context}]
+  (let [{:keys [tiles quantities ::loop/total] :as loop-result} (do-loop context)]
+    (tap> [::post-optimize quantities total loop-result])
+    (assoc context :tileset tiles)))
 
 (def steps
-  [{:name ::init-tiles
-    :exec init-tiles}
-   {:name ::add-wormholes
-    :when [:include-wormholes]
-    :exec #(update % :tiles add-wormholes)}
-   {:name ::add-legendaries
-    :when #{:pok :include-legendaries}
-    :exec #(update % :tiles add-legendaries)}
-   {:name ::fill-remaining
-    :exec fill-remaining}])
+  [{:name ::init
+    :exec init} 
+   {:name ::optimize
+    :exec optimize}])

@@ -6,4 +6,5 @@
 (get @rfdb/app-db :map)
 (get @rfdb/app-db :options)
 
+(:worker-mode @rfdb/app-db)
 (get-in @rfdb/app-db [:map :players])

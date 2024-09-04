@@ -95,6 +95,7 @@
 (defn prepare-tile-array [{{:keys [seed]} :options
                            :keys [tileset]
                            :as context}]
+  ;; possible duplication with init-tile-array
   (let [equidistant-tiles (pick-equidistant-tiles context)
         player-tiles (random/seed-shuffle seed (remove (set equidistant-tiles) tileset))]
     (assoc-in context [:slices :tile-array]

@@ -45,7 +45,7 @@ This app is a pet project, so the app structure is idiosyncratic to say the leas
 
 ### Adding Map layouts
 
-One thing that I tried to make easy (or at least not hard) is adding new layouts, and I would definitely welcome PRs adding new ones. I've tried to write the balancing algorithm in a layout-agnostic way so it should hopefully give results that are at least 'not bad'. Layouts are defined in `src/main/conclave/data/layouts.cljc`, written in [edn](https://github.com/edn-format/edn) (clojure's native data format - think of it as kinda like json but better).
+One thing that I tried to make easy (or at least not hard) is adding new layouts, and I would definitely welcome PRs adding new ones. I've tried to write the balancing algorithm in a layout-agnostic way so it should hopefully give results that are at least 'not bad'. Layouts are defined in `src/main/conclave/data/layouts.cljc`, written in [edn](https://github.com/edn-format/edn) (clojure's native data format - think of it as kinda like json but more expressive).
 
 To add a layout add something like this to the layouts namespace:
 
@@ -55,7 +55,7 @@ To add a layout add something like this to the layouts namespace:
    :code "yml" ;; a short, unique name for the map, used internally
    :pok true ;; whether the map is only possible using PoK tiles (if it's not present it's considered false)
    :radius 4 ;; the number of rings of tiles around Mecatol
-   :type-counts {:blue 1 :red 1} ;; The total number of blue/red tiles on the map
+   :type-counts {:blue 1 :red 1} ;; The total number of 'free' (i.e. non-fixed) blue/red tiles on the map
    :fixed-tiles [] ;; The tiles that are fixed in place (usually Mecatol, it should be possible to fix other tiles in place, but I haven't actually tested this works)
    :blank-coordinates [] ;; Not all coordinates in each ring will have a tile on them
    :hyperlane-tiles [] ;; (optional), any hyperlane tiles on the map
@@ -70,7 +70,7 @@ To add a layout add something like this to the layouts namespace:
 ```clojure
 {:coordinate [0 0 0] ;; a hex coordinate, see above
  :key :18 ;; the key is either the number of the tile as a clojure keyword (e.g. :18 for mecatol, :65 for primor, hyperlane keys have A or B at then end to denote which side they are e.g. :91A and :91B), OR p and an integer to denote a home tile (e.g. :P1, :P2 etc.)
- :rotation 0};; (optional, only needed for hyperlanes) a number between 0 and 5, indicating how many 30deg rotations the tile should get
+ :rotation 0};; (optional, only needed for hyperlanes) a number between 0 and 5, indicating how many 60deg rotations the tile should get
 ```
 
 There are many existing examples in the layouts namespace you can look to for guidance. Once you've created the layout, you can add the def'ed variable name to the `all` list at the end of the namespace.
